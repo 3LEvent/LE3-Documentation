@@ -1,82 +1,49 @@
 /**
- * Design Custom 3LEvent - Orange Professionnel & Moderne
+ * Design System 3LEvent - White & Amber Modern
  */
 
-/* Variables globales */
 :root {
-  /* Orange Principal - "Sunset Pro" (Moins saturé pour éviter le flashy) */
-  --ifm-color-primary: #e67e22;
-  --ifm-color-primary-dark: #cf711f;
-  --ifm-color-primary-darker: #c46b1d;
-  --ifm-color-primary-darkest: #a15818;
-  --ifm-color-primary-light: #e98b38;
-  --ifm-color-primary-lighter: #eb9143;
-  --ifm-color-primary-lightest: #efa464;
+  /* Palette Ambre / Orange Pro (pas flashy) */
+  --ifm-color-primary: #d97706;
+  --ifm-color-primary-dark: #b45309;
+  --ifm-color-primary-darker: #92400e;
+  --ifm-color-primary-darkest: #78350f;
+  --ifm-color-primary-light: #f59e0b;
+  --ifm-color-primary-lighter: #fbbf24;
+  --ifm-color-primary-lightest: #fef3c7;
 
-  /* Ajustements pour le look "Blanc Clean" */
-  --ifm-background-color: #ffffff;
-  --ifm-navbar-background-color: #ffffff;
-  --ifm-footer-background-color: #1a1a1a;
-
-  /* Typographie et Code */
+  /* Ajustements Interface */
   --ifm-code-font-size: 90%;
-  --docusaurus-highlighted-code-line-bg: rgba(230, 126, 34, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(217, 119, 6, 0.1);
+  --ifm-background-color: #ffffff;
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.8);
+  --ifm-footer-background-color: #f8fafc;
 
-  /* Bordures et Ombres */
-  --ifm-global-border-radius: 8px;
-  --custom-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* Custom accents */
+  --3levent-soft-orange: rgba(251, 191, 36, 0.05);
 }
 
-/* Mode Sombre - Orange plus doux pour les yeux */
 [data-theme='dark'] {
-  --ifm-color-primary: #ff9f43;
-  --ifm-color-primary-dark: #ff9124;
-  --ifm-color-primary-darker: #ff8a14;
-  --ifm-color-primary-darkest: #f07900;
-  --ifm-color-primary-light: #ffad62;
-  --ifm-color-primary-lighter: #ffb471;
-  --ifm-color-primary-lightest: #ffc99c;
-
-  --ifm-background-color: #0d1117;
-  --docusaurus-highlighted-code-line-bg: rgba(255, 159, 67, 0.2);
+  --ifm-color-primary: #fbbf24;
+  --ifm-color-primary-dark: #f59e0b;
+  --ifm-color-primary-darker: #d97706;
+  --ifm-color-primary-darkest: #b45309;
+  --ifm-color-primary-light: #fcd34d;
+  --ifm-color-primary-lighter: #fde68a;
+  --ifm-color-primary-lightest: #fef3c7;
+  --docusaurus-highlighted-code-line-bg: rgba(251, 191, 36, 0.15);
 }
 
-/* --- Améliorations de l'interface (Look Moderne) --- */
-
-/* Navbar avec une ombre légère pour le relief */
-.navbar {
-  box-shadow: var(--custom-card-shadow);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+/* Modernisation des cartes de la page d'accueil */
+.card-3l {
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+  background: white;
 }
 
-/* Style des liens de la Sidebar (Barre latérale) */
-.menu__link--active {
-  background-color: rgba(230, 126, 34, 0.1) !important;
-  font-weight: 600;
-}
-
-/* Boutons plus modernes */
-.button--primary {
-  --ifm-button-background-color: var(--ifm-color-primary);
-  --ifm-button-border-color: var(--ifm-color-primary);
-  border-radius: 50px; /* Bords très arrondis pour un look moderne */
-  padding: 0.6rem 1.5rem;
-  transition: all 0.2s ease;
-}
-
-.button--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-
-/* Amélioration des blocs de code */
-.codeBlockContainer_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Container-styles-module {
-  box-shadow: var(--custom-card-shadow);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Adoucissement des Admonitions (Alertes/Notes) */
-.alert {
-  border-left-width: 5px;
-  border-radius: var(--ifm-global-border-radius);
+.card-3l:hover {
+  border-color: var(--ifm-color-primary-light);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.1);
 }

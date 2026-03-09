@@ -1,11 +1,27 @@
 .features {
   display: flex;
   align-items: center;
-  padding: 2rem 0;
+  padding: 4rem 0;
   width: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, var(--3levent-soft-orange) 100%);
 }
 
 .featureSvg {
-  height: 200px;
-  width: 200px;
+  height: 140px;
+  width: 140px;
+  margin-bottom: 1.5rem;
+  /* Effet de transparence sur les SVG */
+  filter: drop-shadow(0 5px 15px rgba(217, 119, 6, 0.2));
+}
+
+.featureTitle {
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.featureDescription {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }

@@ -1,52 +1,47 @@
 ---
 sidebar_position: 1
-id: intro
 ---
 
-# 🚀 Bienvenue sur le Wiki 3LEvent
+# Tutorial Intro
 
-Bienvenue sur la **documentation officielle des développeurs** pour le projet **3LEvent**. Ce site centralise toutes les ressources techniques, les guides d'installation et les protocoles de l'organisation.
+Let's discover **Docusaurus in less than 5 minutes**.
 
----
+## Getting Started
 
-## 🎯 Notre Mission
+Get started by **creating a new site**.
 
-Ce Wiki a pour but de permettre à chaque membre de l'équipe technique de :
-* **Comprendre** l'architecture globale de nos services.
-* **Installer** et configurer les environnements de développement rapidement.
-* **Contribuer** de manière sécurisée et structurée au code source.
+Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
 
-> [!IMPORTANT]
-> L'accès à ce site est protégé par **Cloudflare Zero Trust**. Seuls les membres autorisés de l'organisation 3LEvent peuvent consulter ces pages.
+### What you'll need
 
----
+- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
+  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
 
-## 🛠️ Stack Technique
+## Generate a new site
 
-Le Wiki est propulsé par des outils modernes pour garantir une maintenance facile :
-* **Framework** : [Docusaurus v4](https://docusaurus.io/).
-* **Hébergement** : GitHub Pages.
-* **Déploiement** : GitHub Actions.
-* **Sécurité** : Cloudflare Access.
+Generate a new Docusaurus site using the **classic template**.
 
----
+The classic template will automatically be added to your project after you run the command:
 
-## ✍️ Comment contribuer ?
+```bash
+npm init docusaurus@latest my-website classic
+```
 
-### 1. Structure des branches
-* **`main`** : Branche de production (`doc.3levent.fr`).
-* **`develop`** : Branche de travail et de brouillon.
+You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
 
-### 2. Processus de modification
-1. Faites vos changements sur **`develop`**.
-2. Vérifiez le rendu localement : `npm run start`.
-3. Ouvrez une **Pull Request** vers `main`.
+The command also installs all necessary dependencies you need to run Docusaurus.
 
----
+## Start your site
 
-## 📚 Liens Utiles
+Run the development server:
 
-| Ressource | Lien |
-| :--- | :--- |
-| **Dépôt GitHub** | [3LEvent/LE3-Documentation](https://github.com/3LEvent/LE3-Documentation) |
-| **Discord** | [Discord Officiel](https://discord.gg/MREthDheAK) |
+```bash
+cd my-website
+npm run start
+```
+
+The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
+
+The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
+
+Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
