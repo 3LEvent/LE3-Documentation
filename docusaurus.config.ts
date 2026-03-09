@@ -3,17 +3,17 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'LE3 Documentation',
-  tagline: 'Documentation développeur officielle pour le 3LEvent',
+  title: '3LEvent Developer Portal',
+  tagline: 'Spécifications techniques et standards de l\'écosystème 3LEvent',
   favicon: 'img/favicon.ico',
 
-  // Compatibilité Docusaurus v4
+  // Flag de préparation pour la migration v4
   future: {
     v4: true,
   },
 
-  // Configuration du domaine personnalisé (Cloudflare)
-  url: 'https://doc.3levent.fr', //
+  // Configuration du domaine
+  url: 'https://doc.3levent.fr',
   baseUrl: '/',
   trailingSlash: false,
 
@@ -22,8 +22,15 @@ const config: Config = {
   projectName: 'LE3-Documentation',
   deploymentBranch: 'gh-pages',
 
+  // --- GESTION DES LIENS (RACINE OBLIGATOIRE EN V3) ---
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
+
+  // Configuration du moteur Markdown
+  markdown: {
+    format: 'mdx',
+    mermaid: true, // Support des schémas Mermaid
+  },
 
   i18n: {
     defaultLocale: 'fr',
@@ -36,12 +43,9 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Lien direct pour que ton équipe puisse éditer les pages
-          editUrl:
-              'https://github.com/3LEvent/LE3-Documentation/tree/main/',
+          editUrl: 'https://github.com/3LEvent/LE3-Documentation/tree/main/',
         },
-        // LE BLOG A ÉTÉ RETIRÉ ICI
-        blog: false,
+        blog: false, // Mode documentation pure
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -50,34 +54,36 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/docusaurus-social-card.jpg',
+    // Design system : Forçage du mode clair (White & Emerald)
     colorMode: {
       defaultMode: 'light',
-      respectPrefersColorScheme: true,
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
     },
+    // Navigation épurée sans emojis
     navbar: {
-      title: '3LEvent Doc',
+      title: '3LEvent Developer',
       logo: {
         alt: '3LEvent Logo',
-        src: 'img/logo.svg', // Assure-toi que ton logo est bien dans static/img/
+        src: 'img/logo.svg',
       },
       items: [
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Wiki',
+          label: 'Documentation',
         },
-        // LE LIEN NEWS A ÉTÉ RETIRÉ ICI
         {
-          href: 'https://github.com/3LEvent/LE3-Documentation',
+          href: 'https://github.com/3LEvent',
           label: 'GitHub',
           position: 'right',
         },
       ],
     },
+    // Pied de page professionnel
     footer: {
-      style: 'dark',
+      style: 'light',
       links: [
         {
           title: 'Documentation',
@@ -86,32 +92,57 @@ const config: Config = {
               label: 'Introduction',
               to: '/docs/intro',
             },
+            {
+              label: 'Architecture',
+              to: '/docs/architecture/overview',
+            },
+            {
+              label: 'Standards de Code',
+              to: '/docs/guidelines/coding-standards',
+            },
           ],
         },
         {
-          title: 'Communauté',
+          title: 'Ecosystème',
           items: [
             {
-              label: 'Discord',
+              label: 'Site Officiel',
+              href: 'https://3levent.fr',
+            },
+            {
+              label: 'Discord Staff',
               href: 'https://discord.gg/MREthDheAK',
             },
           ],
         },
         {
-          title: 'Plus',
+          title: 'Infrastructure',
           items: [
             {
-              label: 'GitHub Orga',
+              label: 'GitHub Organization',
               href: 'https://github.com/3LEvent',
+            },
+            {
+              label: 'Cloudflare Dashboard',
+              href: 'https://dash.cloudflare.com',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} 3LEvent. Built with Docusaurus.`,
+      copyright: `© ${new Date().getFullYear()} 3LEvent Organization. Documentation technique réservée à l'usage interne.`,
     },
+    // Coloration syntaxique optimisée pour la stack 3LEvent
     prism: {
       theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      darkTheme: prismThemes.github,
+      additionalLanguages: [
+        'java',
+        'json',
+        'bash',
+        'typescript',
+        'gradle',
+        'yaml'
+      ],
     },
   } satisfies Preset.ThemeConfig,
 };

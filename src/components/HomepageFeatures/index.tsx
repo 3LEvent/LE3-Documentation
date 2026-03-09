@@ -2,54 +2,58 @@ import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
+// Import des icônes professionnelles (FontAwesome set)
+import { FaCloud, FaServer, FaCodeBranch } from 'react-icons/fa';
 
 type FeatureItem = {
     title: string;
-    Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+    Icon: React.ElementType; // Utilisation d'un composant d'icône React
     description: ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [
     {
-        title: 'Écosystème Web & App',
-        Svg: require('@site/static/img/undraw_docusaurus_react.svg').default, // Idéalement remplacer par logo Angular/TS
+        title: 'Écosystème Web & Cloud',
+        Icon: FaCloud,
         description: (
             <>
-                Développement d'interfaces modernes avec <b>Angular</b> et <b>TypeScript</b>.
-                Nos outils web permettent de gérer l'événement 3LEvent en temps réel.
+                Interfaces haute performance développées sous <b>Angular 17+</b>.
+                Gestion du trafic et sécurité périmétrique assurées par l'infrastructure <b>Cloudflare</b>.
             </>
         ),
     },
     {
-        title: 'Infrastructure Minecraft',
-        Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default, // Idéalement remplacer par icône Java
+        title: 'Architecture Game-Server',
+        Icon: FaServer,
         description: (
             <>
-                Architecture backend robuste en <b>Java</b>. Développement de plugins
-                sur-mesure pour une expérience de jeu unique et optimisée.
+                Backends robustes basés sur <b>Java 21</b>. Développement de plugins
+                Paper hautement optimisés avec une gestion stricte de la performance et de la latence.
             </>
         ),
     },
     {
-        title: 'Open Source & GitHub',
-        Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+        title: 'Standardisation & CI/CD',
+        Icon: FaCodeBranch,
         description: (
             <>
-                Toutes nos ressources sont centralisées sur GitHub. Nous prônons le
-                partage de code au sein de l'association <b>3LEvent</b> pour faire progresser la communauté.
+                Déploiement continu via <b>GitHub Actions</b>. Utilisation de templates
+                et de workflows partagés pour garantir l'homogénéité du code source.
             </>
         ),
     },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, Icon, description}: FeatureItem) {
     return (
         <div className={clsx('col col--4')}>
             <div className="text--center">
-                <Svg className={styles.featureSvg} role="img" />
+                {/* L'icône reçoit la classe CSS pour la couleur Emerald et la taille */}
+                <Icon className={styles.featureIcon} />
             </div>
             <div className="text--center padding-horiz--md">
                 <Heading as="h3" className={styles.featureTitle}>{title}</Heading>
+                <div className={styles.divider}></div>
                 <p className={styles.featureDescription}>{description}</p>
             </div>
         </div>

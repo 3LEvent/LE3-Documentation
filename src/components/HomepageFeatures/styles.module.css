@@ -1,27 +1,60 @@
+/* Section globale des fonctionnalités */
 .features {
   display: flex;
   align-items: center;
-  padding: 4rem 0;
+  padding: 5rem 0;
   width: 100%;
-  background: linear-gradient(180deg, #ffffff 0%, var(--3levent-soft-orange) 100%);
+  background-color: #ffffff; /* Fond blanc pur */
+  border-top: 1px solid #f1f5f9; /* Bordure très subtile pour séparer du Hero */
 }
 
-.featureSvg {
-  height: 140px;
-  width: 140px;
-  margin-bottom: 1.5rem;
-  /* Effet de transparence sur les SVG */
-  filter: drop-shadow(0 5px 15px rgba(217, 119, 6, 0.2));
-}
-
-.featureTitle {
-  font-weight: 700;
-  color: #1e293b;
+/* Style des icônes professionnelles */
+.featureIcon {
+  height: 80px; /* Taille plus sobre pour des icônes pro */
+  width: 80px;
   margin-bottom: 1rem;
+  /* Suppression de l'ombre orange au profit d'une clarté maximale */
+  transition: transform 0.3s ease;
 }
 
+.featureIcon:hover {
+  transform: translateY(-5px); /* Animation subtile au survol */
+}
+
+/* Titres des colonnes */
+.featureTitle {
+  font-size: 1.5rem;
+  font-weight: 800; /* Poids fort pour un look moderne */
+  color: #0f172a; /* Slate 900 */
+  margin-top: 1.5rem;
+  letter-spacing: -0.025em;
+}
+
+/* Séparateur horizontal (Emerald 3LEvent) */
+.divider {
+  height: 3px;
+  width: 35px;
+  background-color: #10b981; /* Couleur Emerald de l'event */
+  margin: 1.25rem auto;
+  border-radius: 2px;
+}
+
+/* Descriptions textuelles */
 .featureDescription {
-  color: #64748b;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  color: #475569; /* Slate 600 pour un bon contraste sur blanc */
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Ajustement pour le responsive */
+@media (max-width: 996px) {
+  .features {
+    padding: 3rem 1rem;
+  }
+
+  .featureTitle {
+    font-size: 1.25rem;
+  }
 }

@@ -1,49 +1,154 @@
 /**
- * Design System 3LEvent - White & Amber Modern
+ * Design System 3LEvent - Modern Tech White
+ * Focus: High legibility, professional slate & emerald accents.
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
-  /* Palette Ambre / Orange Pro (pas flashy) */
-  --ifm-color-primary: #d97706;
-  --ifm-color-primary-dark: #b45309;
-  --ifm-color-primary-darker: #92400e;
-  --ifm-color-primary-darkest: #78350f;
-  --ifm-color-primary-light: #f59e0b;
-  --ifm-color-primary-lighter: #fbbf24;
-  --ifm-color-primary-lightest: #fef3c7;
+  /* Palette Professionnelle : Slate (Texte) & Emerald (Accents) */
+  --ifm-color-primary: #059669; /* Emerald 600 */
+  --ifm-color-primary-dark: #047857;
+  --ifm-color-primary-darker: #065f46;
+  --ifm-color-primary-darkest: #064e3b;
+  --ifm-color-primary-light: #10b981;
+  --ifm-color-primary-lighter: #34d399;
+  --ifm-color-primary-lightest: #6ee7b7;
 
-  /* Ajustements Interface */
-  --ifm-code-font-size: 90%;
-  --docusaurus-highlighted-code-line-bg: rgba(217, 119, 6, 0.1);
+  /* Fond Blanc Pur & Surfaces */
   --ifm-background-color: #ffffff;
-  --ifm-navbar-background-color: rgba(255, 255, 255, 0.8);
-  --ifm-footer-background-color: #f8fafc;
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.95);
+  --ifm-navbar-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ifm-footer-background-color: #f8fafc; /* Slate 50 */
 
-  /* Custom accents */
-  --3levent-soft-orange: rgba(251, 191, 36, 0.05);
+  /* Typographie & Couleurs de texte */
+  --ifm-font-family-base: 'Inter', -apple-system, system-ui, sans-serif;
+  --ifm-text-color: #334155; /* Slate 700 */
+  --ifm-heading-color: #0f172a; /* Slate 900 */
+  --ifm-strong-color: #0f172a;
+
+  /* Navigation & Sidebar */
+  --ifm-menu-color: #475569;
+  --ifm-menu-color-active: var(--ifm-color-primary);
+  --ifm-menu-background-active: rgba(16, 185, 129, 0.05);
+
+  /* Code & Blocs */
+  --ifm-code-font-size: 85%;
+  --docusaurus-highlighted-code-line-bg: rgba(16, 185, 129, 0.1);
+  --ifm-pre-background: #f1f5f9; /* Slate 100 */
 }
 
+/* Forçage du design clair (Neutralisation du Dark Mode) */
 [data-theme='dark'] {
-  --ifm-color-primary: #fbbf24;
-  --ifm-color-primary-dark: #f59e0b;
-  --ifm-color-primary-darker: #d97706;
-  --ifm-color-primary-darkest: #b45309;
-  --ifm-color-primary-light: #fcd34d;
-  --ifm-color-primary-lighter: #fde68a;
-  --ifm-color-primary-lightest: #fef3c7;
-  --docusaurus-highlighted-code-line-bg: rgba(251, 191, 36, 0.15);
+  --ifm-background-color: #ffffff;
+  --ifm-text-color: #334155;
+  --ifm-heading-color: #0f172a;
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-color-primary: #059669;
+  --ifm-footer-background-color: #f8fafc;
+  --ifm-pre-background: #f1f5f9;
 }
 
-/* Modernisation des cartes de la page d'accueil */
+/* --- Layout & Navigation --- */
+
+.navbar {
+  border-bottom: 1px solid #f1f5f9;
+  backdrop-filter: blur(10px);
+}
+
+.navbar__title {
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ifm-heading-color);
+}
+
+.footer {
+  border-top: 1px solid #f1f5f9;
+}
+
+/* --- Sidebar Style --- */
+
+.menu__link {
+  font-weight: 500;
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+.menu__link--active {
+  font-weight: 600;
+}
+
+.menu__caret::before {
+  /* Retrait du style par défaut pour un aspect plus sobre */
+  opacity: 0.5;
+}
+
+/* --- Admonitions (Alertes & Notes) --- */
+
+.admonition {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+  background-color: #f8fafc;
+}
+
+.admonition-icon svg {
+  fill: var(--ifm-color-primary);
+}
+
+/* --- Cartes & Conteneurs --- */
+
 .card-3l {
-  border-radius: 12px;
-  border: 1px solid #f1f5f9;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
+  overflow: hidden;
 }
 
 .card-3l:hover {
-  border-color: var(--ifm-color-primary-light);
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.1);
+  border-color: var(--ifm-color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Scrollbars & Code --- */
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 20px;
+}
+
+pre {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px !important;
+}
+
+/* --- Boutons Standards --- */
+
+.button--primary {
+  --ifm-button-background-color: var(--ifm-color-primary);
+  --ifm-button-border-color: var(--ifm-color-primary);
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.button--secondary {
+  --ifm-button-background-color: #ffffff;
+  --ifm-button-border-color: #e2e8f0;
+  --ifm-button-color: var(--ifm-text-color);
+}
+
+.button--secondary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
 }
