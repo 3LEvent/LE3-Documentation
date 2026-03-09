@@ -1,77 +1,110 @@
 ---
-sidebar_position: 5
+sidebar_position: 1
 ---
 
-# Processus de Pull Request
+# Conventions Git
 
-Le processus de Pull Request (PR) est le pilier de la qualité logicielle du **3LEvent**. Il permet de garantir que chaque modification respecte les standards de l'organisation, ne provoque pas de régression et reste cohérente avec les autres modules (Minecraft, Web, Discord).
-
----
-
-## 1. Prérequis avant l'ouverture
-
-Avant de soumettre une Pull Request, le développeur doit s'assurer que les conditions suivantes sont remplies :
-
-* **Synchronisation** : La branche de travail doit être à jour avec la branche `develop` du dépôt concerné.
-* **Normalisation** : Le code doit passer le linting et le formatage automatique (Prettier/ESLint pour le Web/TS, Checkstyle pour Java).
-* **Build Local** : Le projet doit compiler sans erreur en local (`mvn clean install` pour Java ou `npm run build` pour Angular/Node.js).
-* **Secrets** : Aucun secret ou configuration locale ne doit être inclus. Utilisez exclusivement les variables d'environnement définies dans l'organisation.
+L'organisation 3LEvent utilise une stratégie de gestion de version rigoureuse pour garantir la stabilité du code et la clarté de l'historique. Tous les contributeurs doivent respecter ces conventions avant de soumettre une modification.
 
 ---
 
-## 2. Convention de Nommage
+## 1. Stratégie de Branches
 
-Pour faciliter la lecture de l'historique et l'automatisation des changelogs, le titre de la PR doit suivre la convention **Conventional Commits** :
+Nous utilisons une variante simplifiée du **GitHub Flow**.
 
-| Préfixe | Description | Exemple |
-| :--- | :--- | :--- |
-| `feat:` | Ajout d'une nouvelle fonctionnalité | `feat: ajout du système de cosmétiques` |
-| `fix:` | Correction d'un bug | `fix: correction du cooldown des perles` |
-| `refactor:` | Modification du code sans changement de comportement | `refactor: optimisation du chargement des chunks` |
-| `docs:` | Modification de la documentation | `docs: mise à jour du readme de l'api` |
-| `ci:` | Modification des workflows GitHub Actions | `ci: ajout d'un secret de déploiement` |
+* **Branche main** : Contient le code stable en production. Aucun commit direct n'est autorisé.
+* **Branches de fonctionnalités** : Toute modification doit être effectuée dans une branche isolée créée à partir de `main`.
 
----
+### Nommage des branches
+Les branches doivent être nommées selon le format : `type/description-breve` (en minuscules, mots séparés par des tirets).
 
-## 3. Structure de la Description
-
-Toute Pull Request doit être documentée via le template standard de l'organisation. Une description claire réduit le temps de revue.
-
-> **Contenu attendu :**
-> 1. **Description** : Résumé concis des modifications.
-> 2. **Impact** : Liste des modules affectés (ex: Impacte le plugin Core et l'API Web).
-> 3. **Tests effectués** : Description des tests manuels ou automatisés réalisés.
+* `feat/` : Nouvelle fonctionnalité (ex: `feat/systeme-classement`).
+* `fix/` : Correction de bug (ex: `fix/latence-calcul-points`).
+* `docs/` : Documentation uniquement (ex: `docs/maj-api-java`).
+* `refactor/` : Modification du code qui ne change pas le comportement (ex: `refactor/optimisation-queries`).
+* `chore/` : Maintenance technique ou mise à jour de dépendances (ex: `chore/npm-update`).
 
 ---
 
-## 4. Cycle de Revue et Validation
+## 2. Format des Messages de Commit
 
-### Intégration Continue (CI)
-Dès l'ouverture de la PR, le dépôt `LE3-Shared-Workflows` déclenche automatiquement une série de vérifications :
-* Vérification de la compilation.
-* Analyse statique du code.
-* Validation des dépendances.
+Nous suivons la spécification **Conventional Commits**. Un message de commit doit être structuré de la manière suivante :
 
-**Une PR ne peut être fusionnée si l'un de ces checks est en échec.**
+```text
+type(périmètre): description courte en minuscules
 
-### Revue par les pairs
-* **Approbation requise** : Au moins une approbation d'un lead développeur ou d'un pair est nécessaire.
-* **Commentaires** : Les commentaires doivent être constructifs et porter sur l'optimisation, la sécurité ou la conformité aux guidelines de design.
+```
+
+### Les Types de commit
+
+* **feat** : Ajout d'une fonctionnalité.
+* **fix** : Correction d'un bug.
+* **docs** : Changement dans la documentation.
+* **style** : Mise en forme du code (espaces, virgules, etc. - sans changement logique).
+* **refactor** : Amélioration du code existant.
+* **perf** : Amélioration des performances.
+* **test** : Ajout ou modification de tests.
+
+### Le Périmètre (Scope)
+
+Le périmètre est optionnel mais recommandé pour cibler la partie du projet impactée (ex: `web`, `plugin`, `db`, `ui`).
+
+### Exemples de bons commits
+
+* `feat(plugin): ajout du multiplicateur de points de fin de partie`
+* `fix(web): correction de l'affichage du profil sur mobile`
+* `docs(readme): mise à jour des instructions d'installation`
 
 ---
 
-## 5. Fusion (Merge)
+## 3. Workflow de Contribution
 
-Une fois la PR approuvée et les tests validés :
+Pour contribuer au projet, suivez scrupuleusement ces étapes :
 
-1.  **Méthode** : Utilisez prioritairement le **Squash and Merge**. Cela permet de garder un historique de la branche principale (`main` ou `develop`) propre en regroupant tous les commits de la branche de travail en un seul.
-2.  **Nettoyage** : La branche de fonctionnalité doit être supprimée immédiatement après la fusion.
-3.  **Déploiement** : La fusion vers `develop` entraîne automatiquement un déploiement sur l'environnement de staging (Cloudflare Pages ou Serveur de test).
+1. **Synchronisation** : Récupérez les dernières modifications de `main`.
+```bash
+git checkout main
+git pull origin main
+
+```
+
+
+2. **Création** : Créez votre branche de travail.
+```bash
+git checkout -b feat/ma-fonctionnalite
+
+```
+
+
+3. **Commit** : Effectuez des commits fréquents et atomiques (un commit par petite modification logique).
+4. **Push** : Envoyez votre branche sur le dépôt distant.
+```bash
+git push origin feat/ma-fonctionnalite
+
+```
+
+
+5. **Pull Request** : Ouvrez une Pull Request (PR) sur GitHub pour déclencher la revue de code.
 
 ---
 
-## 6. Cas particuliers : Corrections urgentes (Hotfix)
+## 4. Règles de Fusion (Merging)
 
-Pour les corrections critiques durant l'événement :
-* La PR peut être fusionnée directement vers `main` après validation rapide d'un administrateur.
-* Une synchronisation inverse vers `develop` doit être effectuée immédiatement après pour éviter toute divergence.
+* **Squash and Merge** : Nous privilégions le "Squash" lors de la fusion d'une PR. Cela permet de condenser tous les commits de travail en un seul commit propre sur la branche `main`.
+* **Revue obligatoire** : Au moins une approbation d'un lead développeur est requise pour fusionner vers `main`.
+* **Tests CI** : Le build GitHub Actions doit être au vert (Success) avant toute fusion.
+
+---
+
+## 5. Bonnes Pratiques
+
+* **Ne jamais push de secrets** : Clés d'API, mots de passe et identifiants de base de données ne doivent jamais être commit. Utilisez les fichiers `.env` ou les GitHub Secrets.
+* **Rebase vs Merge** : Privilégiez `git rebase main` sur votre branche de fonctionnalité pour rester à jour et éviter les commits de fusion inutiles.
+* **Langue** : Les messages de commit peuvent être rédigés en français ou en anglais, mais la cohérence est de mise au sein d'un même dépôt.
+
+---
+
+### Prochaines étapes
+
+* **[Processus de Pull Request](./pull-request-process.md)**
+* **[Standards de programmation](../guidelines/coding-standards.md)**

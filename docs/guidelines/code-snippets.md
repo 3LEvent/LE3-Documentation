@@ -184,4 +184,4 @@ jobs:
 
 ### Prochaines étapes
 
-Cette bibliothèque est mise à jour régulièrement. Si vous avez besoin d'un nouveau pattern spécifique pour le **[Bot Discord](https://www.google.com/search?q=./projects/discord-bot)** ou les **[Plugins Minecraft](https://www.google.com/search?q=./projects/minecraft-plugins)**, contactez le Lead Dev.
+Cette bibliothèque est mise à jour régulièrement. Si vous avez besoin d'un nouveau pattern spécifique pour le **[Bot Discord](../projects/discord-bot)** ou les **[Plugins Minecraft](../projects/minecraft-plugins)**, contactez le Lead Dev.

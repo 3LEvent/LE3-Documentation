@@ -72,5 +72,5 @@ L'écosystème est conçu pour être extensible. Les développements futurs incl
 ### Prochaines étapes
 
 Pour une immersion technique immédiate, consultez :
-* **[Les standards de programmation](./guidelines/coding-standards)**
-* **[Le guide de configuration de l'environnement](./guidelines/setup)**
+* **[Les standards de programmation](../guidelines/coding-standards)**
+* **[Le guide de configuration de l'environnement](../guidelines/setup)**

@@ -110,5 +110,5 @@ Si un secret est accidentellement poussé sur un dépôt (même si le commit est
 
 ### Prochaines étapes
 
-* **[Consulter la configuration de l'Infrastructure](https://www.google.com/search?q=./infrastructure/cloudflare-setup)**
-* **[Guide du Workflow CI/CD](https://www.google.com/search?q=./workflow/pull-request-process)**
+* **[Consulter la configuration de l'Infrastructure](./cloudflare-setup)**
+* **[Guide du Workflow CI/CD](../workflow/pull-request-process)**

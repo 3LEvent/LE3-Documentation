@@ -107,5 +107,5 @@ En cas d'échec d'un Workflow :
 
 ### Prochaines étapes
 
-* **[Consulter la liste des Secrets disponibles](https://www.google.com/search?q=./infrastructure/secrets-management)**
-* **[Comprendre le Processus de Pull Request](https://www.google.com/search?q=./workflow/pull-request-process)**
+* **[Consulter la liste des Secrets disponibles](./secrets-management)**
+* **[Comprendre le Processus de Pull Request](../workflow/pull-request-process)**

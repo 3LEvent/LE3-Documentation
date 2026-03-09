@@ -104,5 +104,5 @@ Les menus d'inventaire doivent respecter la structure suivante :
 
 ### Prochaines étapes
 
-* **[Consulter les Snippets de Code UI](https://www.google.com/search?q=./guidelines/code-snippets)**
-* **[Guide de développement Angular](https://www.google.com/search?q=./projects/web-applications)**
+* **[Consulter les Snippets de Code UI](./code-snippets)**
+* **[Guide de développement Angular](../projects/web-applications)**

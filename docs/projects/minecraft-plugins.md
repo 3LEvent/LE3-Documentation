@@ -85,5 +85,5 @@ Pour garantir une immersion cohérente, les plugins doivent suivre la charte gra
 
 ### Prochaines étapes
 
-* **[Accéder à la bibliothèque de Snippets Java](./guidelines/code-snippets)**
-* **[Consulter le protocole de communication Inter-Plugins](./architecture/communication-protocol)**
+* **[Accéder à la bibliothèque de Snippets Java](../guidelines/code-snippets)**
+* **[Consulter le protocole de communication Inter-Plugins](../architecture/communication-protocol)**

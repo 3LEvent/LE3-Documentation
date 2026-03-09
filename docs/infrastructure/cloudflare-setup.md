@@ -74,5 +74,5 @@ Pour intégrer un nouveau service satellite dans Cloudflare :
 
 ### Prochaines étapes
 
-* **[Consulter les Workflows de déploiement](./infrastructure/github-actions)**
-* **[Guide de gestion des Secrets](./infrastructure/secrets-management)**
+* **[Consulter les Workflows de déploiement](../infrastructure/github-actions)**
+* **[Guide de gestion des Secrets](../infrastructure/secrets-management)**

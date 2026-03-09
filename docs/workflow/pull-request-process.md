@@ -1,77 +1,86 @@
 ---
-sidebar_position: 5
+sidebar_position: 2
 ---
 
 # Processus de Pull Request
 
-Le processus de Pull Request (PR) est le pilier de la qualité logicielle du **3LEvent**. Il permet de garantir que chaque modification respecte les standards de l'organisation, ne provoque pas de régression et reste cohérente avec les autres modules (Minecraft, Web, Discord).
+Toute modification du code source, de la configuration ou de la documentation doit passer par une Pull Request (PR). Ce processus garantit la qualité du code, la sécurité de l'infrastructure et le partage de connaissances au sein de l'équipe 3LEvent.
 
 ---
 
 ## 1. Prérequis avant l'ouverture
 
-Avant de soumettre une Pull Request, le développeur doit s'assurer que les conditions suivantes sont remplies :
+Avant de soumettre une Pull Request, le contributeur doit s'assurer que les points suivants sont validés localement :
 
-* **Synchronisation** : La branche de travail doit être à jour avec la branche `develop` du dépôt concerné.
-* **Normalisation** : Le code doit passer le linting et le formatage automatique (Prettier/ESLint pour le Web/TS, Checkstyle pour Java).
-* **Build Local** : Le projet doit compiler sans erreur en local (`mvn clean install` pour Java ou `npm run build` pour Angular/Node.js).
-* **Secrets** : Aucun secret ou configuration locale ne doit être inclus. Utilisez exclusivement les variables d'environnement définies dans l'organisation.
+1.  **Build** : Le projet compile sans erreur (`npm run build` ou `gradle build`).
+2.  **Linting** : Le code respecte les standards de formatage (`npm run lint` ou `checkstyle`).
+3.  **Tests** : Tous les tests unitaires existants passent avec succès.
+4.  **Documentation** : Si une fonctionnalité est ajoutée ou modifiée, la documentation correspondante a été mise à jour.
 
 ---
 
-## 2. Convention de Nommage
+## 2. Ouverture de la Pull Request
 
-Pour faciliter la lecture de l'historique et l'automatisation des changelogs, le titre de la PR doit suivre la convention **Conventional Commits** :
+### Titre de la PR
+Le titre doit suivre la convention des commits définie dans les [Conventions Git](./git-conventions.md).
+*Exemple : `feat(web): implémentation du système de notification temps réel`*
 
-| Préfixe | Description | Exemple |
+### Description
+Utilisez le template par défaut (s'il existe) ou fournissez les informations suivantes :
+* **Quoi** : Résumé des changements.
+* **Pourquoi** : Contexte ou lien vers un ticket/issue.
+* **Comment tester** : Étapes pour vérifier le bon fonctionnement.
+
+---
+
+## 3. Le Cycle de Revue
+
+Une fois la PR ouverte, le workflow suivant s'enclenche :
+
+### Analyse Automatique (CI)
+Le pipeline **GitHub Actions** lance automatiquement un build de vérification.
+> Une PR ne peut pas être fusionnée si le build CI est en échec (rouge).
+
+### Revue par les Pairs
+Chaque PR nécessite au moins une approbation d'un autre développeur (ou d'un lead développeur selon la criticité).
+
+| Statut de la Revue | Signification | Action requise |
 | :--- | :--- | :--- |
-| `feat:` | Ajout d'une nouvelle fonctionnalité | `feat: ajout du système de cosmétiques` |
-| `fix:` | Correction d'un bug | `fix: correction du cooldown des perles` |
-| `refactor:` | Modification du code sans changement de comportement | `refactor: optimisation du chargement des chunks` |
-| `docs:` | Modification de la documentation | `docs: mise à jour du readme de l'api` |
-| `ci:` | Modification des workflows GitHub Actions | `ci: ajout d'un secret de déploiement` |
+| **Approved** | Le code est validé. | La PR peut être fusionnée. |
+| **Changes Requested** | Des corrections sont nécessaires. | Le contributeur doit appliquer les retours et redemander une revue. |
+| **Comment** | Questions ou suggestions mineures. | Discussion ouverte entre le contributeur et le reviewer. |
 
 ---
 
-## 3. Structure de la Description
+## 4. Application des Retours
 
-Toute Pull Request doit être documentée via le template standard de l'organisation. Une description claire réduit le temps de revue.
-
-> **Contenu attendu :**
-> 1. **Description** : Résumé concis des modifications.
-> 2. **Impact** : Liste des modules affectés (ex: Impacte le plugin Core et l'API Web).
-> 3. **Tests effectués** : Description des tests manuels ou automatisés réalisés.
-
----
-
-## 4. Cycle de Revue et Validation
-
-### Intégration Continue (CI)
-Dès l'ouverture de la PR, le dépôt `LE3-Shared-Workflows` déclenche automatiquement une série de vérifications :
-* Vérification de la compilation.
-* Analyse statique du code.
-* Validation des dépendances.
-
-**Une PR ne peut être fusionnée si l'un de ces checks est en échec.**
-
-### Revue par les pairs
-* **Approbation requise** : Au moins une approbation d'un lead développeur ou d'un pair est nécessaire.
-* **Commentaires** : Les commentaires doivent être constructifs et porter sur l'optimisation, la sécurité ou la conformité aux guidelines de design.
+Si des changements sont demandés :
+1.  Appliquez les corrections directement sur votre branche de fonctionnalité.
+2.  Push les nouveaux commits (ils apparaîtront automatiquement dans la PR).
+3.  Utilisez le bouton "Resolve conversation" sur GitHub une fois le point traité.
+4.  Une fois tous les retours appliqués, prévenez le reviewer pour une validation finale.
 
 ---
 
 ## 5. Fusion (Merge)
 
-Une fois la PR approuvée et les tests validés :
+Une fois la PR approuvée et le build CI au vert :
 
-1.  **Méthode** : Utilisez prioritairement le **Squash and Merge**. Cela permet de garder un historique de la branche principale (`main` ou `develop`) propre en regroupant tous les commits de la branche de travail en un seul.
-2.  **Nettoyage** : La branche de fonctionnalité doit être supprimée immédiatement après la fusion.
-3.  **Déploiement** : La fusion vers `develop` entraîne automatiquement un déploiement sur l'environnement de staging (Cloudflare Pages ou Serveur de test).
+* **Méthode de fusion** : Nous utilisons le **Squash and Merge**. Tous les commits de la PR seront condensés en un seul commit propre sur la branche `main`.
+* **Nettoyage** : La branche de fonctionnalité doit être supprimée immédiatement après la fusion pour maintenir le dépôt propre.
 
 ---
 
-## 6. Cas particuliers : Corrections urgentes (Hotfix)
+## 6. Post-Fusion
 
-Pour les corrections critiques durant l'événement :
-* La PR peut être fusionnée directement vers `main` après validation rapide d'un administrateur.
-* Une synchronisation inverse vers `develop` doit être effectuée immédiatement après pour éviter toute divergence.
+Après la fusion dans `main` :
+1.  Le déploiement continu vers l'environnement de staging ou de production est déclenché automatiquement.
+2.  Vérifiez que vos changements sont correctement reflétés sur le site ou le serveur.
+3.  En cas de bug critique détecté après fusion, une procédure de *Revert* sera lancée.
+
+---
+
+### Prochaines étapes
+
+* **[Consulter les Conventions Git](./git-conventions.md)**
+* **[Standards de programmation](../guidelines/coding-standards.md)**

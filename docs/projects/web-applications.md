@@ -1,77 +1,86 @@
 ---
-sidebar_position: 5
+sidebar_position: 3
 ---
 
-# Processus de Pull Request
+# Applications Web et Portails
 
-Le processus de Pull Request (PR) est le pilier de la qualité logicielle du **3LEvent**. Il permet de garantir que chaque modification respecte les standards de l'organisation, ne provoque pas de régression et reste cohérente avec les autres modules (Minecraft, Web, Discord).
-
----
-
-## 1. Prérequis avant l'ouverture
-
-Avant de soumettre une Pull Request, le développeur doit s'assurer que les conditions suivantes sont remplies :
-
-* **Synchronisation** : La branche de travail doit être à jour avec la branche `develop` du dépôt concerné.
-* **Normalisation** : Le code doit passer le linting et le formatage automatique (Prettier/ESLint pour le Web/TS, Checkstyle pour Java).
-* **Build Local** : Le projet doit compiler sans erreur en local (`mvn clean install` pour Java ou `npm run build` pour Angular/Node.js).
-* **Secrets** : Aucun secret ou configuration locale ne doit être inclus. Utilisez exclusivement les variables d'environnement définies dans l'organisation.
+Les applications web de l'écosystème **3LEvent** constituent l'interface principale entre les participants, les spectateurs et l'infrastructure technique. Cette section documente la stack technique, les standards de développement et les processus de déploiement des portails web.
 
 ---
 
-## 2. Convention de Nommage
+## 1. Stack Technique de Référence
 
-Pour faciliter la lecture de l'historique et l'automatisation des changelogs, le titre de la PR doit suivre la convention **Conventional Commits** :
+Toutes les applications web modernes de l'organisation doivent s'aligner sur la stack suivante pour garantir une maintenance homogène :
 
-| Préfixe | Description | Exemple |
+| Composant | Technologie | Détails |
 | :--- | :--- | :--- |
-| `feat:` | Ajout d'une nouvelle fonctionnalité | `feat: ajout du système de cosmétiques` |
-| `fix:` | Correction d'un bug | `fix: correction du cooldown des perles` |
-| `refactor:` | Modification du code sans changement de comportement | `refactor: optimisation du chargement des chunks` |
-| `docs:` | Modification de la documentation | `docs: mise à jour du readme de l'api` |
-| `ci:` | Modification des workflows GitHub Actions | `ci: ajout d'un secret de déploiement` |
+| **Framework** | Angular 17+ | Utilisation des *Standalone Components* et des *Signals*. |
+| **Langage** | TypeScript | Mode strict activé obligatoirement. |
+| **Styling** | Tailwind CSS | Design System basé sur la charte Slate & Emerald. |
+| **State Management** | TanStack Query | Pour la gestion du cache serveur et des requêtes asynchrones. |
+| **Hosting** | Cloudflare Pages | Déploiement à l'Edge pour une latence minimale. |
 
 ---
 
-## 3. Structure de la Description
+## 2. Architecture des Applications
 
-Toute Pull Request doit être documentée via le template standard de l'organisation. Une description claire réduit le temps de revue.
+Nos applications sont structurées pour séparer strictement la logique métier de la présentation.
 
-> **Contenu attendu :**
-> 1. **Description** : Résumé concis des modifications.
-> 2. **Impact** : Liste des modules affectés (ex: Impacte le plugin Core et l'API Web).
-> 3. **Tests effectués** : Description des tests manuels ou automatisés réalisés.
+### Structure des dossiers
+* `src/app/core/` : Services globaux, intercepteurs HTTP et authentification.
+* `src/app/shared/` : Composants UI réutilisables, pipes et directives.
+* `src/app/features/` : Modules fonctionnels (ex: dashboard, classement, profil).
+* `src/assets/` : Ressources statiques, icônes et configurations environnementales.
 
----
-
-## 4. Cycle de Revue et Validation
-
-### Intégration Continue (CI)
-Dès l'ouverture de la PR, le dépôt `LE3-Shared-Workflows` déclenche automatiquement une série de vérifications :
-* Vérification de la compilation.
-* Analyse statique du code.
-* Validation des dépendances.
-
-**Une PR ne peut être fusionnée si l'un de ces checks est en échec.**
-
-### Revue par les pairs
-* **Approbation requise** : Au moins une approbation d'un lead développeur ou d'un pair est nécessaire.
-* **Commentaires** : Les commentaires doivent être constructifs et porter sur l'optimisation, la sécurité ou la conformité aux guidelines de design.
+### Gestion du State
+L'utilisation des **Signals** d'Angular est privilégiée pour la réactivité locale. Pour les données partagées de manière complexe, l'utilisation d'un Store léger (RxJS) est autorisée.
 
 ---
 
-## 5. Fusion (Merge)
+## 3. Standards de Développement
 
-Une fois la PR approuvée et les tests validés :
+Pour assurer la qualité du code, les règles suivantes s'appliquent :
 
-1.  **Méthode** : Utilisez prioritairement le **Squash and Merge**. Cela permet de garder un historique de la branche principale (`main` ou `develop`) propre en regroupant tous les commits de la branche de travail en un seul.
-2.  **Nettoyage** : La branche de fonctionnalité doit être supprimée immédiatement après la fusion.
-3.  **Déploiement** : La fusion vers `develop` entraîne automatiquement un déploiement sur l'environnement de staging (Cloudflare Pages ou Serveur de test).
+1.  **Composants Standalone** : Aucun module `NgModule` ne doit être utilisé pour les nouveaux composants.
+2.  **Hydratation et SSR** : Le Server-Side Rendering (SSR) doit être activé pour les pages publiques afin d'optimiser le SEO et le temps de chargement initial.
+3.  **Normalisation UI** : Les composants doivent utiliser les variables CSS définies dans le [Design System](../guidelines/design-system.md).
+4.  **Tests** : Chaque service critique doit être couvert par des tests unitaires (Jasmine/Karma ou Vitest).
 
 ---
 
-## 6. Cas particuliers : Corrections urgentes (Hotfix)
+## 4. Sécurité et Performance
 
-Pour les corrections critiques durant l'événement :
-* La PR peut être fusionnée directement vers `main` après validation rapide d'un administrateur.
-* Une synchronisation inverse vers `develop` doit être effectuée immédiatement après pour éviter toute divergence.
+### Sécurité périmétrique
+* **Cloudflare WAF** : Protection contre les attaques DDoS et filtrage des requêtes malveillantes.
+* **Content Security Policy (CSP)** : Politique stricte définie via les headers Cloudflare pour prévenir les injections XSS.
+* **JWT (JSON Web Tokens)** : Stockage sécurisé des tokens de session dans des cookies `HttpOnly` et `Secure`.
+
+### Optimisation des performances
+* **Lazy Loading** : Chargement différé de toutes les routes de fonctionnalités.
+* **Image Optimization** : Utilisation de formats modernes (WebP/AVIF) et chargement différé (*lazy loading* natif).
+* **Brotli Compression** : Activée par défaut via l'infrastructure Cloudflare.
+
+---
+
+## 5. Pipeline de Déploiement (CI/CD)
+
+Le cycle de vie d'une application web suit ce workflow automatisé :
+
+1.  **Push** sur une branche de fonctionnalité : Déclenchement d'un *Preview Deployment* Cloudflare.
+2.  **Pull Request** : Exécution des tests unitaires et du linting via GitHub Actions.
+3.  **Merge sur main** : Build de production et déploiement immédiat sur le domaine principal (ex: `app.3levent.fr`).
+
+Pour plus de détails sur les workflows, consultez le guide [GitHub Actions](../infrastructure/github-actions.md).
+
+---
+
+## 6. Maintenance
+
+Les dépendances doivent être mises à jour trimestriellement à l'aide de `npm outdated`. Une attention particulière est portée aux mises à jour majeures d'Angular pour ne jamais avoir plus d'une version de retard sur la branche stable.
+
+---
+
+### Prochaines étapes
+
+* **[Consulter les Standards de Code](../guidelines/coding-standards.md)**
+* **[Guide de déploiement Cloudflare](../infrastructure/cloudflare-setup.md)**

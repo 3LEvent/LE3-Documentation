@@ -113,5 +113,5 @@ Redis est utilisé pour les opérations nécessitant une latence inférieure à 
 
 ### Prochaines étapes
 
-* **[Consulter le protocole de communication](https://www.google.com/search?q=./communication-protocol)**
-* **[Voir les snippets de requêtes SQL](https://www.google.com/search?q=../guidelines/code-snippets)**
+* **[Consulter le protocole de communication](./communication-protocol)**
+* **[Voir les snippets de requêtes SQL](../guidelines/code-snippets)**

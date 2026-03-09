@@ -89,5 +89,5 @@ Pour éviter les débats sur le style (espaces, accolades, etc.), nous imposons 
 
 ### Prochaines étapes
 
-* **[Consulter les Snippets de Code](./guidelines/code-snippets)**
+* **[Consulter les Snippets de Code](../guidelines/code-snippets)**
 * **[Guide de contribution et Pull Requests](../workflow/pull-request-process)**

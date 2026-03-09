@@ -81,5 +81,5 @@ Le déploiement est automatisé via `LE3-Shared-Workflows` :
 
 ### Prochaines étapes
 
-* **[Consulter les Snippets TypeScript](./guidelines/code-snippets)**
-* **[Accéder à la liste des Secrets de l'Organisation](./infrastructure/secrets-management)**
+* **[Consulter les Snippets TypeScript](../guidelines/code-snippets)**
+* **[Accéder à la liste des Secrets de l'Organisation](../infrastructure/secrets-management)**
