@@ -10,6 +10,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Architecture',
+      className: 'sidebar-icon-architecture',
       collapsed: false,
       items: [
         'architecture/overview',
@@ -20,6 +21,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Standards & Guidelines',
+      className: 'sidebar-icon-standards',
       collapsed: false,
       items: [
         'guidelines/coding-standards',
@@ -30,6 +32,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Workflow',
+      className: 'sidebar-icon-workflow',
       collapsed: true,
       items: [
         'workflow/git-conventions',
@@ -39,6 +42,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Infrastructure',
+      className: 'sidebar-icon-infra',
       collapsed: true,
       items: [
         'infrastructure/secrets-management',
@@ -49,6 +53,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Modules Ecosystem',
+      className: 'sidebar-icon-projects',
       collapsed: true,
       items: [
         'projects/minecraft-plugins',
