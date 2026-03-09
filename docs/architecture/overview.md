@@ -50,13 +50,13 @@ L'organisation GitHub est segmentée pour assurer une séparation nette des resp
 Pour maintenir une cohérence maximale sur un projet de cette envergure, chaque contributeur doit suivre trois principes fondamentaux :
 
 ### Normalisation
-Tout code produit doit être identique dans sa structure, qu'il s'agisse d'un plugin Java ou d'une application Angular. Cela passe par l'utilisation stricte de nos [Coding Standards](./guidelines/coding-standards).
+Tout code produit doit être identique dans sa structure, qu'il s'agisse d'un plugin Java ou d'une application Angular. Cela passe par l'utilisation stricte de nos [Coding Standards](../guidelines/coding-standards).
 
 ### Sécurité par Design
-Aucune donnée sensible ne transite en clair. L'utilisation des [GitHub Secrets](./infrastructure/secrets-management) et des tunnels Cloudflare est obligatoire pour toute communication inter-services.
+Aucune donnée sensible ne transite en clair. L'utilisation des [GitHub Secrets](../infrastructure/secrets-management) et des tunnels Cloudflare est obligatoire pour toute communication inter-services.
 
 ### Automatisation
-"If it’s not automated, it’s broken." Aucun déploiement ne se fait manuellement. Tout passage en production est validé par une suite de tests et un build automatisé via [GitHub Actions](./infrastructure/github-actions).
+"If it’s not automated, it’s broken." Aucun déploiement ne se fait manuellement. Tout passage en production est validé par une suite de tests et un build automatisé via [GitHub Actions](../infrastructure/github-actions).
 
 ---
 
