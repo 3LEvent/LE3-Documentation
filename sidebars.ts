@@ -24,6 +24,7 @@ const sidebars: SidebarsConfig = {
       className: 'sidebar-icon-standards',
       collapsed: false,
       items: [
+        'guidelines/setup',
         'guidelines/coding-standards',
         'guidelines/code-snippets',
         'guidelines/design-system',
