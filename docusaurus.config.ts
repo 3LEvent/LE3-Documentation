@@ -4,22 +4,22 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'LE3 Documentation',
-  tagline: 'Documentation développeur officielle pour le 3LEvent', //
+  tagline: 'Documentation développeur officielle pour le 3LEvent',
   favicon: 'img/favicon.ico',
 
-  // Améliore la compatibilité avec Docusaurus v4
+  // Compatibilité Docusaurus v4
   future: {
     v4: true,
   },
 
-  // Configuration du domaine personnalisé sécurisé par Cloudflare
+  // Configuration du domaine personnalisé (Cloudflare)
   url: 'https://doc.3levent.fr', //
   baseUrl: '/',
   trailingSlash: false,
 
-  // Configuration GitHub pour le déploiement automatique
-  organizationName: '3LEvent', //
-  projectName: 'LE3-Documentation', //
+  // Configuration GitHub
+  organizationName: '3LEvent',
+  projectName: 'LE3-Documentation',
   deploymentBranch: 'gh-pages',
 
   onBrokenLinks: 'throw',
@@ -36,14 +36,12 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Permet aux membres de modifier la doc directement sur GitHub via la branche main
+          // Lien direct pour que ton équipe puisse éditer les pages
           editUrl:
               'https://github.com/3LEvent/LE3-Documentation/tree/main/',
         },
-        blog: {
-          showReadingTime: true,
-          onInlineTags: 'warn',
-        },
+        // LE BLOG A ÉTÉ RETIRÉ ICI
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -52,16 +50,16 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Image pour le partage sur les réseaux sociaux
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
-      respectPrefersColorScheme: true, // S'adapte au mode sombre/clair du système
+      defaultMode: 'light',
+      respectPrefersColorScheme: true,
     },
     navbar: {
       title: '3LEvent Doc',
       logo: {
         alt: '3LEvent Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo.svg', // Assure-toi que ton logo est bien dans static/img/
       },
       items: [
         {
@@ -70,7 +68,7 @@ const config: Config = {
           position: 'left',
           label: 'Wiki',
         },
-        {to: '/blog', label: 'News', position: 'left'},
+        // LE LIEN NEWS A ÉTÉ RETIRÉ ICI
         {
           href: 'https://github.com/3LEvent/LE3-Documentation',
           label: 'GitHub',
