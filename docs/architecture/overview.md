@@ -17,7 +17,7 @@ L'architecture est de type **modulaire et distribuée**. Elle repose sur une com
 ### Flux de données principaux :
 1.  **Gameplay ↔ Database** : Les statistiques des joueurs (points, succès, kills) sont enregistrées en temps réel depuis les serveurs Minecraft.
 2.  **Database ↔ API/Web** : Le site internet (`LE3-Web-Main`) interroge ces données pour afficher les classements en direct et les profils d'équipes.
-3.  **Minecraft ↔ Discord** : Le bot (`LE3-App-DiscordBot`) transmet les logs de modération et les alertes de sécurité pour une surveillance staff déportée.
+3. **API/Web ↔ Discord** : Le bot (`LE3-App-DiscordBot`) communique directement avec l'API du site pour piloter le système d'inscription des participants (validation des comptes, liaison d'identifiants).
 
 ---
 
@@ -39,9 +39,8 @@ L'écosystème est structuré autour de quatre piliers technologiques :
 L'organisation GitHub est segmentée pour assurer une séparation nette des responsabilités :
 
 * **Templates (`LE3-*-Template`)** : Dépôts de référence pour garantir que chaque nouveau module hérite des standards de l'organisation.
-* **Core (`LE3-Plugin-Core`)** : Le noyau central dont dépendent tous les autres plugins de l'événement.
 * **Infrastructure (`LE3-Shared-Workflows`)** : Le moteur centralisant l'automatisation du build et du déploiement.
-* **Satellites (`LE3-Plugin-*`)** : Les modules spécifiques à chaque mini-jeu (FlagWars, DeadHands, etc.).
+* **Satellites (`LE3-Plugin-*`)** : Les repository spécifique à chaque plugins (FlagWars, DeadHands, Core, etc.).
 
 ---
 
@@ -63,10 +62,9 @@ Aucune donnée sensible ne transite en clair. L'utilisation des [GitHub Secrets]
 ## 5. Roadmap Technique
 
 L'écosystème est conçu pour être extensible. Les développements futurs incluent :
-* L'intégration d'applications mobiles satellites.
-* La mise en place d'un système de replay web 2D basé sur les logs de position.
-* L'automatisation complète de la gestion des serveurs via Kubernetes ou des conteneurs isolés.
-
+* La création de nouvelle applications satellite et de nouveaux plugins.
+* La normalisation de tout les codes existant.
+* L'automatisation complète de la gestion du github et des repository.
 ---
 
 ### Prochaines étapes
