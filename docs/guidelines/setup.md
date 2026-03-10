@@ -28,7 +28,7 @@ Le développement des serveurs de jeu repose sur les technologies Java les plus 
 * **Variable d'environnement** : Assurez-vous que `JAVA_HOME` pointe correctement vers l'installation du JDK 21.
 
 ### Outils de Build
-* **Gradle** : Version 8.5+. Nous utilisons le Gradle Wrapper (`gradlew`) inclus dans chaque dépôt pour garantir l'homogénéité des builds.
+* **Maven** : Version 3.9+. L'utilisation du Maven Wrapper (`mvnw`) est standard sur l'ensemble de nos dépôts pour garantir l'homogénéité et la reproductibilité des builds.
 
 ---
 
@@ -49,7 +49,7 @@ Pour maintenir une cohérence dans la qualité du code (Normalisation), nous rec
 * **Plugin Minecraft Development** : Pour la gestion des événements et des dépendances Paper/Spigot.
 * **CheckStyle** : Pour vérifier le respect des normes de codage en temps réel.
 
-### Visual Studio Code (Recommandé pour le Web et la Doc)
+### Visual Studio Code / Webstorm (Recommandé pour le Web et la Doc)
 Extensions obligatoires :
 * **Prettier** : Pour le formatage automatique.
 * **ESLint** : Pour l'analyse statique du code TypeScript/Angular.
