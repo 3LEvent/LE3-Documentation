@@ -1,111 +1,139 @@
 ---
-sidebar_position: 10
+sidebar_position: 2
 ---
 
-# Automatisation et CI/CD (GitHub Actions)
+# CI/CD (GitHub Actions)
 
-L'automatisation des cycles de build, de test et de déploiement est gérée par GitHub Actions. Pour garantir la cohérence de l'écosystème et faciliter la maintenance, **3LEvent** utilise des workflows réutilisables (Reusable Workflows).
+L'automatisation est centralisée dans le dépôt **`LE3-Shared-Workflows`** : chaque projet appelle
+un moteur de build partagé plutôt que de redéfinir sa logique.
 
----
-
-## 1. Architecture Centralisée
-
-Plutôt que de définir la logique de build dans chaque dépôt, toute l'intelligence CI/CD est centralisée dans le dépôt :
-👉 `LE3-Shared-Workflows`
-
-Chaque projet satellite (Plugin, Web, App) fait appel à ces moteurs de build standardisés. Cela permet de mettre à jour la stratégie de déploiement de 20 dépôts en modifiant un seul fichier.
-
----
-
-## 2. Workflows Standards Disponibles
-
-L'organisation propose trois types de moteurs de build principaux :
-
-| Workflow | Usage | Actions effectuées |
-| :--- | :--- | :--- |
-| `java-plugin-build.yml` | Plugins Minecraft | Checkstyle, Build Maven/Gradle, Archivage de l'Artifact. |
-| `angular-deploy.yml` | Applications Web | Linting, Build Angular, Déploiement sur Cloudflare Pages. |
-| `nodejs-app-check.yml` | Bots et API | Tests unitaires, Linting TypeScript, Build de production. |
+:::caution État réel de la couverture
+Seul **`LE3-Plugin-Core`** possède aujourd'hui des workflows. Les trois applications web
+(`3levent`, `3levent-live`, `3levent-panel`) n'ont **aucun** `.github/workflows/` : elles sont
+construites et déployées manuellement. Les combler est un chantier ouvert (§5).
+:::
 
 ---
 
-## 3. Mise en Œuvre dans un Nouveau Dépôt
+## 1. Workflows du plugin Minecraft
 
-Pour activer la CI/CD sur un nouveau projet, créez un fichier `.github/workflows/main.yml` et appelez le workflow partagé correspondant.
+Six workflows sont actifs dans `LE3-Plugin-Core`.
 
-### Exemple pour un Plugin Minecraft :
+| Fichier | Nom | Déclencheur | Effet |
+| :--- | :--- | :--- | :--- |
+| `build-verify.yml` | LE3-Plugin-Verify | push `develop`, PR vers `main`/`develop`/`releases/*`/`hotfix/*`, manuel | Appelle `LE3-Shared-Workflows/.github/workflows/java-engine.yml@main` |
+| `deploy-dev.yml` | LE3-Plugin-Dev-Build | push `develop`, manuel | `mvn -B package`, JAR en artefact (rétention **7 jours**) |
+| `publish.yml` | LE3-Plugin-Publish | push `main`, manuel | `mvn -B deploy` vers GitHub Packages, puis resynchronise `develop` |
+| `release.yml` | LE3-Plugin-Release | tag `v*` | `mvn -B clean package`, checksums SHA-256, Release GitHub |
+| `security.yml` | LE3-Security-Scan | push/PR `main`+`develop`, cron `25 4 * * 5`, manuel | CodeQL `java-kotlin`, requêtes `security-extended` |
+| `sync-develop.yml` | Sync Develop | push `main`, manuel | Reset dur de `develop` sur `main` |
+
+Tous utilisent JDK 21 Temurin (`actions/setup-java@v4`) et un groupe de concurrence
+`${{ github.workflow }}-${{ github.ref }}` avec `cancel-in-progress: true`, pour ne pas empiler
+les builds sur des push successifs.
+
+### Appel du moteur partagé
+
 ```yaml
-name: Build Plugin
-on: [push, pull_request]
-
 jobs:
-  call-shared-workflow:
-    uses: 3LEvent/LE3-Shared-Workflows/.github/workflows/java-plugin-build.yml@main
-    with:
-      java-version: '21'
+  call-java-engine:
+    uses: 3LEvent/LE3-Shared-Workflows/.github/workflows/java-engine.yml@main
     secrets: inherit
-
 ```
 
-### Exemple pour une Application Web (Angular) :
+`secrets: inherit` transmet les secrets de l'organisation sans les redéclarer localement.
 
-```yaml
-name: Deploy Web App
-on:
-  push:
-    branches: [main, develop]
+### Build de développement à la demande
 
-jobs:
-  call-shared-workflow:
-    uses: 3LEvent/LE3-Shared-Workflows/.github/workflows/angular-deploy.yml@main
-    with:
-      project-name: 'le3-web-main'
-    secrets: inherit
+`deploy-dev.yml` ne déploie rien malgré son nom : il **prépare un artefact téléchargeable**
+(`LE3-DEV-<repo>-b<run_number>`) que le staff récupère depuis l'onglet Actions pour l'installer
+manuellement sur le serveur. Le `workflow_dispatch` permet de le lancer sans push.
 
+### Release
+
+`release.yml` se déclenche uniquement sur un tag `v*`. Il génère un `checksums.txt` (SHA-256) à
+côté du JAR et laisse `generate_release_notes: true` composer les notes par comparaison avec la
+version précédente.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
 ---
 
-## 4. Déclencheurs (Triggers) et Environnements
+## 2. Synchronisation `main` → `develop`
 
-Le comportement de la CI/CD s'adapte en fonction de la branche cible :
+Deux workflows font **la même chose** : `sync-develop.yml`, et l'étape « Sync Develop with Main »
+de `publish.yml`. Tous deux réalisent un `git reset --hard origin/main` sur `develop` suivi d'un
+`push --force`.
 
-1. **Pull Request vers `develop**` :
-* Déclenche uniquement les tests et le build de vérification.
-* Empêche la fusion si une erreur est détectée.
+:::danger `develop` est écrasée à chaque publication
+Toute modification présente sur `develop` mais absente de `main` est **définitivement perdue** au
+prochain push sur `main`. Ne laissez jamais de travail non fusionné vivre sur `develop` : créez
+une branche `feat/`.
+:::
 
-
-2. **Push sur `develop` (Staging)** :
-* Déploie automatiquement sur l'environnement de test.
-* Génère une version "Snaphot" pour les plugins Java.
-
-
-3. **Push sur `main` (Production)** :
-* Déploie sur l'infrastructure de production (Cloudflare).
-* Génère une Release GitHub officielle.
-
-
+`sync-develop.yml` utilise un PAT d'organisation (`LE3_SYNC_TOKEN`) injecté dans l'URL du push
+pour contourner les *rulesets* de branche protégée — le `GITHUB_TOKEN` standard n'y suffit pas.
+Ces deux workflows font double emploi : en conserver un seul éviterait les *race conditions*.
 
 ---
 
-## 5. Gestion des Échecs et Monitoring
+## 3. Analyse de sécurité
 
-En cas d'échec d'un Workflow :
+`security.yml` exécute CodeQL en mode `build-mode: manual` : le workflow lance lui-même
+`mvn -B clean install -DskipTests` pour que CodeQL cartographie l'ensemble du projet avant
+l'analyse. Résultats dans l'onglet **Security → Code scanning** du dépôt.
 
-* **Notification** : Une alerte est envoyée automatiquement sur le canal Discord `#staff-logs-dev`.
-* **Logs** : Les détails de l'erreur sont consultables dans l'onglet **Actions** du dépôt concerné.
-* **Blocage** : Pour les dépôts critiques, la fusion de code est bloquée tant que le workflow n'est pas "Success".
+Le scan hebdomadaire (`cron: '25 4 * * 5'`, vendredi 04h25 UTC) détecte les vulnérabilités
+publiées après la fusion du code.
 
 ---
 
-## 6. Sécurité des Workflows
+## 4. Modèle de branches et CI
 
-* **secrets: inherit** : Cette commande permet aux workflows partagés d'accéder aux secrets de l'organisation (Tokens Cloudflare, Maven, etc.) sans les redéfinir localement.
-* **Permissions** : Les workflows sont exécutés avec des permissions `read-only` par défaut. Seuls les workflows de déploiement ont l'autorisation `write` pour les artifacts et les releases.
+| Branche | Ce que déclenche un push |
+| :--- | :--- |
+| `feat/*`, `fix/*` | rien (la CI part de la PR) |
+| PR vers `develop`/`main` | `build-verify` + `security` — bloquants |
+| `develop` | `build-verify`, `deploy-dev` (artefact), `security` |
+| `main` | `publish` (GitHub Packages), `sync-develop`, `security` |
+| tag `v*` | `release` (Release GitHub + checksums) |
+
+---
+
+## 5. À faire : CI des applications web
+
+Les trois applications sont prêtes pour une CI (scripts `build` et `lint` normalisés), il ne
+manque que les workflows. Un moteur partagé `node-engine.yml` devrait, au minimum :
+
+1. `npm ci`
+2. `npm run lint`
+3. `npm run build` (backend + frontend + CSS + assets)
+4. construire et publier l'image Docker
+
+:::note `npm test` n'est pas utilisable
+Il renvoie `exit 1` sur les trois dépôts. Ne l'ajoutez pas au pipeline avant d'avoir des tests
+réels, sinon la CI sera rouge en permanence — ou pire, quelqu'un ajoutera `|| true`.
+:::
+
+---
+
+## 6. En cas d'échec
+
+1. **Logs** : onglet **Actions** du dépôt, job concerné.
+2. **Formatage Java** : `fmt-maven-plugin` reformate en phase `validate`. Un échec de build sur le
+   style est presque toujours résolu par `mvn clean package` en local suivi d'un commit.
+3. **Publication** : `publish.yml` requiert `packages: write`. Un `401` sur GitHub Packages est
+   généralement un problème de `settings.xml` ou de permissions de workflow.
+4. **Sync** : si `sync-develop` échoue, vérifier la validité de `LE3_SYNC_TOKEN` (les PAT
+   expirent).
 
 ---
 
 ### Prochaines étapes
 
-* **[Consulter la liste des Secrets disponibles](./secrets-management)**
-* **[Comprendre le Processus de Pull Request](../workflow/pull-request-process)**
+* **[Gestion des secrets](./secrets-management)**
+* **[Processus de Pull Request](../workflow/pull-request-process)**
+* **[Déploiement et hébergement](./cloudflare-setup)**

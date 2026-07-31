@@ -1,85 +1,113 @@
 ---
-sidebar_position: 9
+sidebar_position: 6
 ---
 
-# Bot Discord Central
+# Bot Discord — à implémenter
 
-Le dépôt `LE3-App-DiscordBot` héberge le bot officiel du **3LEvent**. Il agit comme une passerelle automatisée entre l'infrastructure de jeu, le site web et les serveurs de communication.
+:::warning Statut : non implémenté
+Il n'existe **aucun dépôt de bot Discord** dans l'écosystème à ce jour. Cette page décrit
+l'intégration prévue et les points d'ancrage **déjà présents dans le code** pour l'accueillir.
+Tout ce qui suit la section 2 est une spécification, pas une description de l'existant.
+:::
 
 ---
 
-## 1. Stack Technique et Framework
+## 1. Ce qui existe déjà
 
-Le bot doit être développé en respectant la stack technique unifiée de l'organisation :
+L'écosystème est prêt à recevoir un bot sans modification des services existants.
 
-| Composant | Technologie | Version |
+| Point d'ancrage | Où | État |
 | :--- | :--- | :--- |
-| **Runtime** | Node.js | 20.x+ (LTS) |
-| **Langage** | TypeScript | 5.x+ |
-| **Librairie** | discord.js | v14+ |
-| **Gestionnaire** | npm | Dernière version stable |
+| Nom de service `discord-bot` | `EcosystemServiceName` dans les trois contrats | **réservé** |
+| Bus d'événements `le3:eventbus` | Redis | opérationnel |
+| Tolérance aux types inconnus | `default: break` chez tous les consommateurs | opérationnel |
+| OTP de liaison Discord | `verifications` (Core), champ `method` (`DM` ou `SLASH`) | **implémenté côté site** |
+| OAuth2 Discord joueurs | `/api/auth/discord/*` (Core) | opérationnel |
+| Rôles Discord | `DISCORD_ROLE_INSCRIT_ID`, `DISCORD_TEAM_ROLES_IDS`, `LE3_DISCORD_BOT_TOKEN` | variables déjà déclarées |
+
+Le champ `method` de la collection `verifications` prévoit explicitement une valeur `SLASH` :
+le mécanisme d'OTP a été conçu pour être validé par une commande slash du futur bot.
+
+### Webhooks Discord déjà en production
+
+Deux intégrations Discord fonctionnent déjà, **sans bot** — de simples webhooks sortants :
+
+* **Panel** : alertes sur les logs `ERROR` / `CRITICAL` (`LE3_DISCORD_ALERT_WEBHOOK_URL`).
+* **Live** : notification des pronostics (`DISCORD_PREDICTION_WEBHOOK_URL`).
+
+Un webhook suffit pour notifier. Un bot n'est nécessaire que pour **agir** : commandes,
+attribution de rôles, gestion de salons.
 
 ---
 
-## 2. Rôles et Responsabilités
+## 2. Périmètre visé
 
-Le bot centralise plusieurs fonctions critiques :
-* **Inscriptions** : Liaison entre les comptes Discord et les pseudos Minecraft via l'API Web.
-* **Logs de Sécurité** : Reporting en temps réel des actions de modération et des alertes de sécurité (logs anti-triche).
-* **Automates** : Gestion des salons temporaires, attribution des rôles d'équipes et annonces automatiques du calendrier.
-* **Interactions API** : Commandes Slash pour consulter les scores et l'état des serveurs sans être en jeu.
-
----
-
-## 3. Architecture du Code
-
-Le projet doit suivre une structure modulaire pour faciliter la maintenance :
-
-* `src/commands/` : Dossier contenant la logique des commandes Slash (une classe ou un fichier par commande).
-* `src/events/` : Gestionnaires d'événements Discord (ready, interactionCreate, messageCreate).
-* `src/services/` : Logique métier (connexion à la base de données, appels API 3LEvent).
-* `src/utils/` : Fonctions utilitaires, formatage des embeds et gestionnaires d'erreurs.
+1. **Liaison des comptes** — commande slash de validation d'OTP, complétant le flux du portail.
+2. **Attribution des rôles** — rôle « inscrit » et rôles d'équipe, à partir des événements du bus.
+3. **Annonces** — calendrier des épreuves, résultats, changements de classement.
+4. **Consultation** — commandes slash pour les scores et l'état du serveur.
+5. **Relais de logs** — remplacer à terme les webhooks bruts par des embeds enrichis.
 
 ---
 
-## 4. Standards de Développement
+## 3. Contraintes d'implémentation
 
-### Typage Strict
-L'utilisation du type `any` est proscrite. Chaque interaction, membre ou message doit être correctement typé selon les interfaces fournies par `discord.js`.
+### Stack imposée
 
-### Gestion des Embeds
-Pour maintenir la cohérence visuelle avec le site web, les embeds doivent respecter la charte graphique :
-* **Couleur** : Utilisation de la couleur primaire de l'évenement (définie dans la config globale).
-* **Footer** : Mention systématique du "3LEvent - Système Automatisé".
-* **Icons** : Utilisation des icônes de l'organisation pour les titres.
+Identique aux autres applications Node : TypeScript strict, ESM natif, Node `>=20`,
+`discord.js` v14+, ESLint. Dépôt nommé `LE3-App-DiscordBot`.
 
-### Commandes Slash
-Toutes les nouvelles fonctionnalités doivent être implémentées via des **Slash Commands**. Les commandes textuelles classiques (préfixes) sont réservées exclusivement aux outils de debug interne.
+### Intégration au bus, pas à la base
+
+:::danger Règle non négociable
+Le bot **ne doit ouvrir aucune base de données** d'un autre service : ni la MongoDB du Core, ni
+celle du Live ou du Panel, ni la MySQL du plugin. Il s'abonne à `le3:eventbus` et, s'il a besoin
+d'agir, il publie un événement de commande. C'est ce qui permet d'ajouter le bot sans toucher aux
+services existants — et de le retirer sans rien casser.
+:::
+
+Il doit utiliser une **copie locale** de `ecosystem-event.ts`, comme les trois autres services, et
+publier avec `source.service: 'discord-bot'`.
+
+Événements à consommer en priorité : `plugin.teams.snapshot.v1` (rôles d'équipe),
+`plugin.achievement.granted.v1` (annonces), `plugin.team.points.updated.v1` (classement).
+
+### Sécurité
+
+* `DISCORD_TOKEN` / `LE3_DISCORD_BOT_TOKEN` exclusivement via `process.env`, validé au démarrage
+  avec échec immédiat si absent.
+* Toute commande administrative doit re-vérifier une permission Discord côté serveur
+  (`PermissionsBitField`), jamais se fier au masquage de l'interface.
+* Bot de test et serveur Discord dédiés en développement ; le jeton de production n'est accessible
+  qu'aux workflows GitHub.
+
+### Cohérence visuelle
+
+Les embeds doivent utiliser la palette de marque (voir [Design System](../guidelines/design-system)) :
+`#0094FF` pour l'information, `#E73344` pour les alertes, `#1A2238` en fond. Pied de page
+systématique : « 3LEvent — Système Automatisé ».
 
 ---
 
-## 5. Sécurité et Secrets
+## 4. Structure de dépôt proposée
 
-La sécurité du bot est primordiale car il possède des permissions administratives :
-
-1.  **Token** : Le jeton du bot (`DISCORD_TOKEN`) ne doit jamais apparaître dans le code. Il doit être récupéré via `process.env`.
-2.  **Environnements** :
-    * **Développement** : Utilisez un bot de test et un serveur Discord dédié au staff.
-    * **Production** : Seuls les Workflows GitHub ont accès au token de production.
-3.  **Filtrage** : Toute commande administrative doit être protégée par une vérification de rôle (ex: `PermissionsBitField.Flags.Administrator`).
-
----
-
-## 6. Déploiement (CI/CD)
-
-Le déploiement est automatisé via `LE3-Shared-Workflows` :
-* **Build** : Compilation TypeScript vers JavaScript.
-* **Linting** : Vérification de la conformité du code via ESLint.
-* **Runtime** : Le bot est exécuté via un gestionnaire de processus (type PM2 ou conteneur Docker) assurant un redémarrage automatique en cas d'erreur.
+```text
+LE3-App-DiscordBot/
+├── src/
+│   ├── commands/            # une commande slash par fichier
+│   ├── events/
+│   │   ├── discord/         # ready, interactionCreate…
+│   │   └── ecosystem-event.ts   # copie du contrat du bus
+│   ├── services/            # bus Redis, appels API, formatage des embeds
+│   ├── utils/
+│   └── index.ts
+├── Dockerfile
+└── package.json
+```
 
 ---
 
 ### Prochaines étapes
 
-* **[Consulter les Snippets TypeScript](../guidelines/code-snippets)**
-* **[Accéder à la liste des Secrets de l'Organisation](../infrastructure/secrets-management)**
+* **[Protocoles de communication](../architecture/communication-protocol)** — le contrat à respecter
+* **[Applications Web](./web-applications)** — les conventions Node de l'organisation

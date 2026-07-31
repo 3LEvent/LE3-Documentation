@@ -4,65 +4,127 @@ sidebar_position: 1
 
 # Introduction au Développement 3LEvent
 
-Bienvenue sur la documentation technique officielle du **3LEvent**. Ce portail centralise l'ensemble des ressources, standards et procédures nécessaires au développement et à la maintenance de l'écosystème (Plugins Minecraft, Applications Web, Bots et Infrastructure).
+Bienvenue sur la documentation technique officielle du **3LEvent**. Ce portail centralise les
+standards, l'architecture réelle et les procédures d'exploitation de l'écosystème.
 
-L'objectif de cette documentation est de garantir une cohérence technique absolue entre les différents collaborateurs et modules du projet.
-
-## Architecture de l'Écosystème
-
-L'écosystème 3LEvent repose sur quatre piliers interconnectés :
-
-1.  **Serveurs de Jeu (Java)** : Plugins propriétaires basés sur l'API Paper pour la gestion du gameplay, des épreuves et du noyau central.
-2.  **Interface Web (Angular)** : Dashboard, classements en temps réel et portail d'inscription.
-3.  **Automates (Node.js/TypeScript)** : Bot Discord centralisant les logs, la modération et les alertes de sécurité.
-4.  **Infrastructure (Cloudflare/GitHub)** : Gestion du réseau, des tunnels de sécurité et de l'intégration continue (CI/CD).
-
-## Environnement Technique
-
-Tous les développeurs doivent s'aligner sur la stack technologique suivante pour assurer la compatibilité des modules :
-
-| Composant | Technologie | Version Requise (2026) |
-| :--- | :--- | :--- |
-| **Backend Minecraft** | Java | 21+ |
-| **Scripts / Bots** | Node.js / TypeScript | 20.x+ / 5.x+ |
-| **Frontend Web** | Angular | 17+ |
-| **Gestionnaire de Paquets** | npm / Maven / Gradle | Dernières versions stables |
-| **Infrastructure** | Cloudflare | Tunnels & WAF |
-
-## Standards de Développement
-
-### 1. Normalisation du Code
-Le code doit être autodocumenté et suivre les conventions de nommage strictes :
-* **Java** : Respect des [Google Java Style Guide].
-* **TypeScript** : Linting obligatoire via les fichiers de configuration présents dans les templates.
-* **Dépôts** : Tous les noms de dépôts doivent être préfixés par `LE3-`.
-
-### 2. Utilisation des Templates
-Pour garantir la conformité du design et de la structure, aucun projet ne doit être démarré de zéro. Utilisez les dépôts de référence (Template Repository) :
-* `LE3-Plugin-Template` : Pour tout nouveau module Minecraft.
-* `LE3-Web-Template` : Pour toute application ou page satellite.
-* `LE3-App-Template` : Pour les services TypeScript/Node.js.
-
-### 3. Workflow Git
-L'organisation utilise une stratégie de branchement stricte :
-* **main** : Branche de production, protégée.
-* **develop** : Branche d'intégration pour les tests.
-* **feature/** : Branche isolée pour le développement de nouvelles fonctionnalités.
-
-Chaque modification doit impérativement faire l'objet d'une **Pull Request** validée par le système de CI/CD (`LE3-Shared-Workflows`).
-
-## Sécurité et Secrets
-
-Aucune clé d'API, jeton de bot ou identifiant de base de données ne doit apparaître en clair dans le code source.
-* **GitHub Secrets** : Tous les secrets sont centralisés au niveau de l'organisation 3LEvent sur GitHub.
-* **Environnement** : Utilisez les variables d'environnement injectées dynamiquement lors du déploiement via les Workflows.
+Cette documentation décrit **ce qui est déployé**, pas une cible idéale. Chaque affirmation
+technique de ce portail est vérifiable dans le code des dépôts référencés ci-dessous.
 
 ---
 
-### Prochaines étapes
+## 1. Les quatre services de l'écosystème
 
-Pour commencer à contribuer, veuillez consulter les sections suivantes :
+L'écosystème est composé de quatre unités déployables indépendantes. Elles ne partagent
+**aucun code** : elles se coordonnent par un bus d'événements Redis et quelques appels HTTP
+authentifiés.
 
-* **[Configuration de l'environnement de développement](./guidelines/setup)**
-* **[Guide d'utilisation de Git et GitHub](./workflow/git-conventions)**
-* **[Bibliothèque de Snippets et Design System](./guidelines/code-snippets)**
+| Service | Dépôt | Rôle | Port | Domaine |
+| :--- | :--- | :--- | :--- | :--- |
+| **Core Web** | `3levent` | Site public : forum, inscriptions, profils, back-office | `3000` | `3levent.fr` |
+| **Live Web** | `3levent-live` | Dashboard temps réel : classement, Twitch, pronostics | `3001` | `live.3levent.fr` |
+| **Staff Panel** | `3levent-panel` | Monitoring, gestion in-game, éditeur BDD, IAM | `3200` | `panel.3levent.fr` |
+| **Plugin Core** | `LE3-Plugin-Core` | Plugin Paper : équipes, succès, progression | — | serveur Minecraft |
+
+:::info Bot Discord
+Le bot Discord (`LE3-App-DiscordBot`) est **prévu mais pas encore implémenté**. Le contrat
+d'événements réserve déjà le nom de service `discord-bot`, ce qui lui permettra de se brancher
+sur le bus sans modifier les services existants. Voir [Bot Discord](./projects/discord-bot).
+:::
+
+---
+
+## 2. Stack technique réelle
+
+Les trois applications web partagent strictement la même stack, les mêmes conventions et la même
+structure de dossiers. Un développeur qui connaît l'une connaît les trois.
+
+| Composant | Technologie | Version |
+| :--- | :--- | :--- |
+| **Runtime** | Node.js | `>=20` (images Docker en `node:22-slim`) |
+| **Langage** | TypeScript strict, ESM natif | `5.9.x` |
+| **Serveur HTTP** | Express | `5.x` |
+| **Base de données** | MongoDB via Mongoose | `8.x` |
+| **Cache / Sessions / Bus** | Redis (`redis` + `connect-redis`) | `redis:7` |
+| **Frontend** | HTML statique + TypeScript compilé (`tsc`), **aucun framework** | — |
+| **Styles** | Tailwind CSS (CLI, directive `@theme`) | `4.x` |
+| **Plugin Minecraft** | Java + Paper API | Java 21, Paper `1.21.11` |
+| **Build plugin** | Maven (shade + fmt-maven-plugin) | — |
+| **Exécution** | Docker | — |
+
+:::warning Ce que la stack n'est PAS
+Il n'y a **ni Angular, ni React, ni framework SPA, ni TanStack Query, ni Cloudflare Pages, ni
+Workers**. Le frontend est composé de fichiers `.html` servis par Express et de fichiers `.ts`
+compilés en JavaScript natif chargé par `<script type="module">`. Les anciennes versions de cette
+documentation décrivaient une stack Angular qui n'a jamais été déployée.
+:::
+
+---
+
+## 3. Structure commune des applications web
+
+Les trois applications suivent la même arborescence. Le backend et le frontend ont chacun leur
+`tsconfig.json` et sont compilés séparément vers `dist/`.
+
+```text
+<app>/
+├── backend/
+│   ├── config/db-config.ts       # Connexion Mongoose
+│   ├── controllers/              # Logique métier (1 fichier par domaine)
+│   ├── events/ecosystem-event.ts # Contrat d'enveloppe du bus (dupliqué par service)
+│   ├── middleware/               # auth, maintenance
+│   ├── models/                   # Schémas Mongoose
+│   ├── routes/                   # Routeurs Express montés sous /api/*
+│   ├── services/                 # Redis, consumers, intégrations tierces
+│   ├── utils/
+│   └── server.ts                 # Point d'entrée
+├── public/
+│   ├── *.html                    # Pages servies par Express
+│   ├── js/*.ts                   # Handlers frontend (compilés par tsc)
+│   ├── src/input.css             # Source Tailwind (tokens @theme)
+│   └── css/style.css             # Sortie Tailwind (générée)
+├── Dockerfile
+└── package.json
+```
+
+---
+
+## 4. Standards non négociables
+
+### Code
+
+* **Anglais technique** pour tout le code (identifiants, commentaires, logs). Les messages
+  destinés aux joueurs et au staff sont en français.
+* **TypeScript strict** : `any` interdit, `unknown` sinon.
+* **ESM** : les imports relatifs se terminent par `.js`, même en TypeScript
+  (`import { Team } from '../models/team-model.js'`).
+* **Fichiers en kebab-case** : `plugin-api-controller.ts`, `team-cache-model.ts`.
+
+Détail complet : [Standards de programmation](./guidelines/coding-standards).
+
+### Sécurité
+
+* Aucun secret dans le code source ou dans un fichier commité.
+* Toute I/O du plugin Java (SQL, HTTP) est asynchrone : jamais sur le thread principal.
+* Les comparaisons de secrets partagés utilisent une comparaison à temps constant
+  (`secure-compare.ts`).
+
+Détail complet : [Gestion des secrets](./infrastructure/secrets-management).
+
+### Git
+
+Branches `main` (production) et `develop` (intégration), branches de travail `feat/`, `fix/`,
+`docs/`, `refactor/`, `chore/`. Commits au format **Conventional Commits**. Fusion en
+**Squash and Merge**. Détail : [Conventions Git](./workflow/git-conventions).
+
+---
+
+## 5. Par où commencer
+
+| Votre objectif | Lire en premier |
+| :--- | :--- |
+| Comprendre comment les services communiquent | [Vue d'ensemble](./architecture/overview) |
+| Monter un environnement local | [Configuration de l'environnement](./guidelines/setup) |
+| Travailler sur le site public | [Core Web](./projects/web-core) |
+| Travailler sur le panel staff | [Staff Panel](./projects/staff-panel) |
+| Travailler sur le plugin | [Plugins Minecraft](./projects/minecraft-plugins) |
+| Comprendre les données | [Schéma des données](./architecture/database-schema) |

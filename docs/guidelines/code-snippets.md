@@ -4,184 +4,373 @@ sidebar_position: 3
 
 # Bibliothèque de Snippets
 
-Cette section regroupe les modèles de code approuvés pour l'écosystème **3LEvent**. L'utilisation de ces extraits garantit la maintenabilité, la sécurité et la cohérence visuelle entre les différents modules (Minecraft, Web, Discord).
+Modèles extraits du code réellement déployé. Copiez ces structures plutôt que d'inventer les
+vôtres : elles portent des décisions déjà prises (format de réponse, sécurité, asynchronisme).
 
 ---
 
-## 1. Java / Paper API (Plugins Minecraft)
+## 1. Backend TypeScript
 
-Tout plugin doit utiliser l'API **MiniMessage** pour le formatage et privilégier l'asynchronisme pour les opérations lourdes.
+### Réponse API standard
 
-### Structure d'une Commande Standard
-Les commandes doivent valider les permissions et utiliser les composants de texte pour respecter le Design System.
+Chaque contrôleur définit ce helper en haut de fichier. La duplication est assumée : le format est
+un contrat public.
 
-```java
-public class TeamInfoCommand implements CommandExecutor {
-
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) return true;
-
-        // Instance MiniMessage pour le formatage
-        var mm = MiniMessage.miniMessage();
-        
-        if (!player.hasPermission("le3.player.info")) {
-            player.sendMessage(mm.deserialize("<red>Erreur :</red> <gray>Vous n'avez pas la permission.</gray>"));
-            return true;
-        }
-
-        // Appel à l'API du Core (Exemple)
-        Team team = CoreAPI.getInstance().getTeamManager().getPlayerTeam(player.getUniqueId());
-        
-        // Message avec dégradé conforme à la charte graphique
-        player.sendMessage(mm.deserialize(
-            "<gradient:#10B981:#6366F1><bold>3LEvent</bold></gradient> <dark_gray>»</dark_gray> " +
-            "<gray>Votre équipe :</gray> <white>" + team.getName() + "</white>"
-        ));
-
-        return true;
-    }
-}
-
+```ts
+const sendResponse = (
+    res: Response,
+    statusCode: number,
+    data: unknown = null,
+    error: string | null = null
+): void => {
+    res.status(statusCode).json({
+        success: statusCode < 400,
+        timestamp: new Date().toISOString(),
+        data,
+        error: error ? { message: error, code: statusCode } : null
+    });
+};
 ```
 
-### Accès Base de Données (Asynchrone)
+### Squelette de contrôleur
 
-Il est strictement interdit de bloquer le thread principal pour des requêtes SQL ou Redis.
+```ts
+/**
+ * Endpoint: GET /api/<domaine>/<ressource>
+ * Description: ...
+ * Security: ...
+ */
+export const getResource = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        // 1. Sécurité / validation des entrées
+        // 2. Accès aux données (Mongoose, MySQL…)
+        const data = await Model.find().lean();
+
+        // 3. Réponse
+        sendResponse(res, 200, data);
+    } catch (error) {
+        console.error('[LE3-API] Critical Error while fetching resource:', error);
+        next(error);   // délègue au gestionnaire d'erreurs global
+    }
+};
+```
+
+### Route avec permission (Panel)
+
+```ts
+import { requireAuth, requirePermission } from '../middleware/auth.js';
+
+router.get('/tables', requireAuth, requirePermission('MANAGE_DATABASE'), dbEditorCtrl.listTables);
+
+// Protection d'un routeur entier
+router.use(requireAuth, requirePermission('MANAGE_IAM'));
+```
+
+### Route avec rôle (Core)
+
+```ts
+import { requireAuth } from '../utils/helpers.js';
+import { authorize } from '../middleware/auth.js';
+
+router.get('/stats', requireAuth, authorize('STAFF', 'ADMIN'), adminCtrl.getDashboardStats);
+```
+
+:::danger Respecter la casse des rôles
+Les rôles sont stockés en majuscules (`ADMIN`, `STAFF`, `MEMBER`, `CAPTAIN`) et comparés par
+`includes()`. `authorize('Staff', ...)` échoue silencieusement en `403` — ce bug existe
+actuellement sur `GET /api/admin/users/search`.
+:::
+
+### Authentification par secret partagé
+
+```ts
+import { secureCompare } from '../utils/secure-compare.js';
+
+const isPluginAuthenticated = (req: Request): boolean => {
+    const pluginSecret = req.headers['x-plugin-secret'];
+    const expectedSecret = process.env.LE3_PLUGIN_SECRET;
+    return typeof pluginSecret === 'string'
+        && typeof expectedSecret === 'string'
+        && secureCompare(pluginSecret, expectedSecret);
+};
+```
+
+`secureCompare` effectue une comparaison à **temps constant**. Un `===` sur un jeton laisse fuiter
+sa longueur et son préfixe par mesure du temps de réponse.
+
+---
+
+## 2. Bus d'événements
+
+### Publier
+
+```ts
+import { createEcosystemEvent } from '../events/ecosystem-event.js';
+
+const bus = req.app.locals.eventBus;
+
+if (bus) {
+    void bus.publish(createEcosystemEvent({
+        type: 'plugin.teams.snapshot.v1',
+        aggregate: { type: 'plugin-sync', id: 'teams' },
+        payload: { teams: payload },
+        source: {
+            service: 'core-web',
+            instanceId: process.env.HOSTNAME || 'core'
+        }
+    })).catch((error) => {
+        console.error('[LE3-BUS] Failed to publish team snapshot event:', error);
+    });
+}
+```
+
+Trois règles visibles dans ce fragment : la publication ne bloque pas la réponse HTTP (`void` +
+`.catch`), le bus peut être absent (on teste), et l'enveloppe passe **toujours** par
+`createEcosystemEvent`.
+
+### Consommer
+
+```ts
+export const startMyConsumer = async (bus: RedisEventBus): Promise<void> => {
+    await bus.subscribe(async (event: EcosystemEventEnvelope) => {
+        try {
+            switch (event.type) {
+                case 'plugin.team.points.updated.v1':
+                    await handleTeamPointsUpdated(event.payload as PluginTeamPointsPayload);
+                    break;
+                default:
+                    // Type inconnu : ignoré volontairement, pour que d'autres
+                    // producteurs puissent être ajoutés sans toucher ce fichier.
+                    break;
+            }
+        } catch (error) {
+            console.error(`[LE3-BUS] Failed to handle ${event.type}:`, error);
+        }
+    });
+};
+```
+
+### Projection idempotente
+
+```ts
+await LiveTeamState.updateOne(
+    { slot_key: payload.slotKey.toLowerCase() },
+    {
+        $set: { points: payload.points },
+        $setOnInsert: { name: payload.slotKey }
+    },
+    { upsert: true }
+);
+```
+
+Un événement rejoué doit produire le même état. `$set` pour ce que l'événement fait autorité,
+`$setOnInsert` pour les valeurs de création uniquement.
+
+---
+
+## 3. Modèle Mongoose
+
+```ts
+import { Schema, model } from 'mongoose';
+import type { Types, HydratedDocument, InferSchemaType } from 'mongoose';
+
+const TeamCacheSchema = new Schema({
+    slot_key: { type: String, required: true, unique: true, index: true },
+    name: { type: String, required: true },
+    points: { type: Number, default: 0 },
+    member_count: { type: Number, default: 0 }
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+TeamCacheSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+
+export type ITeamCache = InferSchemaType<typeof TeamCacheSchema> & { _id: Types.ObjectId };
+export type TeamCacheDocument = HydratedDocument<ITeamCache>;
+
+export const TeamCache = model<ITeamCache>('TeamCache', TeamCacheSchema);
+```
+
+Le type est **dérivé** du schéma avec `InferSchemaType` : une interface écrite à la main finit
+toujours par diverger.
+
+### Journal borné (capped)
+
+```ts
+}, {
+    capped: { size: 25 * 1024 * 1024, max: 50_000 },
+    timestamps: { createdAt: true, updatedAt: false }
+});
+```
+
+Empreinte disque bornée, sans tâche de purge.
+
+---
+
+## 4. Frontend TypeScript
+
+### Appel API avec session
+
+```ts
+export const apiFetch = async <T>(url: string, options: RequestInit = {}): Promise<StandardResponse<T>> => {
+    const response = await fetch(url, {
+        credentials: 'include',        // indispensable : cookie de session
+        headers: { 'Content-Type': 'application/json', ...options.headers },
+        ...options
+    });
+    return response.json() as Promise<StandardResponse<T>>;
+};
+```
+
+### Avatar joueur avec repli
+
+```ts
+export const getUserAvatarURL = (user: BaseUser | null): string => {
+    if (user && user.mc_uuid) {
+        return `https://mc-heads.net/avatar/${user.mc_uuid}/100`;
+    }
+    return 'https://mc-heads.net/avatar/MHF_Steve/100';
+};
+```
+
+Le repli est doublé côté HTML par un `onerror` : `mc-heads.net` peut répondre 404 pour un UUID
+valide mais inconnu.
+
+---
+
+## 5. Java / Paper
+
+### Écriture SQL asynchrone
 
 ```java
-public CompletableFuture<Void> updatePlayerPoints(UUID uuid, int points) {
-    return CompletableFuture.runAsync(() -> {
-        try (Connection conn = dataSource.getConnection()) {
-            String query = "UPDATE le3_players SET score = score + ? WHERE uuid = ?";
-            PreparedStatement ps = conn.prepareStatement(query);
-            ps.setInt(1, points);
-            ps.setString(2, uuid.toString());
-            ps.executeUpdate();
+public void modifyTeamPointsAsync(@NotNull String teamId, int pointsDelta) {
+    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        var sql = "UPDATE teams SET points = points + ? WHERE id = ?";
+        try (var conn = getConnection(); var stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, pointsDelta);
+            stmt.setString(2, teamId);
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Erreur lors de la mise à jour du score : " + e.getMessage());
+            StyledLogger.error("[Database] Failed to modify points for slot {0}.", teamId);
         }
     });
 }
-
 ```
 
----
+### Lecture asynchrone avec `CompletableFuture`
 
-## 2. TypeScript / Angular (Web Applications)
-
-Les applications Web doivent séparer la logique de l'interface via des services et utiliser un typage strict.
-
-### Service d'API avec Typage Strict
-
-```typescript
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
-
-export interface LeaderboardEntry {
-  teamName: string;
-  points: number;
-  rank: number;
+```java
+public CompletableFuture<Integer> getTeamProgressAsync(@NotNull String teamId, @NotNull String key) {
+    CompletableFuture<Integer> future = new CompletableFuture<>();
+    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        var sql = "SELECT progress FROM team_achievements WHERE team_id = ? AND achievement_key = ?";
+        try (var conn = getConnection(); var stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, teamId);
+            stmt.setString(2, key);
+            try (var rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    future.complete(rs.getInt("progress"));
+                    return;
+                }
+            }
+        } catch (SQLException e) {
+            StyledLogger.error("[Database] Progress retrieval failed: {0}", e.getMessage());
+        }
+        future.complete(0);   // valeur de repli : le future se complète toujours
+    });
+    return future;
 }
+```
 
-@Injectable({ providedIn: 'root' })
-export class LeaderboardService {
-  private readonly endpoint = `${environment.apiUrl}/stats/leaderboard`;
+Un `CompletableFuture` qui ne se complète jamais gèle l'appelant : prévoyez systématiquement le
+chemin d'échec.
 
-  constructor(private http: HttpClient) {}
+### Upsert compatible MySQL et SQLite
 
-  /**
-   * Récupère le classement actuel
-   */
-  getLeaderboard(): Observable<LeaderboardEntry[]> {
-    return this.http.get<LeaderboardEntry[]>(this.endpoint);
-  }
+```java
+var sql = isMysql
+    ? "INSERT INTO core_settings (setting_key, setting_value) VALUES (?, ?) "
+      + "ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)"
+    : "INSERT INTO core_settings (setting_key, setting_value) VALUES (?, ?) "
+      + "ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value";
+```
+
+### Appel HTTP vers l'API du site
+
+```java
+public CompletableFuture<Void> syncTeamsFromSite() {
+    return CompletableFuture.runAsync(() -> {
+        var apiUrl = plugin.getConfig().getString("api.sync_url");
+        var apiSecret = plugin.getConfig().getString("api.secret", "CHANGE_ME");
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl))
+                .header("x-plugin-secret", apiSecret)
+                .timeout(Duration.ofSeconds(10))   // toujours borner un appel réseau
+                .GET()
+                .build();
+        // ... vérifier response.statusCode(), puis le champ "success" de l'enveloppe
+    });
 }
-
 ```
+
+### Texte coloré (Adventure, pas MiniMessage)
+
+Le plugin utilise le `LegacyComponentSerializer` d'Adventure via `ColorTranslator`, avec les codes
+`&` et hexadécimaux `&#RRGGBB` — **pas** MiniMessage.
+
+```java
+// Message lu depuis config.yml, jamais écrit en dur
+var raw = plugin.getConfig().getString("messages.achievement_granted");
+player.sendMessage(ColorTranslator.translateColors(player, raw
+        .replace("%achievement_name%", achievement.getName())
+        .replace("%team_name%", team.getName())));
+```
+
+`translateColors` applique aussi les placeholders PlaceholderAPI quand le plugin est présent, et
+retire l'italique par défaut des composants. Variantes disponibles : `stripColors`,
+`getStripped`, `toPlainText`.
+
+### Journalisation
+
+```java
+StyledLogger.success("[Core] Plugin enabled successfully - Version {0}", getPluginMeta().getVersion());
+StyledLogger.warn("[Hook] Vault not found. Economy features are disabled.");
+StyledLogger.error("[Database] Failed to initialize tables: {0}", e.getMessage());
+```
+
+Messages paramétrés `{0}` (`MessageFormat`), jamais de concaténation.
 
 ---
 
-## 3. Node.js / Discord.js (Discord Bot)
-
-Les interactions doivent utiliser les **Slash Commands** et respecter le format des Embeds officiels.
-
-### Template de Commande Slash
-
-```typescript
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-
-export const command = {
-  data: new SlashCommandBuilder()
-    .setName('score')
-    .setDescription('Affiche le score actuel de votre équipe'),
-
-  async execute(interaction: ChatInputCommandInteraction) {
-    const scoreEmbed = new EmbedBuilder()
-      .setColor(0x10B981) // Emerald-500
-      .setTitle('🏆 Classement Actuel')
-      .addFields(
-        { name: 'Équipe', value: 'Alpha', inline: true },
-        { name: 'Points', value: '1,250', inline: true }
-      )
-      .setFooter({ text: '3LEvent - Système Automatisé' })
-      .setTimestamp();
-
-    await interaction.reply({ embeds: [scoreEmbed] });
-  },
-};
-
-```
-
----
-
-## 4. Frontend / UI (Tailwind CSS)
-
-Utilisation des variables CSS globales pour les composants d'interface.
-
-### Carte de Statistique (Standard)
-
-```html
-<div class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-lg transition-all hover:border-emerald-500/50">
-  <span class="text-emerald-500 text-xs font-bold uppercase tracking-widest">Live Stats</span>
-  <h3 class="text-white text-xl font-black mt-1">Total Points</h3>
-  <div class="mt-4 flex items-center justify-between">
-    <p class="text-4xl text-white font-mono">45,820</p>
-    <div class="h-8 w-8 bg-emerald-500/10 flex items-center justify-center rounded-full">
-      <lucide-icon name="trending-up" class="text-emerald-500 w-4 h-4"></lucide-icon>
-    </div>
-  </div>
-</div>
-
-```
-
----
-
-## 5. CI/CD (GitHub Actions)
-
-Appel d'un workflow réutilisable avec injection de secrets.
+## 6. Configuration YAML d'un succès
 
 ```yaml
-name: Production Deployment
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    uses: 3LEvent/LE3-Shared-Workflows/.github/workflows/angular-deploy.yml@main
-    with:
-      project-name: 'web-main-app'
-    secrets:
-      # Héritage automatique des secrets de l'organisation
-      token: ${{ secrets.LE3_CLOUDFLARE_API_TOKEN }}
-
+achievement_equip_diamond_helmet:
+  name: "Diamond Helmet Equipped"
+  description: "Equip a diamond helmet."
+  material: "DIAMOND_HELMET"
+  type: "ARMOR_EQUIP"
+  arguments: ["DIAMOND_HELMET"]
+  threshold: 1
+  points: 5
+  world: "world"
+  day: 1
+  rewards:
+    xp: 100
+    money: 50.0                                  # nécessite Vault
+    items: ["GOLD_INGOT:5", "DIAMOND:1:SHARPNESS_1"]
+    effects: ["SPEED:30:1"]                      # EFFET:DURÉE_SEC:AMPLIFICATEUR
+    commands: ["broadcast %player% has completed a challenge!"]
 ```
 
 ---
 
 ### Prochaines étapes
 
-Cette bibliothèque est mise à jour régulièrement. Si vous avez besoin d'un nouveau pattern spécifique pour le **[Bot Discord](../projects/discord-bot)** ou les **[Plugins Minecraft](../projects/minecraft-plugins)**, contactez le Lead Dev.
+* **[Standards de programmation](./coding-standards)**
+* **[Protocoles de communication](../architecture/communication-protocol)**

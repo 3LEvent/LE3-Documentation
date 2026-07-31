@@ -10,10 +10,22 @@ L'organisation 3LEvent utilise une stratégie de gestion de version rigoureuse p
 
 ## 1. Stratégie de Branches
 
-Nous utilisons une variante simplifiée du **GitHub Flow**.
+Deux branches permanentes, plus des branches de travail éphémères.
 
-* **Branche main** : Contient le code stable en production. Aucun commit direct n'est autorisé.
-* **Branches de fonctionnalités** : Toute modification doit être effectuée dans une branche isolée créée à partir de `main`.
+* **`main`** : code stable en production. Aucun commit direct. Un push déclenche la publication
+  (GitHub Packages pour le plugin) et la resynchronisation de `develop`.
+* **`develop`** : branche d'intégration. Un push y déclenche un build de vérification et un
+  artefact de développement téléchargeable.
+* **Branches de travail** : créées à partir de `develop` (ou de `main` pour un correctif urgent),
+  fusionnées par Pull Request.
+* **`releases/*`, `hotfix/*`** : reconnues comme cibles de PR par la CI du plugin.
+
+:::danger `develop` est écrasée à chaque push sur `main`
+Les workflows `sync-develop.yml` et `publish.yml` exécutent
+`git reset --hard origin/main` puis `git push --force` sur `develop`. **Tout travail présent sur
+`develop` et absent de `main` est définitivement perdu.** Ne travaillez jamais directement sur
+`develop` : créez toujours une branche `feat/`, `fix/`, etc.
+:::
 
 ### Nommage des branches
 Les branches doivent être nommées selon le format : `type/description-breve` (en minuscules, mots séparés par des tirets).
@@ -47,12 +59,14 @@ type(périmètre): description courte en minuscules
 
 ### Le Périmètre (Scope)
 
-Le périmètre est optionnel mais recommandé pour cibler la partie du projet impactée (ex: `web`, `plugin`, `db`, `ui`).
+Le périmètre est optionnel mais recommandé. Périmètres usuels de l'écosystème : `core`, `live`,
+`panel`, `plugin`, `bus`, `auth`, `db`, `ui`, `infra`, `docs`.
 
 ### Exemples de bons commits
 
 * `feat(plugin): ajout du multiplicateur de points de fin de partie`
-* `fix(web): correction de l'affichage du profil sur mobile`
+* `fix(core): correction de l'affichage du profil sur mobile`
+* `feat(bus): nouvel événement plugin.quest.completed.v1`
 * `docs(readme): mise à jour des instructions d'installation`
 
 ---
@@ -61,10 +75,10 @@ Le périmètre est optionnel mais recommandé pour cibler la partie du projet im
 
 Pour contribuer au projet, suivez scrupuleusement ces étapes :
 
-1. **Synchronisation** : Récupérez les dernières modifications de `main`.
+1. **Synchronisation** : Récupérez les dernières modifications de `develop`.
 ```bash
-git checkout main
-git pull origin main
+git checkout develop
+git pull origin develop
 
 ```
 
@@ -98,9 +112,16 @@ git push origin feat/ma-fonctionnalite
 
 ## 5. Bonnes Pratiques
 
-* **Ne jamais push de secrets** : Clés d'API, mots de passe et identifiants de base de données ne doivent jamais être commit. Utilisez les fichiers `.env` ou les GitHub Secrets.
-* **Rebase vs Merge** : Privilégiez `git rebase main` sur votre branche de fonctionnalité pour rester à jour et éviter les commits de fusion inutiles.
-* **Langue** : Les messages de commit peuvent être rédigés en français ou en anglais, mais la cohérence est de mise au sein d'un même dépôt.
+* **Ne jamais push de secrets** : clés d'API, mots de passe et identifiants ne doivent jamais être
+  commités. Vérifiez que `.env` est bien ignoré **avant** votre premier commit dans un dépôt — ce
+  n'est pas le cas partout aujourd'hui, voir
+  [Gestion des secrets](../infrastructure/secrets-management).
+* **Rebase plutôt que merge** : `git rebase develop` sur votre branche de travail pour rester à
+  jour sans commits de fusion parasites.
+* **Contrat d'événements** : s'il est modifié, les **trois copies** de `ecosystem-event.ts`
+  doivent l'être dans la même PR.
+* **Langue** : les messages de commit peuvent être en français ou en anglais, mais la cohérence
+  est de mise au sein d'un même dépôt. Le code, lui, est toujours en anglais.
 
 ---
 

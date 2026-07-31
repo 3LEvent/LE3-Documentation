@@ -10,12 +10,25 @@ Toute modification du code source, de la configuration ou de la documentation do
 
 ## 1. Prérequis avant l'ouverture
 
-Avant de soumettre une Pull Request, le contributeur doit s'assurer que les points suivants sont validés localement :
+Avant de soumettre une Pull Request, le contributeur doit valider localement :
 
-1.  **Build** : Le projet compile sans erreur (`npm run build` ou `gradle build`).
-2.  **Linting** : Le code respecte les standards de formatage (`npm run lint` ou `checkstyle`).
-3.  **Tests** : Tous les tests unitaires existants passent avec succès.
-4.  **Documentation** : Si une fonctionnalité est ajoutée ou modifiée, la documentation correspondante a été mise à jour.
+1.  **Build** : le projet compile sans erreur — `npm run build` (web, documentation) ou
+    `mvn clean package` (plugin).
+2.  **Linting** : `npm run lint`. Pour le plugin, `fmt-maven-plugin` reformate automatiquement au
+    build — commitez le résultat.
+3.  **Vérification manuelle** : rejouez le chemin que vous avez modifié et décrivez la procédure
+    dans la PR.
+4.  **Documentation** : mise à jour si un comportement, une variable d'environnement, un endpoint
+    ou un type d'événement a changé.
+5.  **Contrat du bus** : si `ecosystem-event.ts` est touché, les **trois copies** sont
+    synchronisées dans la même PR.
+
+:::caution Il n'y a pas de tests automatisés
+`npm test` renvoie `exit 1` sur les trois applications web, et le plugin n'a pas de suite de
+tests. **Un build vert ne prouve rien sur le comportement.** La vérification manuelle décrite au
+point 3 est, aujourd'hui, la seule preuve de non-régression — la description de la PR doit
+permettre au reviewer de la rejouer.
+:::
 
 ---
 

@@ -24,13 +24,19 @@ const config: Config = {
 
   // --- GESTION DES LIENS (RACINE OBLIGATOIRE EN V3) ---
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
 
   // Configuration du moteur Markdown
   markdown: {
     format: 'mdx',
     mermaid: true, // Support des schémas Mermaid
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
   },
+
+  // Requis pour que `markdown.mermaid` produise réellement des diagrammes :
+  // sans ce thème, les blocs ```mermaid sont silencieusement ignorés au build.
+  themes: ['@docusaurus/theme-mermaid'],
 
   i18n: {
     defaultLocale: 'fr',

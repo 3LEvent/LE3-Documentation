@@ -1,86 +1,158 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 ---
 
-# Applications Web et Portails
+# Applications Web — Stack commune
 
-Les applications web de l'écosystème **3LEvent** constituent l'interface principale entre les participants, les spectateurs et l'infrastructure technique. Cette section documente la stack technique, les standards de développement et les processus de déploiement des portails web.
+Les trois applications web du 3LEvent (`3levent`, `3levent-live`, `3levent-panel`) partagent la
+même stack, les mêmes conventions et la même chaîne de build. Cette page décrit **ce qui leur est
+commun** ; les pages [Core Web](./web-core), [Live Web](./web-live) et
+[Staff Panel](./staff-panel) décrivent leurs spécificités.
 
 ---
 
-## 1. Stack Technique de Référence
+## 1. Stack
 
-Toutes les applications web modernes de l'organisation doivent s'aligner sur la stack suivante pour garantir une maintenance homogène :
-
-| Composant | Technologie | Détails |
+| Composant | Choix | Version |
 | :--- | :--- | :--- |
-| **Framework** | Angular 17+ | Utilisation des *Standalone Components* et des *Signals*. |
-| **Langage** | TypeScript | Mode strict activé obligatoirement. |
-| **Styling** | Tailwind CSS | Design System basé sur la charte Slate & Emerald. |
-| **State Management** | TanStack Query | Pour la gestion du cache serveur et des requêtes asynchrones. |
-| **Hosting** | Cloudflare Pages | Déploiement à l'Edge pour une latence minimale. |
+| Runtime | Node.js | `>=20` (Docker : `node:22-slim`) |
+| Langage | TypeScript strict, **ESM natif** (`"type": "module"`) | `5.9.x` |
+| Serveur | Express | `5.x` |
+| Base de données | MongoDB / Mongoose | `8.x` |
+| Sessions & bus | Redis + `connect-redis` | `redis:7` |
+| Sécurité HTTP | `helmet`, `cors` | — |
+| Journalisation HTTP | `morgan` | — |
+| Frontend | HTML + TypeScript compilé, **aucun framework** | — |
+| CSS | Tailwind CSS via `@tailwindcss/cli` | `4.x` |
+| Exécution dev | `tsx --env-file=.env watch` | — |
+
+:::warning Pas de framework frontend
+Il n'y a ni Angular, ni React, ni Vue, ni bundler. Les pages sont des fichiers `.html` servis par
+Express ; le comportement vient de fichiers `public/js/*.ts` compilés par `tsc` en JavaScript ESM
+et chargés en `<script type="module">`. Toute proposition d'introduire un framework doit être
+discutée avant d'être implémentée : elle change la chaîne de build des trois applications.
+:::
 
 ---
 
-## 2. Architecture des Applications
+## 2. Arborescence normalisée
 
-Nos applications sont structurées pour séparer strictement la logique métier de la présentation.
+```text
+<app>/
+├── backend/
+│   ├── config/db-config.ts        # Connexion Mongoose
+│   ├── controllers/               # Logique métier, 1 fichier par domaine
+│   ├── events/ecosystem-event.ts  # Contrat du bus (copie locale)
+│   ├── middleware/                # auth.ts, maintenance.ts
+│   ├── models/                    # Schémas Mongoose (kebab-case, suffixe -model)
+│   ├── routes/                    # Routeurs Express, suffixe -routes
+│   ├── services/                  # Redis, consumers, intégrations tierces
+│   ├── types/express.d.ts         # Augmentations Request / SessionData
+│   ├── utils/
+│   ├── tsconfig.json
+│   └── server.ts
+├── public/
+│   ├── *.html
+│   ├── js/*.ts                    # Handlers, suffixe -handler + utils.ts
+│   ├── src/input.css              # Tokens Tailwind (@theme)
+│   ├── css/style.css              # Généré — ne pas éditer
+│   └── tsconfig.json
+├── Dockerfile
+└── package.json
+```
 
-### Structure des dossiers
-* `src/app/core/` : Services globaux, intercepteurs HTTP et authentification.
-* `src/app/shared/` : Composants UI réutilisables, pipes et directives.
-* `src/app/features/` : Modules fonctionnels (ex: dashboard, classement, profil).
-* `src/assets/` : Ressources statiques, icônes et configurations environnementales.
-
-### Gestion du State
-L'utilisation des **Signals** d'Angular est privilégiée pour la réactivité locale. Pour les données partagées de manière complexe, l'utilisation d'un Store léger (RxJS) est autorisée.
-
----
-
-## 3. Standards de Développement
-
-Pour assurer la qualité du code, les règles suivantes s'appliquent :
-
-1.  **Composants Standalone** : Aucun module `NgModule` ne doit être utilisé pour les nouveaux composants.
-2.  **Hydratation et SSR** : Le Server-Side Rendering (SSR) doit être activé pour les pages publiques afin d'optimiser le SEO et le temps de chargement initial.
-3.  **Normalisation UI** : Les composants doivent utiliser les variables CSS définies dans le [Design System](../guidelines/design-system.md).
-4.  **Tests** : Chaque service critique doit être couvert par des tests unitaires (Jasmine/Karma ou Vitest).
-
----
-
-## 4. Sécurité et Performance
-
-### Sécurité périmétrique
-* **Cloudflare WAF** : Protection contre les attaques DDoS et filtrage des requêtes malveillantes.
-* **Content Security Policy (CSP)** : Politique stricte définie via les headers Cloudflare pour prévenir les injections XSS.
-* **JWT (JSON Web Tokens)** : Stockage sécurisé des tokens de session dans des cookies `HttpOnly` et `Secure`.
-
-### Optimisation des performances
-* **Lazy Loading** : Chargement différé de toutes les routes de fonctionnalités.
-* **Image Optimization** : Utilisation de formats modernes (WebP/AVIF) et chargement différé (*lazy loading* natif).
-* **Brotli Compression** : Activée par défaut via l'infrastructure Cloudflare.
+Un contrôleur ne connaît jamais Redis directement : il passe par `req.app.locals.eventBus`.
 
 ---
 
-## 5. Pipeline de Déploiement (CI/CD)
+## 3. Séquence de démarrage de `server.ts`
 
-Le cycle de vie d'une application web suit ce workflow automatisé :
+Les trois serveurs suivent la même séquence numérotée en commentaires. La respecter est important :
+plusieurs étapes dépendent de l'ordre.
 
-1.  **Push** sur une branche de fonctionnalité : Déclenchement d'un *Preview Deployment* Cloudflare.
-2.  **Pull Request** : Exécution des tests unitaires et du linting via GitHub Actions.
-3.  **Merge sur main** : Build de production et déploiement immédiat sur le domaine principal (ex: `app.3levent.fr`).
+1. Chargement de l'environnement (`dotenv`).
+2. Validation **fail-fast** des variables critiques → `throw` si absentes.
+3. Connexion MongoDB → `process.exit(1)` en cas d'échec.
+4. Résolution du chemin `public/` (essaie `dist/public`, `public`, `../public`).
+5. Sécurité réseau : `helmet` (CSP explicite, HSTS 1 an), `cors` (origines en liste blanche),
+   `morgan`, parseurs de corps.
+6. Session Redis + hydratation `req.user`.
+7. Bus d'événements + démarrage des consumers.
+8. Routes de pages / garde de maintenance / `express.static`.
+9. Montage des routeurs `/api/*`.
+10. Gestionnaire d'erreurs global (JSON sous `/api/`, HTML sinon).
+11. Écoute + arrêt propre sur `SIGINT` / `SIGTERM`.
 
-Pour plus de détails sur les workflows, consultez le guide [GitHub Actions](../infrastructure/github-actions.md).
+:::danger Ordre des routes du Panel
+Sur le panel, les routes de pages privées sont déclarées **avant** `express.static`. Inverser cet
+ordre exposerait les fichiers HTML privés aux visiteurs non authentifiés.
+:::
 
 ---
 
-## 6. Maintenance
+## 4. Scripts npm
 
-Les dépendances doivent être mises à jour trimestriellement à l'aide de `npm outdated`. Une attention particulière est portée aux mises à jour majeures d'Angular pour ne jamais avoir plus d'une version de retard sur la branche stable.
+Identiques dans les trois dépôts :
+
+| Script | Effet |
+| :--- | :--- |
+| `npm run dev` | Backend en rechargement à chaud (`tsx --env-file=.env watch`) |
+| `npm run dev:css` | Tailwind en mode `--watch` (autre terminal) |
+| `npm run build:backend` | `tsc -p backend/tsconfig.json` |
+| `npm run build:frontend` | `tsc -p public/tsconfig.json` |
+| `npm run build:css` | Tailwind minifié vers `public/css/style.css` |
+| `npm run copy-assets` | Copie HTML/CSS/images/polices vers `dist/` via `copyfiles` |
+| `npm run build` | `clean` + backend + frontend + css + assets |
+| `npm start` | `node --env-file=.env dist/backend/server.js` |
+| `npm run lint` | `eslint backend/**/*.ts` |
+
+:::caution `npm test` n'est pas implémenté
+Sur les trois applications, `npm test` renvoie encore
+`Error: no test specified && exit 1`. Il n'existe aucun test automatisé côté web. Ne vous fiez pas
+à un « build vert » pour valider un comportement.
+:::
+
+---
+
+## 5. Sécurité HTTP commune
+
+* `app.disable('x-powered-by')` et `app.set('trust proxy', 1)` (les applications tournent derrière
+  un reverse proxy).
+* CSP explicite par application, adaptée aux domaines réellement embarqués (Twitch, Discord CDN,
+  `mc-heads.net`, Google Fonts…). Ajouter une ressource externe **exige** de mettre à jour la
+  directive correspondante, sinon le navigateur la bloque silencieusement.
+* HSTS : `maxAge: 31536000`, `includeSubDomains`, `preload`.
+* CORS en liste blanche : `3levent.fr` / `live.3levent.fr` pour les sites publics,
+  `LE3_PANEL_ALLOWED_ORIGIN` pour le panel.
+* Limites de corps calibrées par usage : `10mb` sur le Core (téléversements), `5mb` sur le Panel,
+  `10kb` sur le Live (qui ne reçoit que des votes).
+
+---
+
+## 6. Conteneurisation
+
+Le `Dockerfile` est identique dans les trois dépôts : `node:22-slim`, installation des dépendances
+d'abord (cache de couches), puis copie du projet.
+
+```dockerfile
+FROM node:22-slim
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+CMD ["node", "backend/server.js"]
+```
+
+:::note Contenu attendu de l'image
+La commande est `node backend/server.js`, pas `dist/backend/server.js` : c'est le **contenu de
+`dist/`** qui est déployé à la racine du projet. Le `npm run build` doit donc avoir été exécuté
+avant la construction de l'image.
+:::
 
 ---
 
 ### Prochaines étapes
 
-* **[Consulter les Standards de Code](../guidelines/coding-standards.md)**
-* **[Guide de déploiement Cloudflare](../infrastructure/cloudflare-setup.md)**
+* **[Core Web](./web-core)** · **[Live Web](./web-live)** · **[Staff Panel](./staff-panel)**
+* **[Standards de programmation](../guidelines/coding-standards)**
+* **[Design System](../guidelines/design-system)**
