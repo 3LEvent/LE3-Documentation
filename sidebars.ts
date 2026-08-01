@@ -30,7 +30,6 @@ const sidebars: SidebarsConfig = {
         'projects/web-live',
         'projects/staff-panel',
         'projects/minecraft-plugins',
-        'projects/discord-bot',
       ],
     },
     {
