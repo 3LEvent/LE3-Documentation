@@ -203,7 +203,6 @@ Cinq workflows sont actifs dans le dépôt :
 | `publish.yml` | push `main`, manuel | `mvn deploy` vers GitHub Packages, puis resynchronise `develop` sur `main` |
 | `release.yml` | tag `v*` | Build de production, checksums SHA-256, Release GitHub |
 | `security.yml` | push/PR `main`/`develop` + hebdomadaire | CodeQL `java-kotlin`, requêtes `security-extended` |
-| `sync-develop.yml` | push `main`, manuel | Reset dur de `develop` sur `main` (PAT `LE3_SYNC_TOKEN`) |
 
 Détail : [GitHub Actions](../infrastructure/github-actions).
 

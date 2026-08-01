@@ -21,8 +21,8 @@ Deux branches permanentes, plus des branches de travail éphémères.
 * **`releases/*`, `hotfix/*`** : reconnues comme cibles de PR par la CI du plugin.
 
 :::danger `develop` est écrasée à chaque push sur `main`
-Les workflows `sync-develop.yml` et `publish.yml` exécutent
-`git reset --hard origin/main` puis `git push --force` sur `develop`. **Tout travail présent sur
+Le workflow `publish.yml` exécute `git reset --hard origin/main` puis `git push --force`
+sur `develop` après chaque publication. **Tout travail présent sur
 `develop` et absent de `main` est définitivement perdu.** Ne travaillez jamais directement sur
 `develop` : créez toujours une branche `feat/`, `fix/`, etc.
 :::

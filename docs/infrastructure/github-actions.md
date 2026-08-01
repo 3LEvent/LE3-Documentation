@@ -7,10 +7,11 @@ sidebar_position: 2
 L'automatisation est centralisée dans le dépôt **`LE3-Shared-Workflows`** : chaque projet appelle
 un moteur de build partagé plutôt que de redéfinir sa logique.
 
-:::caution État réel de la couverture
-Seul **`LE3-Plugin-Core`** possède aujourd'hui des workflows. Les trois applications web
-(`3levent`, `3levent-live`, `3levent-panel`) n'ont **aucun** `.github/workflows/` : elles sont
-construites et déployées manuellement. Les combler est un chantier ouvert (§5).
+:::note Couverture complète depuis le 2026-08-01
+Les six dépôts de code ont désormais une CI. Les trois applications web appellent le moteur
+partagé `node-engine.yml` (lint, tests, build, rapport de vulnérabilités) et disposent d'un
+workflow de déploiement continu, inerte tant que la variable `DEPLOY_ENABLED` n'est pas
+positionnée.
 :::
 
 ---
@@ -25,8 +26,7 @@ Six workflows sont actifs dans `LE3-Plugin-Core`.
 | `deploy-dev.yml` | LE3-Plugin-Dev-Build | push `develop`, manuel | `mvn -B package`, JAR en artefact (rétention **7 jours**) |
 | `publish.yml` | LE3-Plugin-Publish | push `main`, manuel | `mvn -B deploy` vers GitHub Packages, puis resynchronise `develop` |
 | `release.yml` | LE3-Plugin-Release | tag `v*` | `mvn -B clean package`, checksums SHA-256, Release GitHub |
-| `security.yml` | LE3-Security-Scan | push/PR `main`+`develop`, cron `25 4 * * 5`, manuel | CodeQL `java-kotlin`, requêtes `security-extended` |
-| `sync-develop.yml` | Sync Develop | push `main`, manuel | Reset dur de `develop` sur `main` |
+| `security.yml` | LE3-Security-Scan | push/PR `main`+`develop`, cron `25 4 * * 5`, manuel | Semgrep OSS + osv-scanner |
 
 Tous utilisent JDK 21 Temurin (`actions/setup-java@v4`) et un groupe de concurrence
 `${{ github.workflow }}-${{ github.ref }}` avec `cancel-in-progress: true`, pour ne pas empiler
@@ -64,32 +64,40 @@ git push origin v1.0.0
 
 ## 2. Synchronisation `main` → `develop`
 
-Deux workflows font **la même chose** : `sync-develop.yml`, et l'étape « Sync Develop with Main »
-de `publish.yml`. Tous deux réalisent un `git reset --hard origin/main` sur `develop` suivi d'un
-`push --force`.
+Un seul mécanisme : l'étape « Sync Develop with Main » de `publish.yml`, qui ne s'exécute
+qu'**après** une publication réussie.
+
+`sync-develop.yml` a été supprimé le 2026-08-01. Il faisait exactement la même chose, sur le
+même déclencheur : deux `git push --force` concurrents sur la même branche.
 
 :::danger `develop` est écrasée à chaque publication
-Toute modification présente sur `develop` mais absente de `main` est **définitivement perdue** au
-prochain push sur `main`. Ne laissez jamais de travail non fusionné vivre sur `develop` : créez
-une branche `feat/`.
+`publish.yml` exécute `git reset --hard origin/main` puis `git push --force` sur `develop`.
+Toute modification présente sur `develop` mais absente de `main` est **définitivement
+perdue**. Ne laissez jamais de travail non fusionné vivre sur `develop` : créez une branche
+`feat/`.
 :::
 
-`sync-develop.yml` utilise un PAT d'organisation (`LE3_SYNC_TOKEN`) injecté dans l'URL du push
-pour contourner les *rulesets* de branche protégée — le `GITHUB_TOKEN` standard n'y suffit pas.
-Ces deux workflows font double emploi : en conserver un seul éviterait les *race conditions*.
-
----
+Le secret `LE3_SYNC_TOKEN` a été supprimé en même temps : il n'avait plus de consommateur.
+À noter qu'il n'a jamais fonctionné comme documenté, il n'existait que sur
+`LE3-Plugin-Template` alors que `LE3-Plugin-Core` le référençait aussi. Le push réussissait
+grâce au jeton laissé par `actions/checkout`, pas grâce au PAT.
 
 ## 3. Analyse de sécurité
 
-`security.yml` exécute CodeQL en mode `build-mode: manual` : le workflow lance lui-même
-`mvn -B clean install -DskipTests` pour que CodeQL cartographie l'ensemble du projet avant
-l'analyse. Résultats dans l'onglet **Security → Code scanning** du dépôt.
+`security.yml` exécute **Semgrep OSS** (jeux de règles `p/java` et `p/secrets`) et
+**osv-scanner** sur l'arbre de dépendances Maven résolu, donc transitives comprises.
+
+CodeQL a été retiré le 2026-08-01 : le *code scanning* exige GitHub Advanced Security,
+indisponible sur un dépôt privé en plan Free. Le workflow échouait à chaque exécution depuis
+des mois, y compris le cron hebdomadaire.
+
+Aucune action tierce n'est utilisée : Semgrep est installé via `pipx`, osv-scanner depuis son
+binaire de release. Les résultats vont dans le résumé de job et dans un artefact conservé 30
+jours. Ils n'apparaissent **pas** dans l'onglet Security, qui exige lui aussi Advanced
+Security.
 
 Le scan hebdomadaire (`cron: '25 4 * * 5'`, vendredi 04h25 UTC) détecte les vulnérabilités
 publiées après la fusion du code.
-
----
 
 ## 4. Modèle de branches et CI
 
@@ -98,27 +106,43 @@ publiées après la fusion du code.
 | `feat/*`, `fix/*` | rien (la CI part de la PR) |
 | PR vers `develop`/`main` | `build-verify` + `security` — bloquants |
 | `develop` | `build-verify`, `deploy-dev` (artefact), `security` |
-| `main` | `publish` (GitHub Packages), `sync-develop`, `security` |
+| `main` | `publish` (GitHub Packages, puis resync de `develop`), `security`, `deploy` si activé |
 | tag `v*` | `release` (Release GitHub + checksums) |
 
 ---
 
-## 5. À faire : CI des applications web
+## 5. CI des applications web
 
-Les trois applications sont prêtes pour une CI (scripts `build` et `lint` normalisés), il ne
-manque que les workflows. Un moteur partagé `node-engine.yml` devrait, au minimum :
+Les trois applications appellent `node-engine.yml` depuis `LE3-Shared-Workflows` :
 
-1. `npm ci`
-2. `npm run lint`
-3. `npm run build` (backend + frontend + CSS + assets)
-4. construire et publier l'image Docker
+```yaml
+jobs:
+  verify:
+    uses: 3LEvent/LE3-Shared-Workflows/.github/workflows/node-engine.yml@main
+    permissions:
+      contents: read
+    secrets: inherit
+```
 
-:::note `npm test` n'est pas utilisable
-Il renvoie `exit 1` sur les trois dépôts. Ne l'ajoutez pas au pipeline avant d'avoir des tests
-réels, sinon la CI sera rouge en permanence — ou pire, quelqu'un ajoutera `|| true`.
+Le moteur enchaîne `npm ci`, `npm run lint`, `npm test`, `npm run build`, puis publie un
+rapport `npm audit`.
+
+`npm audit` **ne fait pas échouer le build** : une alerte publiée pendant la nuit sur une
+dépendance transitive rendrait rouge une PR sans rapport avec elle. C'est Dependabot qui
+ouvre le correctif. Le lint et les tests, eux, sont bloquants.
+
+:::note `npm test` fonctionne désormais
+Il renvoyait `exit 1` sur les trois dépôts. Chacun exécute maintenant une vraie suite Vitest
+de 18 tests couvrant le contrat du bus d'événements.
 :::
 
----
+### Déploiement continu
+
+Chaque application dispose d'un `deploy.yml` qui, sur push vers `main`, se connecte au
+serveur en SSH, met à jour le code, reconstruit l'image et redémarre le conteneur, puis
+vérifie qu'il tourne toujours 15 secondes plus tard.
+
+Le job est **inerte** tant que la variable de dépôt `DEPLOY_ENABLED` ne vaut pas `true`.
 
 ## 6. En cas d'échec
 
@@ -127,8 +151,8 @@ réels, sinon la CI sera rouge en permanence — ou pire, quelqu'un ajoutera `||
    style est presque toujours résolu par `mvn clean package` en local suivi d'un commit.
 3. **Publication** : `publish.yml` requiert `packages: write`. Un `401` sur GitHub Packages est
    généralement un problème de `settings.xml` ou de permissions de workflow.
-4. **Sync** : si `sync-develop` échoue, vérifier la validité de `LE3_SYNC_TOKEN` (les PAT
-   expirent).
+4. **Sync** : la resynchronisation de `develop` fait partie de `publish.yml`. Si elle échoue,
+   la publication a réussi mais `develop` est restée en arrière : relancer le workflow.
 
 ---
 

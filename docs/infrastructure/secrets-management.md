@@ -145,18 +145,39 @@ if (dbPassword == null || dbPassword.isBlank()) {
 
 ## 9. GitHub Secrets
 
-Les secrets de CI sont centralisés au niveau de l'organisation et hérités par les workflows via
-`secrets: inherit`.
+**Aucun secret d'organisation, aucun secret de dépôt.** Vérifié le 2026-08-01.
+
+Sept secrets d'organisation existaient, en `visibility: all` donc lisibles par les 16 dépôts,
+et référencés par aucun workflow. Ils dataient de mars 2026 et n'avaient jamais été
+modifiés. Ils ont été supprimés. `LE3_SYNC_TOKEN` aussi, avec le workflow qui le consommait.
 
 | Secret | Usage |
-| :--- | :--- |
-| `GITHUB_TOKEN` | Fourni automatiquement — publication sur GitHub Packages |
-| `LE3_SYNC_TOKEN` | PAT administrateur — `sync-develop.yml` |
+|---|---|
+| `GITHUB_TOKEN` | Fourni automatiquement, publication sur GitHub Packages |
 
-Les workflows s'exécutent avec des permissions restreintes, élargies explicitement au cas par cas
-(`contents: write`, `packages: write`, `security-events: write`).
+Les workflows s'exécutent avec des permissions restreintes, élargies explicitement au cas par
+cas (`contents: write`, `packages: write`).
 
----
+Les secrets applicatifs vivent désormais dans **Infisical** (`vault.3levent.fr`), un projet
+par application plus un projet partagé pour les trois valeurs qui ne doivent jamais
+diverger. Les conteneurs les récupèrent au démarrage par le réseau Docker interne : aucun
+identifiant Infisical ne transite par GitHub.
+
+## 10. Ne jamais coder un secret en dur
+
+Deux applications signaient les sessions avec une valeur de repli littérale :
+
+```ts
+secret: SESSION_SECRET || 'une_constante_committee'
+```
+
+Sans la variable, l'application démarrait quand même et signait tous les cookies avec une
+constante lisible dans le dépôt. Quiconque avait accès au code pouvait forger une session
+pour n'importe quel compte, y compris `super-admin` sur le panel, ce qui contourne
+entièrement Authentik.
+
+Corrigé le 2026-08-01 : les deux applications refusent maintenant de démarrer sans
+`LE3_SESSION_SECRET`, conformément au principe d'**échec explicite** du §1.
 
 ### Prochaines étapes
 
