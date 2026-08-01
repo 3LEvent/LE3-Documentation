@@ -79,7 +79,7 @@ Le déploiement est automatisé via **GitHub Actions** à chaque push sur la bra
 Toute modification de la documentation doit respecter les principes suivants :
 
 1. **Zéro Emoji** : Les titres, labels et menus doivent rester sobres et professionnels.
-2. **Standardisation** : Se référer aux [Coding Standards](https://www.google.com/search?q=./docs/guidelines/coding-standards.md) pour les exemples de code.
+2. **Standardisation** : Se référer aux [Coding Standards](./docs/guidelines/coding-standards.md) pour les exemples de code.
 3. **Validation** : Vérifier que `npm run build` passe sans erreur avant de push. L'option `onBrokenLinks: 'throw'` bloque le déploiement en cas de liens morts.
 
 ---
