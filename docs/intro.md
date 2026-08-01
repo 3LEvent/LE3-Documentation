@@ -22,7 +22,7 @@ authentifiés.
 | **Core Web** | `3levent` | Site public : forum, inscriptions, profils, back-office | `3000` | `3levent.fr` |
 | **Live Web** | `3levent-live` | Dashboard temps réel : classement, Twitch, pronostics | `3001` | `live.3levent.fr` |
 | **Staff Panel** | `3levent-panel` | Monitoring, gestion in-game, éditeur BDD, IAM | `3200` | `panel.3levent.fr` |
-| **Plugin Core** | `LE3-Plugin-Core` | Plugin Paper : équipes, succès, progression | — | serveur Minecraft |
+| **Plugin Core** | `LE3-Plugin-Core` | Plugin Paper : équipes, succès, progression | - | serveur Minecraft |
 
 ---
 
@@ -38,11 +38,11 @@ structure de dossiers. Un développeur qui connaît l'une connaît les autres.
 | **Serveur HTTP** | Express | `5.x` |
 | **Base de données** | MongoDB via Mongoose | `8.x` |
 | **Cache / Sessions / Bus** | Redis (`redis` + `connect-redis`) | `redis:7` |
-| **Frontend** | HTML statique + TypeScript compilé (`tsc`), **aucun framework** | — |
+| **Frontend** | HTML statique + TypeScript compilé (`tsc`), **aucun framework** | - |
 | **Styles** | Tailwind CSS (CLI, directive `@theme`) | `4.x` |
 | **Plugin Minecraft** | Java + Paper API | Java 21, Paper `1.21.11` |
-| **Build plugin** | Maven (shade + fmt-maven-plugin) | — |
-| **Exécution** | Docker | — |
+| **Build plugin** | Maven (shade + fmt-maven-plugin) | - |
+| **Exécution** | Docker | - |
 
 ---
 

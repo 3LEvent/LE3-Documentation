@@ -12,15 +12,16 @@ Toute modification du code source, de la configuration ou de la documentation do
 
 Avant de soumettre une Pull Request, le contributeur doit valider localement :
 
-1.  **Build** : le projet compile sans erreur — `npm run build` (web, documentation) ou
+1.  **Build** : le projet compile sans erreur, `npm run build` (web, documentation) ou
     `mvn clean package` (plugin).
-2.  **Linting** : `npm run lint`. Pour le plugin, `fmt-maven-plugin` reformate automatiquement au
-    build — commitez le résultat.
-3.  **Vérification manuelle** : rejouez le chemin que vous avez modifié et décrivez la procédure
+2.  **Linting** : `npm run lint`, qui doit passer sans erreur. Pour le plugin,
+    `fmt-maven-plugin` reformate automatiquement au build, commitez le résultat.
+3.  **Tests** : `npm test`. Les trois applications web ont une suite Vitest.
+4.  **Vérification manuelle** : rejouez le chemin que vous avez modifié et décrivez la procédure
     dans la PR.
-4.  **Documentation** : mise à jour si un comportement, une variable d'environnement, un endpoint
+5.  **Documentation** : mise à jour si un comportement, une variable d'environnement, un endpoint
     ou un type d'événement a changé.
-5.  **Contrat du bus** : si `ecosystem-event.ts` est touché, les **trois copies** sont
+6.  **Contrat du bus** : si `ecosystem-event.ts` est touché, les **trois copies** sont
     synchronisées dans la même PR.
 
 ---

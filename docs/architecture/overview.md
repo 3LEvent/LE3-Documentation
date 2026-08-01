@@ -17,14 +17,14 @@ d'un autre. La coordination passe par **un canal Redis Pub/Sub unique** (`le3:ev
 transitent des enveloppes JSON au format standardisé.
 
 Conséquence pratique : ajouter un nouveau consommateur (le futur bot Discord, par exemple) ne
-demande **aucune modification** des services existants — il lui suffit de s'abonner au canal.
+demande **aucune modification** des services existants - il lui suffit de s'abonner au canal.
 
 ```mermaid
 flowchart TD
     MC["Serveur Minecraft<br/>LE3-Plugin-Core (Java 21 / Paper)"]
-    CORE["Core Web — 3levent<br/>3levent.fr"]
-    LIVE["Live Web — 3levent-live<br/>live.3levent.fr"]
-    PANEL["Staff Panel — 3levent-panel<br/>panel.3levent.fr"]
+    CORE["Core Web - 3levent<br/>3levent.fr"]
+    LIVE["Live Web - 3levent-live<br/>live.3levent.fr"]
+    PANEL["Staff Panel - 3levent-panel<br/>panel.3levent.fr"]
     BUS[("Redis<br/>canal le3:eventbus")]
     MYSQL[("MySQL<br/>base du plugin")]
     MDB1[("MongoDB<br/>Core")]
@@ -54,7 +54,7 @@ valide le secret partagé puis relaie l'enveloppe sur `le3:eventbus`.
 
 ## 2. Rôle de chaque service
 
-### Core Web — dépôt `3levent`
+### Core Web - dépôt `3levent`
 
 Le site public et le point d'entrée de l'écosystème.
 
@@ -65,7 +65,7 @@ Le site public et le point d'entrée de l'écosystème.
 * **Passerelle du plugin** : c'est le seul service que le plugin Minecraft contacte.
 * **Journal d'événements** : persiste chaque enveloppe du bus dans la collection `event_bus_events`.
 
-### Live Web — dépôt `3levent-live`
+### Live Web - dépôt `3levent-live`
 
 Le dashboard temps réel destiné aux spectateurs.
 
@@ -75,7 +75,7 @@ Le dashboard temps réel destiné aux spectateurs.
 * **Session partagée** avec le Core : même cookie `3levent.sid`, même préfixe Redis `le3:sess:`,
   domaine `.3levent.fr`. Un joueur connecté sur `3levent.fr` est connecté sur `live.3levent.fr`.
 
-### Staff Panel — dépôt `3levent-panel`
+### Staff Panel - dépôt `3levent-panel`
 
 L'outil interne du staff, derrière SSO Authentik.
 
@@ -85,7 +85,7 @@ L'outil interne du staff, derrière SSO Authentik.
 * IAM : rôles panel, groupes d'accès, annuaire du staff.
 * CMS : configuration du site, mode maintenance par site, édition de `achievements.yml`.
 
-### Plugin Core — dépôt `LE3-Plugin-Core`
+### Plugin Core - dépôt `LE3-Plugin-Core`
 
 Le noyau Java du serveur de jeu (Paper `1.21.11`, Java 21).
 

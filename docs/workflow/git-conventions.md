@@ -21,8 +21,8 @@ Deux branches permanentes, plus des branches de travail éphémères.
 * **`releases/*`, `hotfix/*`** : reconnues comme cibles de PR par la CI du plugin.
 
 :::danger `develop` est écrasée à chaque push sur `main`
-Les workflows `sync-develop.yml` et `publish.yml` exécutent
-`git reset --hard origin/main` puis `git push --force` sur `develop`. **Tout travail présent sur
+Le workflow `publish.yml` exécute `git reset --hard origin/main` puis `git push --force`
+sur `develop` après chaque publication. **Tout travail présent sur
 `develop` et absent de `main` est définitivement perdu.** Ne travaillez jamais directement sur
 `develop` : créez toujours une branche `feat/`, `fix/`, etc.
 :::
@@ -113,7 +113,7 @@ git push origin feat/ma-fonctionnalite
 ## 5. Bonnes Pratiques
 
 * **Ne jamais push de secrets** : clés d'API, mots de passe et identifiants ne doivent jamais être
-  commités. Vérifiez que `.env` est bien ignoré **avant** votre premier commit dans un dépôt — ce
+  commités. Vérifiez que `.env` est bien ignoré **avant** votre premier commit dans un dépôt - ce
   n'est pas le cas partout aujourd'hui, voir
   [Gestion des secrets](../infrastructure/secrets-management).
 * **Rebase plutôt que merge** : `git rebase develop` sur votre branche de travail pour rester à

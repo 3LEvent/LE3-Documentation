@@ -175,7 +175,7 @@ demandées, ou `SUPER_ADMIN`. Un `403` renvoie explicitement la liste des permis
 
 1. **Pages** : les routes HTML privées sont déclarées **avant** `express.static`, pour qu'un
    fichier HTML privé ne puisse jamais être servi à un visiteur non authentifié.
-2. **Navigation** : le frontend masque les onglets auxquels le membre n'a pas droit — confort,
+2. **Navigation** : le frontend masque les onglets auxquels le membre n'a pas droit - confort,
    pas sécurité.
 3. **API** : chaque route re-vérifie la permission côté serveur. C'est la seule barrière qui
    compte.

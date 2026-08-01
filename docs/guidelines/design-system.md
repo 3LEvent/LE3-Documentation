@@ -15,7 +15,7 @@ Chaque dépôt contient encore un `tailwind.config.js` hérité de Tailwind v3. 
 
 ---
 
-## 1. Palette de marque — la règle des trois couleurs
+## 1. Palette de marque - la règle des trois couleurs
 
 L'identité repose sur trois couleurs, et trois seulement.
 
@@ -41,13 +41,13 @@ pour ne pas casser le HTML existant. **Ne les utilisez pas dans du code neuf.**
 
 ## 2. Trois applications, trois variantes
 
-### `3levent` — clair, marque pure
+### `3levent` - clair, marque pure
 
 Surfaces `#FFFFFF` / `#F8FAFC`, texte `#1A2238`, bordures `#E2E8F0` / `#94A3B8`. Les couleurs
 sociales sont, elles aussi, ramenées à la palette de marque (Discord et Twitter en bleu, YouTube en
 rouge, Twitch en dark).
 
-### `3levent-panel` — clair, neutre « entreprise »
+### `3levent-panel` - clair, neutre « entreprise »
 
 Le panel garde les trois couleurs de marque **en accents seulement** et repose sur des neutres
 plus froids, plus lisibles pour de longues sessions de travail. Ses couleurs de statut sont
@@ -61,7 +61,7 @@ sémantiques, pas brandées :
 | `--color-border-subtle` | `#E6E9EE` | | `--color-text-main` | `#1F2733` |
 | `--color-border-strong` | `#CBD2DC` | | `--color-text-muted` | `#5B6675` |
 
-### `3levent-live` — sombre
+### `3levent-live` - sombre
 
 Le Live est la seule application au thème sombre. Il conserve la palette historique complète
 (`le3-yellow` `#FFCD00`, `le3-pink` `#F04A92`) et les **vraies** couleurs des plateformes
@@ -86,7 +86,7 @@ même (vitrine publique, outil de travail, overlay de diffusion).
 * **Police principale** : `Outfit`, avec repli `ui-sans-serif, system-ui, sans-serif`
   (`--font-main`).
 * **Police monospace** (panel uniquement) : `JetBrains Mono`, repli `ui-monospace,
-  SFMono-Regular, Menlo` (`--font-mono`) — utilisée pour la console de logs.
+  SFMono-Regular, Menlo` (`--font-mono`) - utilisée pour la console de logs.
 * In-game : police Minecraft par défaut, formatage via les codes `&` et hexadécimaux `&#RRGGBB`
   résolus par `ColorTranslator`.
 
@@ -105,13 +105,13 @@ n'écrivez pas une chaîne d'utilitaires quand une classe existe déjà.
 | `.btn-danger` | Fond `le3-red`, texte blanc |
 | `.btn-ghost` | Fond clair, bordure, texte atténué |
 | `.btn-soft` | Fond `le3-blue/10`, texte `le3-blue` |
-| `.btn-discord` | `#5865F2` — seule exception à la règle des trois couleurs |
+| `.btn-discord` | `#5865F2` - seule exception à la règle des trois couleurs |
 
 ### Badges
 
 `.badge-admin` (rouge), `.badge-staff` (bleu), `.badge-member` (neutre), et sur le panel
 `.badge-success`, `.badge-warning`, `.badge-error`. Motif systématique : `bg-<couleur>/10` +
-`text-<couleur>` — fond teinté à 10 %, jamais de fond plein.
+`text-<couleur>` - fond teinté à 10 %, jamais de fond plein.
 
 ### Structure
 
@@ -175,7 +175,7 @@ Conventions actuelles :
 * **Web** : **Font Awesome** via CDN (`cdnjs.cloudflare.com`, autorisé dans la CSP). Les modèles
   stockent des classes d'icônes en base (`categories.icon` avec `fa-comments` par défaut,
   `resourcelinks.icon` avec `fa-link`).
-* **Avatars joueurs** : `mc-heads.net` — tête Minecraft à partir du `mc_uuid`, avec repli
+* **Avatars joueurs** : `mc-heads.net` - tête Minecraft à partir du `mc_uuid`, avec repli
   `MHF_Steve` géré par un `onerror`. Aucun avatar Discord n'est utilisé côté site public.
 * **In-game** : caractères Unicode du resource pack, injectés via les placeholders
   `%img_teamN%`.

@@ -316,7 +316,7 @@ public CompletableFuture<Void> syncTeamsFromSite() {
 ### Texte coloré (Adventure, pas MiniMessage)
 
 Le plugin utilise le `LegacyComponentSerializer` d'Adventure via `ColorTranslator`, avec les codes
-`&` et hexadécimaux `&#RRGGBB` — **pas** MiniMessage.
+`&` et hexadécimaux `&#RRGGBB` - **pas** MiniMessage.
 
 ```java
 // Message lu depuis config.yml, jamais écrit en dur

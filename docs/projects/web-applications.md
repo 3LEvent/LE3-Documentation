@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Applications Web — Stack commune
+# Applications Web - Stack commune
 
 Les trois applications web du 3LEvent (`3levent`, `3levent-live`, `3levent-panel`) partagent la
 même stack, les mêmes conventions et la même chaîne de build. Cette page décrit **ce qui leur est
@@ -20,11 +20,11 @@ commun** ; les pages [Core Web](./web-core), [Live Web](./web-live) et
 | Serveur | Express | `5.x` |
 | Base de données | MongoDB / Mongoose | `8.x` |
 | Sessions & bus | Redis + `connect-redis` | `redis:7` |
-| Sécurité HTTP | `helmet`, `cors` | — |
-| Journalisation HTTP | `morgan` | — |
-| Frontend | HTML + TypeScript compilé, **aucun framework** | — |
+| Sécurité HTTP | `helmet`, `cors` | - |
+| Journalisation HTTP | `morgan` | - |
+| Frontend | HTML + TypeScript compilé, **aucun framework** | - |
 | CSS | Tailwind CSS via `@tailwindcss/cli` | `4.x` |
-| Exécution dev | `tsx --env-file=.env watch` | — |
+| Exécution dev | `tsx --env-file=.env watch` | - |
 
 :::warning Pas de framework frontend
 Il n'y a ni Angular, ni React, ni Vue, ni bundler. Les pages sont des fichiers `.html` servis par
@@ -55,7 +55,7 @@ discutée avant d'être implémentée : elle change la chaîne de build des troi
 │   ├── *.html
 │   ├── js/*.ts                    # Handlers, suffixe -handler + utils.ts
 │   ├── src/input.css              # Tokens Tailwind (@theme)
-│   ├── css/style.css              # Généré — ne pas éditer
+│   ├── css/style.css              # Généré - ne pas éditer
 │   └── tsconfig.json
 ├── Dockerfile
 └── package.json

@@ -219,7 +219,7 @@ pour le frontend.
 ## 6. Drapeaux Redis partagés (maintenance)
 
 Le mode maintenance est piloté par site depuis le CMS du panel et transite **uniquement** par
-Redis — aucun appel HTTP entre le panel et les sites publics.
+Redis - aucun appel HTTP entre le panel et les sites publics.
 
 | Clé Redis | Lue par |
 | :--- | :--- |
@@ -241,7 +241,7 @@ les sites publics parlent bien au même Redis :
 1. Choisir un `type` suivant `<domaine>.<entité>.<action>.v<n>`.
 2. Le déclarer dans les trois copies du contrat si le Panel doit l'utiliser (constante
    `EventTypes`), sinon la chaîne littérale suffit côté producteur.
-3. Publier via `createEcosystemEvent()` — jamais un objet construit à la main.
+3. Publier via `createEcosystemEvent()` - jamais un objet construit à la main.
 4. Ajouter un `case` dans le consommateur concerné. Ne rien changer chez les autres : ils
    ignoreront le type inconnu.
 5. Documenter le type et son payload dans le catalogue de cette page.

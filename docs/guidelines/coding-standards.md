@@ -11,7 +11,7 @@ Ces règles sont dérivées du code réellement déployé. Elles sont ce qu'un r
 ## 1. Principes
 
 * **Clarté avant brièveté.** Le code est lu bien plus souvent qu'il n'est écrit.
-* **Anglais technique dans le code** — identifiants, commentaires, logs. Les messages destinés aux
+* **Anglais technique dans le code** : identifiants, commentaires, logs. Les messages destinés aux
   joueurs et au staff sont en **français**.
 * **Fail fast.** Valider les prérequis au démarrage et lever immédiatement. Les trois serveurs
   `throw` si une variable critique manque, et `process.exit(1)` si la base est injoignable.
@@ -103,7 +103,7 @@ filtrables dans la console du panel.
   pas un sujet de revue.
 * `@NotNull` sur les paramètres des méthodes publiques.
 
-### Thread safety — la règle qui casse un serveur
+### Thread safety - la règle qui casse un serveur
 
 :::danger Ne jamais appeler l'API Bukkit depuis un thread asynchrone
 Et symétriquement : **jamais** de requête SQL ou d'appel HTTP sur le thread principal. Toute
@@ -131,7 +131,7 @@ Tout état partagé entre threads utilise une structure concurrente (`Concurrent
 ### Journalisation
 
 Passer par `StyledLogger` (`info`, `success`, `warn`, `error`) avec des messages paramétrés
-`{0}`, `{1}` — jamais de concaténation.
+`{0}`, `{1}` - jamais de concaténation.
 
 ### Messages joueurs
 
