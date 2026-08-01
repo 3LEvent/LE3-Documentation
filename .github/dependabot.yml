@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # Dépendances applicatives.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      # Regroupe les mises à jour mineures et correctives en une seule PR, pour éviter
+      # une avalanche hebdomadaire. Les majeures restent séparées, elles méritent une revue.
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  # Actions GitHub. Elles sont épinglées par SHA : Dependabot met à jour le SHA et le
+  # commentaire de version, ce qui est la seule façon tenable de suivre les mises à jour
+  # sans revenir aux tags mobiles.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "ci(deps)"
