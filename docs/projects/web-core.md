@@ -94,13 +94,6 @@ Toutes les routes exigent `requireAuth` **et** `authorize(...)` :
 | Tournoi | `GET /signups`, `GET /teams` | `STAFF`, `ADMIN` |
 | Tournoi | `DELETE /signups/:id`, `DELETE /teams/:id` | `ADMIN` |
 
-:::danger Bug connu : casse du rôle
-`GET /api/admin/users/search` est déclarée avec `authorize('Staff', 'ADMIN')`. La valeur stockée
-dans `users.role` est `STAFF` en majuscules : la comparaison `allowedRoles.includes(user.role)`
-échoue donc pour tout compte STAFF, qui reçoit un `403`. Seuls les `ADMIN` peuvent utiliser la
-recherche avancée. Correction : `authorize('STAFF', 'ADMIN')` dans
-`backend/routes/admin-routes.ts`.
-:::
 
 ### `/api/plugin` — réservé au serveur Minecraft
 
@@ -120,12 +113,6 @@ Contrat détaillé : [Protocoles de communication](../architecture/communication
 | Ours Orange | `orange` | Caimans Cyan | `cyan` |
 | Jaguards Jaunes | `yellow` | Administrateurs | `admin` |
 | Vipères Vertes | `green` | | |
-
-:::caution Table figée dans le code
-`TEAM_SLOT_MAP` est une constante du contrôleur, et l'énumération `PREDEFINED_TEAMS` en est une
-autre dans `user-model.ts`. Renommer une équipe côté site sans mettre à jour ces deux endroits
-produit un `slotKey` `unknown` et l'équipe disparaît silencieusement côté serveur de jeu.
-:::
 
 Les comptes `ADMIN` et `STAFF` ayant lié leur compte Minecraft sont injectés automatiquement dans
 l'équipe `admin` — mais **jamais** s'ils appartiennent déjà à une équipe de tournoi : l'équipe
@@ -157,17 +144,6 @@ appel HTTP entre les deux services.
 | `LE3_DISCORD_BOT_TOKEN`, `LE3_DISCORD_GUILD_ID` | Attribution de rôles Discord |
 | `DISCORD_ROLE_INSCRIT_ID`, `DISCORD_TEAM_ROLES_IDS` | Identifiants de rôles Discord |
 | `LE3_TWITCH_CLIENT_ID` / `_SECRET` / `_REDIRECT_URI` | OAuth Twitch |
-
----
-
-## 7. Points de vigilance
-
-* **Ajout d'un domaine externe** (script, image, iframe) : il faut modifier la CSP dans `server.ts`,
-  sinon le navigateur le bloque sans erreur serveur.
-* **Secret de session de repli** : `'kiyoni_deltaoff_fallback_secret'` est utilisé si
-  `LE3_SESSION_SECRET` manque. Ne jamais laisser ce cas se produire en production.
-* **Le journal `eventlogs` grossit sans limite** — contrairement aux journaux du panel, cette
-  collection n'est pas *capped*. Prévoir une purge ou un TTL.
 
 ---
 

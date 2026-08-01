@@ -75,11 +75,6 @@ import { authorize } from '../middleware/auth.js';
 router.get('/stats', requireAuth, authorize('STAFF', 'ADMIN'), adminCtrl.getDashboardStats);
 ```
 
-:::danger Respecter la casse des rôles
-Les rôles sont stockés en majuscules (`ADMIN`, `STAFF`, `MEMBER`, `CAPTAIN`) et comparés par
-`includes()`. `authorize('Staff', ...)` échoue silencieusement en `403` — ce bug existe
-actuellement sur `GET /api/admin/users/search`.
-:::
 
 ### Authentification par secret partagé
 

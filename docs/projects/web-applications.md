@@ -106,12 +106,6 @@ Identiques dans les trois dépôts :
 | `npm start` | `node --env-file=.env dist/backend/server.js` |
 | `npm run lint` | `eslint backend/**/*.ts` |
 
-:::caution `npm test` n'est pas implémenté
-Sur les trois applications, `npm test` renvoie encore
-`Error: no test specified && exit 1`. Il n'existe aucun test automatisé côté web. Ne vous fiez pas
-à un « build vert » pour valider un comportement.
-:::
-
 ---
 
 ## 5. Sécurité HTTP commune

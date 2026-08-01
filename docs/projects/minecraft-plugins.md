@@ -75,14 +75,6 @@ L'ordre compte : plusieurs étapes dépendent des précédentes.
 5. **Synchronisation des équipes depuis le site**, puis chargement des succès.
 6. Menus, enregistrement des listeners et des commandes, placeholders.
 
-:::warning `join()` bloquant au démarrage
-`teamManager.syncTeamsFromSite().join()` bloque volontairement le thread principal pendant le
-démarrage, pour garantir que les équipes soient connues avant l'arrivée du premier joueur. La
-requête HTTP est bornée à **10 secondes** (`.timeout(Duration.ofSeconds(10))`) : si le site est
-injoignable, le démarrage du serveur est retardé d'autant, puis le plugin poursuit **sans
-équipes**. Vérifiez les logs `[Teams]` après tout démarrage.
-:::
-
 À l'arrêt : sauvegarde de `data.yml` et fermeture du pool de connexions.
 
 ---
@@ -150,12 +142,6 @@ Le listener PNJ (`NpcInteractionListener`) n'est enregistré que si **Citizens**
 2. L'enregistrer dans `EventListenerRegistrar.registerListeners()`.
 3. Documenter le `type` et ses `arguments` dans l'en-tête de `achievements.yml`.
 
-:::note Fichier à reformater
-`EventListenerRegistrar.java` est actuellement stocké **sur une seule ligne** (tout le fichier
-sans retours). Il reste compilable et le `fmt-maven-plugin` le reformate au build, mais le diff
-Git est illisible tant que la version formatée n'est pas commitée.
-:::
-
 ---
 
 ## 6. Persistance
@@ -188,12 +174,6 @@ les identifiants manquent — pratique en local, à ne jamais laisser en product
 Permissions fines : `le3core.team.info|list`, `le3core.achievement.give|add|set|copyid`,
 `le3core.achievement.accessday.*`, `le3core.admin.reload|days|status|sync|hidescores`.
 
-:::caution Enregistrement de la commande racine
-`registerCommands()` appelle `getCommand("advancementscore")`, alors que `plugin.yml` déclare la
-commande sous le nom `le3core` (avec `advancementscore` en alias). Bukkit résout `getCommand()`
-par nom **ou** par alias, donc cela fonctionne — mais utilisez `getCommand("le3core")` pour rester
-cohérent avec la déclaration.
-:::
 
 ---
 
@@ -209,12 +189,6 @@ cohérent avec la déclaration.
   avec placeholders `%name%`, `%progress%`, `%threshold%`, `%percent%`, `%points%`, `%rewards%`.
 * `messages` — tous les messages joueurs, en français, avec codes couleur `&` et hexadécimaux
   `&#RRGGBB`.
-
-:::danger Secrets en clair dans `config.yml`
-Le `config.yml` versionné contient des identifiants MySQL et un secret d'API en clair. Ces valeurs
-doivent être **révoquées** et remplacées par des variables d'environnement lues au démarrage. Voir
-[Gestion des secrets](../infrastructure/secrets-management) pour le motif de lecture recommandé.
-:::
 
 ---
 

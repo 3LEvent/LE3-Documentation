@@ -42,13 +42,6 @@ miroir désigné par `LE3_ACHIEVEMENTS_CONFIG_PATH`), avec filtres par jour et p
 
 Routes : `GET /api/achievements`, `/days`, `/worlds`, `/:id/yaml`.
 
-:::caution Module en consultation seule
-Malgré ce que laisse entendre le README du dépôt, **aucune attribution de succès n'est
-implémentée**. Le helper `publishPanelCommand()` et les types de commande
-(`achievement.grant.requested`…) existent dans le contrat, mais aucun contrôleur ne les publie, et
-le plugin n'a pas de consommateur de commandes. L'attribution reste à faire, des deux côtés.
-:::
-
 ### Éditeur de base de données
 
 Remplace phpMyAdmin pour la base MySQL du plugin. Restreint à une **liste blanche stricte**
@@ -150,26 +143,7 @@ terminaux.
 
 ---
 
-## 5. Migration depuis l'ancienne authentification locale
-
-À faire **une seule fois** sur une base qui contenait des comptes avec mot de passe. Mongoose crée
-les index manquants au démarrage mais ne supprime jamais les obsolètes : l'ancien index
-`username_1` reste `unique` et fait échouer la création du compte SSO en `E11000`, la connexion
-renvoyant `?error=account_conflict`.
-
-```js
-// mongosh, sur la base du panel
-db.staffusers.deleteMany({ authentik_sub: { $exists: false } });
-db.staffusers.dropIndex('username_1');
-db.staffusers.dropIndex('email_1');
-```
-
-Puis redémarrer le service. `panelroles` et `siteconfigs` ne sont pas concernés : les rôles sont
-conservés.
-
----
-
-## 6. Variables d'environnement
+## 5. Variables d'environnement
 
 | Variable | Rôle |
 | :--- | :--- |
@@ -189,15 +163,6 @@ conservés.
 | `LE3_PLUGIN_MYSQL_HOST` / `_PORT` / `_DATABASE` / `_USER` / `_PASSWORD` | Base du plugin |
 | `LE3_PTERODACTYL_URL` / `_API_KEY` / `_SERVER_ID` | Clé **client** (`ptlc_…`) avec accès console |
 | `LE3_PANEL_URL`, `LE3_PANEL_ALLOWED_ORIGIN` | URL publique, origines CORS |
-
----
-
-## 7. Arrêt propre
-
-`SIGINT` / `SIGTERM` déclenchent, dans l'ordre : fermeture du serveur HTTP, arrêt du moniteur
-Pterodactyl, puis fermeture du bus, du client Redis de session et du **pool MySQL**
-(`closePluginDbPool`). Le pool MySQL est spécifique au panel : ne pas l'oublier si vous ajoutez une
-étape d'arrêt.
 
 ---
 

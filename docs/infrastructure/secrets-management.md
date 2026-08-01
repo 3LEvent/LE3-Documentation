@@ -25,14 +25,6 @@ Aucun secret ne doit apparaître en clair dans le code source ni dans un fichier
 
 Les variables suivent `LE3_[SERVICE]_[NOM]`.
 
-:::caution Exceptions existantes
-Toutes ne respectent pas encore la convention : `REDIS_URL`, `SESSION_SECRET` (repli de
-`LE3_SESSION_SECRET`), `MONGO_URI` (repli de `LE3_DATABASE_URL`), `TWITCH_CLIENT_ID` /
-`TWITCH_CLIENT_SECRET` sur le Live, `DISCORD_PREDICTION_WEBHOOK_URL`,
-`DISCORD_ROLE_INSCRIT_ID`, `DISCORD_TEAM_ROLES_IDS`. Les replis sont conservés pour compatibilité
-descendante ; n'introduisez **pas** de nouvelle variable hors convention.
-:::
-
 ---
 
 ## 3. Catalogue par service
@@ -101,58 +93,16 @@ n'affiche plus rien en temps réel.
 
 ---
 
-## 5. Secrets de repli — à éliminer
-
-:::danger Trois replis dangereux dans le code
-```ts
-// 3levent/backend/server.ts
-secret: SESSION_SECRET || 'kiyoni_deltaoff_fallback_secret'
-// 3levent-panel/backend/server.ts
-secret: SESSION_SECRET || 'kiyoni_deltaoff_panel_fallback_secret'
-```
-Si la variable manque, le service démarre **avec un secret public**, connu de quiconque lit le
-dépôt : toute session peut alors être forgée. Ces replis doivent être remplacés par un `throw`,
-comme le fait déjà `3levent-live`.
-:::
-
-Le bon modèle, déjà appliqué dans le Live :
-
-```ts
-if (!DATABASE_URL || !SESSION_SECRET) {
-    throw new Error('[CRITICAL] Missing LE3_DATABASE_URL or SESSION_SECRET in environment variables.');
-}
-```
-
----
-
-## 6. Développement local
+## 5. Développement local
 
 1. Copier `.env.example` en `.env` (seul `3levent-panel` en fournit un ; demander le modèle à un
    lead pour les autres).
 2. Renseigner des valeurs de **test**, jamais celles de production.
 3. Vérifier que `.env` est bien ignoré par Git avant tout commit.
 
-:::danger `.env` est actuellement versionné
-`3levent` et `3levent-live` **n'ont pas de `.gitignore`** et leur fichier `.env` **est suivi par
-Git**, avec des valeurs de production renseignées (`git ls-files | grep .env` le confirme dans les
-deux dépôts). Tous les secrets qu'ils contiennent sont à considérer comme compromis.
-
-Remise en conformité :
-
-```bash
-# 1. Révoquer d'abord toutes les valeurs (voir §8) — c'est l'étape qui compte
-# 2. Puis retirer le fichier du suivi, sans le supprimer du disque
-printf '.env\nnode_modules/\ndist/\n.DS_Store\n.idea/\n' >> .gitignore
-git rm --cached .env
-git add .gitignore
-git commit -m "chore(security): stop tracking .env and add gitignore"
-# 3. Purger l'historique (git filter-repo) après avoir prévenu les contributeurs
-```
-:::
-
 ---
 
-## 7. Implémentation
+## 6. Implémentation
 
 ### Node.js
 
@@ -177,12 +127,6 @@ if (dbPassword == null || dbPassword.isBlank()) {
     dbPassword = getConfig().getString("database.password");
 }
 ```
-
-:::danger Fuite active dans `LE3-Plugin-Core`
-Le `config.yml` versionné contient des identifiants MySQL et un secret d'API en clair. Ces valeurs
-doivent être considérées comme **compromises** : appliquez la procédure §8, puis remplacez-les par
-des valeurs neutres (`CHANGE_ME`) dans le dépôt.
-:::
 
 ---
 

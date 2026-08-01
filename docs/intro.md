@@ -12,10 +12,9 @@ technique de ce portail est vérifiable dans le code des dépôts référencés 
 
 ---
 
-## 1. Les quatre services de l'écosystème
+## 1. Les services de l'écosystème
 
-L'écosystème est composé de quatre unités déployables indépendantes. Elles ne partagent
-**aucun code** : elles se coordonnent par un bus d'événements Redis et quelques appels HTTP
+L'écosystème est composé d'unités déployables indépendantes. Elles se coordonnent par un bus d'événements Redis et quelques appels HTTP
 authentifiés.
 
 | Service | Dépôt | Rôle | Port | Domaine |
@@ -25,18 +24,12 @@ authentifiés.
 | **Staff Panel** | `3levent-panel` | Monitoring, gestion in-game, éditeur BDD, IAM | `3200` | `panel.3levent.fr` |
 | **Plugin Core** | `LE3-Plugin-Core` | Plugin Paper : équipes, succès, progression | — | serveur Minecraft |
 
-:::info Bot Discord
-Le bot Discord (`LE3-App-DiscordBot`) est **prévu mais pas encore implémenté**. Le contrat
-d'événements réserve déjà le nom de service `discord-bot`, ce qui lui permettra de se brancher
-sur le bus sans modifier les services existants. Voir [Bot Discord](./projects/discord-bot).
-:::
-
 ---
 
 ## 2. Stack technique réelle
 
-Les trois applications web partagent strictement la même stack, les mêmes conventions et la même
-structure de dossiers. Un développeur qui connaît l'une connaît les trois.
+Les applications web partagent strictement la même stack, les mêmes conventions et la même
+structure de dossiers. Un développeur qui connaît l'une connaît les autres.
 
 | Composant | Technologie | Version |
 | :--- | :--- | :--- |
@@ -51,18 +44,11 @@ structure de dossiers. Un développeur qui connaît l'une connaît les trois.
 | **Build plugin** | Maven (shade + fmt-maven-plugin) | — |
 | **Exécution** | Docker | — |
 
-:::warning Ce que la stack n'est PAS
-Il n'y a **ni Angular, ni React, ni framework SPA, ni TanStack Query, ni Cloudflare Pages, ni
-Workers**. Le frontend est composé de fichiers `.html` servis par Express et de fichiers `.ts`
-compilés en JavaScript natif chargé par `<script type="module">`. Les anciennes versions de cette
-documentation décrivaient une stack Angular qui n'a jamais été déployée.
-:::
-
 ---
 
 ## 3. Structure commune des applications web
 
-Les trois applications suivent la même arborescence. Le backend et le frontend ont chacun leur
+Les applications web suivent la même arborescence. Le backend et le frontend ont chacun leur
 `tsconfig.json` et sont compilés séparément vers `dist/`.
 
 ```text

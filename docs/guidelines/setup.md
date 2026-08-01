@@ -132,11 +132,6 @@ Style à chaque build. Ne combattez pas le formateur : commitez le résultat.
 5. Régler `api.sync_url` sur votre Core local (`http://localhost:3000/api/plugin/sync-teams`) et
    `api.secret` sur la même valeur que `LE3_PLUGIN_SECRET`.
 
-:::caution Le démarrage dépend du site
-Le plugin attend la réponse de `sync-teams` **avant** de terminer son démarrage. Si votre Core
-local n'est pas lancé, le démarrage du serveur de test sera ralenti par le délai HTTP.
-:::
-
 ---
 
 ## 5. Configuration TypeScript

@@ -168,12 +168,6 @@ Conventions actuelles :
   titres, `&#A2D149` (vert) pour les confirmations, `&c` pour les erreurs.
 * Petites capitales Unicode (`ᴘʀᴏɢʀès`, `ᴘᴏɪɴᴛs`) pour l'esthétique du serveur.
 
-:::note L'in-game diverge du web
-La palette in-game (`#7d97db`, `#db7d7d`, `#A2D149`) n'est pas celle du web (`#0094FF`,
-`#E73344`). C'est un écart existant, à trancher : soit aligner l'in-game sur la marque, soit
-documenter l'in-game comme un univers visuel distinct.
-:::
-
 ---
 
 ## 7. Iconographie

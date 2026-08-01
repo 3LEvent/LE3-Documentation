@@ -117,12 +117,6 @@ L'identité (pseudo, nom affiché, e-mail, groupes) appartient à Authentik et e
 chaque connexion** : elle est en lecture seule dans le panel. La déconnexion ferme aussi la session
 Authentik (*RP-initiated logout*).
 
-:::caution Retirer un accès
-Désactiver le membre (`DISABLED`) ou lui retirer son rôle suffit à bloquer l'accès. **Le supprimer
-ne suffit pas** : tant qu'il a accès à l'application côté Authentik, une reconnexion recrée un
-compte — sans rôle, mais présent.
-:::
-
 ### Amorçage du premier administrateur
 
 Sur une base neuve, personne n'a de rôle, donc personne ne peut en attribuer.
@@ -185,20 +179,6 @@ demandées, ou `SUPER_ADMIN`. Un `403` renvoie explicitement la liste des permis
    pas sécurité.
 3. **API** : chaque route re-vérifie la permission côté serveur. C'est la seule barrière qui
    compte.
-
----
-
-## 5. Points de vigilance
-
-* **Secrets de repli en dur** : `server.ts` retombe sur une chaîne littérale si
-  `LE3_SESSION_SECRET` est absent (`'kiyoni_deltaoff_fallback_secret'`,
-  `'kiyoni_deltaoff_panel_fallback_secret'`). Cette valeur ne doit jamais être active en
-  production — vérifiez que la variable est bien injectée.
-* **`LE3_JWT_SECRET`** : si la variable manque, `protect` journalise une erreur critique mais
-  laisse passer l'authentification par session. Le chemin JWT est alors inutilisable.
-* **Migration depuis l'auth locale du panel** : l'index unique `username_1` résiduel fait échouer
-  la création du compte SSO en `E11000` (`?error=account_conflict`). Procédure de nettoyage dans
-  [Staff Panel](../projects/staff-panel).
 
 ---
 

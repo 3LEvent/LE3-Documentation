@@ -154,12 +154,6 @@ Journal du bus d'événements. Un document par enveloppe : `event_id` (unique, c
 `payload` (Mixed), `status` (`RECEIVED|PROCESSED|FAILED`), `processed_at`, `error_message`.
 Index composé `{ type: 1, occurred_at: -1 }`.
 
-:::note Incohérence connue
-Le contrat exporte `EVENT_LOG_COLLECTION = 'event_bus_events'`, mais cette constante **n'est
-utilisée nulle part** : le modèle `EventLog` n'impose pas de nom de collection, donc les documents
-atterrissent dans `eventlogs`. Si vous inspectez la base, cherchez `eventlogs`.
-:::
-
 ---
 
 ## 4. MongoDB — base Live (`3levent-live`)
@@ -254,11 +248,6 @@ développement local, et celles autorisées par la liste blanche `EDITABLE_TABLE
 | `le3:eventbus` | Canal Pub/Sub | Bus d'événements | — |
 | `le3:maintenance:main` | String | Maintenance de `3levent.fr` | — |
 | `le3:maintenance:live` | String | Maintenance de `live.3levent.fr` | — |
-
-:::info Redis n'est pas un cache de classement
-Le classement n'est **pas** stocké dans un `ZSET` Redis : il est servi depuis le read-model
-MongoDB du Live (`liveteamstates`). Redis ne porte que les sessions, le bus et les drapeaux.
-:::
 
 ---
 

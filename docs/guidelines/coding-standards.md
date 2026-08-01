@@ -194,12 +194,6 @@ Les méthodes publiques et les endpoints sont documentés en JSDoc/Javadoc (`@pa
    endpoint a changé.
 5. Aucun secret, aucun `console.log` de debug, aucun code mort.
 
-:::caution Pas de filet de tests
-`npm test` n'est pas implémenté sur les applications web. Un build vert ne prouve **rien** sur le
-comportement : testez manuellement le chemin que vous modifiez, et décrivez comment le rejouer
-dans la description de la PR.
-:::
-
 ---
 
 ### Prochaines étapes

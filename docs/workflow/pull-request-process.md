@@ -23,13 +23,6 @@ Avant de soumettre une Pull Request, le contributeur doit valider localement :
 5.  **Contrat du bus** : si `ecosystem-event.ts` est touché, les **trois copies** sont
     synchronisées dans la même PR.
 
-:::caution Il n'y a pas de tests automatisés
-`npm test` renvoie `exit 1` sur les trois applications web, et le plugin n'a pas de suite de
-tests. **Un build vert ne prouve rien sur le comportement.** La vérification manuelle décrite au
-point 3 est, aujourd'hui, la seule preuve de non-régression — la description de la PR doit
-permettre au reviewer de la rejouer.
-:::
-
 ---
 
 ## 2. Ouverture de la Pull Request

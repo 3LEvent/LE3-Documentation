@@ -67,12 +67,6 @@ défaut.
 sur le fil**. Les copies ne sont pas identiques : le Panel ajoute `panel-web` et l'énumération
 `EventTypes`, le Core ajoute `EVENT_LOG_COLLECTION`.
 
-:::danger Modifier le contrat
-Un changement de forme de l'enveloppe doit être appliqué aux **trois** copies dans la même Pull
-Request. Un consommateur qui reçoit une enveloppe invalide la rejette silencieusement — la panne
-est difficile à diagnostiquer parce que rien ne casse bruyamment.
-:::
-
 ### Catalogue des types d'événements
 
 **Télémétrie du plugin → écosystème** (relayée par le Core) :
@@ -98,13 +92,6 @@ est difficile à diagnostiquer parce que rien ne casse bruyamment.
 
 `achievement.grant.requested`, `achievement.progress.set.requested`,
 `achievement.progress.add.requested`.
-
-:::caution État réel
-Le helper `publishPanelCommand()` (`backend/utils/helpers.ts`) est en place et publie sous
-`source.service: 'panel-web'`, mais **aucun contrôleur ne l'appelle encore**. La page Achievements
-du panel est aujourd'hui en consultation seule. Côté plugin, aucun consommateur de commandes n'est
-implémenté non plus.
-:::
 
 ### Règle de tolérance
 
