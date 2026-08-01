@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# Staff Panel — `3levent-panel`
+# Staff Panel - `3levent-panel`
 
 L'outil interne du staff, derrière SSO Authentik : monitoring serveur, gestion in-game, éditeur
 de base de données et gestion des accès.
@@ -33,7 +33,7 @@ pour le frontend :
 
 1. les événements `server.metrics.heartbeat` / `log.entry.created` reçus sur le bus ;
 2. le **service Pterodactyl** (`pterodactyl-service.ts`), qui interroge directement le serveur de
-   jeu quand il est configuré — et ne fait rien sinon.
+   jeu quand il est configuré - et ne fait rien sinon.
 
 ### Gestion in-game
 
@@ -90,11 +90,11 @@ uniquement dans l'environnement.
 
 ## 2. Sécurité : trois barrières
 
-1. **Pages** — `PRIVATE_PAGES` (`dashboard`, `achievements`, `database`, `iam`, `profile`, `cms`)
+1. **Pages** : `PRIVATE_PAGES` (`dashboard`, `achievements`, `database`, `iam`, `profile`, `cms`)
    est déclaré **avant** `express.static`, pour qu'un HTML privé ne puisse jamais être servi à un
    visiteur non authentifié. `/` redirige vers `/dashboard.html` ou `/login.html` selon la session.
-2. **Navigation** — le frontend masque les onglets non autorisés. Confort, pas sécurité.
-3. **API** — chaque route re-vérifie sa permission via `requirePermission`. C'est la seule
+2. **Navigation** : le frontend masque les onglets non autorisés. Confort, pas sécurité.
+3. **API** : chaque route re-vérifie sa permission via `requirePermission`. C'est la seule
    barrière qui compte.
 
 La session du panel est **isolée** de celle des joueurs : cookie `le3panel.sid`, préfixe Redis
@@ -148,14 +148,14 @@ terminaux.
 | Variable | Rôle |
 | :--- | :--- |
 | `PORT`, `NODE_ENV` | Serveur (défaut `3200`) |
-| `LE3_MONGO_URI` | MongoDB du panel — **obligatoire**, `throw` si absente |
+| `LE3_MONGO_URI` | MongoDB du panel - **obligatoire**, `throw` si absente |
 | `REDIS_URL` | Bus **partagé** avec le Core, le Live et le plugin |
 | `LE3_SESSION_SECRET`, `LE3_COOKIE_DOMAIN` | Session isolée du panel |
 | `LE3_AUTHENTIK_ISSUER` | Issuer OIDC, **slash final obligatoire** |
 | `LE3_AUTHENTIK_CLIENT_ID` / `_CLIENT_SECRET` | Client OIDC |
 | `LE3_AUTHENTIK_REDIRECT_URI` | Doit correspondre **au caractère près** à Authentik |
 | `LE3_AUTHENTIK_POST_LOGOUT_REDIRECT_URI`, `LE3_AUTHENTIK_SCOPES` | Optionnels |
-| `LE3_BOOTSTRAP_SUPER_ADMIN` | Amorçage du premier admin — **à vider ensuite** |
+| `LE3_BOOTSTRAP_SUPER_ADMIN` | Amorçage du premier admin - **à vider ensuite** |
 | `LE3_DEV_AUTH_BYPASS` | Bypass local, jamais en production |
 | `LE3_DISCORD_CLIENT_ID` / `_SECRET` / `_REDIRECT_URI` | Liaison Discord (jamais connexion) |
 | `LE3_DISCORD_ALERT_WEBHOOK_URL` | Salon privé d'alertes critiques |

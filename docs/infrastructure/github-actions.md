@@ -104,7 +104,7 @@ publiées après la fusion du code.
 | Branche | Ce que déclenche un push |
 | :--- | :--- |
 | `feat/*`, `fix/*` | rien (la CI part de la PR) |
-| PR vers `develop`/`main` | `build-verify` + `security` — bloquants |
+| PR vers `develop`/`main` | `build-verify` + `security` - bloquants |
 | `develop` | `build-verify`, `deploy-dev` (artefact), `security` |
 | `main` | `publish` (GitHub Packages, puis resync de `develop`), `security`, `deploy` si activé |
 | tag `v*` | `release` (Release GitHub + checksums) |

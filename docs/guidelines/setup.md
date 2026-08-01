@@ -77,7 +77,7 @@ npm start         # node --env-file=.env dist/backend/server.js
 
 ## 3. Services locaux (MongoDB, Redis, MySQL)
 
-Seul `3levent-panel` fournit un `docker-compose.dev.yml` — mais il est utilisable pour l'ensemble
+Seul `3levent-panel` fournit un `docker-compose.dev.yml` - mais il est utilisable pour l'ensemble
 de la stack, puisqu'il lance les trois dépendances.
 
 ```bash
@@ -98,7 +98,7 @@ Pointez ensuite les `.env` des autres applications sur ces mêmes instances : `R
 
 Mettez `LE3_DEV_AUTH_BYPASS=true` et `NODE_ENV=development`, puis utilisez le bouton
 **« Connexion développeur (local) »** de la page de connexion : il ouvre une session
-`SUPER_ADMIN`. Les deux conditions sont exigées simultanément — impossible de l'activer par
+`SUPER_ADMIN`. Les deux conditions sont exigées simultanément - impossible de l'activer par
 accident en production.
 
 ### Sessions partagées en local
@@ -161,15 +161,15 @@ configuration.
 
 ## 6. IDE
 
-### IntelliJ IDEA — Java
+### IntelliJ IDEA - Java
 
 * Plugin **Minecraft Development** (événements, dépendances Paper).
-* Style de code : **Google Java Style** — importer le même profil que `fmt-maven-plugin`.
+* Style de code : **Google Java Style** : importer le même profil que `fmt-maven-plugin`.
 
-### VS Code / WebStorm — TypeScript et documentation
+### VS Code / WebStorm - TypeScript et documentation
 
 * **ESLint** (les dépôts embarquent `eslint` 9).
-* **Tailwind CSS IntelliSense** — attention, Tailwind v4 déclare ses tokens dans `input.css` via
+* **Tailwind CSS IntelliSense** : attention, Tailwind v4 déclare ses tokens dans `input.css` via
   `@theme`, pas dans `tailwind.config.js`.
 * **Mermaid** pour prévisualiser les diagrammes de cette documentation.
 
@@ -196,9 +196,9 @@ build` local évite un aller-retour de revue.
 
 ## 8. Accès à demander
 
-1. **GitHub** — rejoindre l'organisation 3LEvent.
-2. **Authentik** (`sso.3levent.fr`) — obligatoire pour accéder au panel staff.
-3. **Valeurs `.env`** — jamais transmises par messagerie publique ; voir
+1. **GitHub** : rejoindre l'organisation 3LEvent.
+2. **Authentik** (`sso.3levent.fr`) - obligatoire pour accéder au panel staff.
+3. **Valeurs `.env`** : jamais transmises par messagerie publique ; voir
    [Gestion des secrets](../infrastructure/secrets-management).
 
 ---

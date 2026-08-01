@@ -113,7 +113,7 @@ git push origin feat/ma-fonctionnalite
 ## 5. Bonnes Pratiques
 
 * **Ne jamais push de secrets** : clés d'API, mots de passe et identifiants ne doivent jamais être
-  commités. Vérifiez que `.env` est bien ignoré **avant** votre premier commit dans un dépôt — ce
+  commités. Vérifiez que `.env` est bien ignoré **avant** votre premier commit dans un dépôt - ce
   n'est pas le cas partout aujourd'hui, voir
   [Gestion des secrets](../infrastructure/secrets-management).
 * **Rebase plutôt que merge** : `git rebase develop` sur votre branche de travail pour rester à

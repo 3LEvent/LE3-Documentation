@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Core Web — `3levent`
+# Core Web - `3levent`
 
 Le site public du 3LEvent : forum, portail d'inscription, profils joueurs, back-office, et
 **passerelle unique du plugin Minecraft** vers le reste de l'écosystème.
@@ -21,14 +21,14 @@ Stack, arborescence et scripts : voir [Applications Web](./web-applications).
 
 ## 1. Responsabilités
 
-1. **Forum** — catégories hiérarchiques, threads, commentaires, recherche, épinglage, verrouillage.
-2. **Portail d'inscription** — liaison Microsoft (compte Minecraft) et Discord, OTP, rattachement
+1. **Forum** : catégories hiérarchiques, threads, commentaires, recherche, épinglage, verrouillage.
+2. **Portail d'inscription** : liaison Microsoft (compte Minecraft) et Discord, OTP, rattachement
    à une équipe.
-3. **Profils** — liaison/déliaison Discord et Twitch.
-4. **Back-office `/admin`** — statistiques, architecture du forum, gestion des membres, audit,
+3. **Profils** : liaison/déliaison Discord et Twitch.
+4. **Back-office `/admin`** : statistiques, architecture du forum, gestion des membres, audit,
    gestion du tournoi.
-5. **Passerelle plugin** — `/api/plugin/*`, seul point de contact du serveur Minecraft.
-6. **Journal du bus** — persiste chaque événement de `le3:eventbus` dans `eventlogs`.
+5. **Passerelle plugin** : `/api/plugin/*`, seul point de contact du serveur Minecraft.
+6. **Journal du bus** : persiste chaque événement de `le3:eventbus` dans `eventlogs`.
 
 ---
 
@@ -36,13 +36,13 @@ Stack, arborescence et scripts : voir [Applications Web](./web-applications).
 
 | Route | Fichier | Garde |
 | :--- | :--- | :--- |
-| `/` | `index.html` | — |
-| `/signup` | `signup.html` | — |
-| `/forum` | `forum.html` | — |
-| `/forum/threads/:id` | `thread.html` | — |
+| `/` | `index.html` | - |
+| `/signup` | `signup.html` | - |
+| `/forum` | `forum.html` | - |
+| `/forum/threads/:id` | `thread.html` | - |
 | `/forum/create` | `create-thread.html` | session requise |
-| `/search` | `search.html` | — |
-| `/profile` | `profile.html` | — |
+| `/search` | `search.html` | - |
+| `/profile` | `profile.html` | - |
 | `/login` | `login.html` | redirige vers `/profile` si déjà connecté |
 | `/admin` | `admin.html` | rôle `STAFF` ou `ADMIN` |
 
@@ -50,13 +50,13 @@ Stack, arborescence et scripts : voir [Applications Web](./web-applications).
 
 `server.ts` expose une table `REDIRECTS` : `/wiki`, `/soutien`, `/discord`, `/twitter`,
 `/youtube`, `/direct` (→ `live.3levent.fr`), `/rules`, `/cgu`, `/credits`. Les trois dernières
-pointent vers des threads du forum par identifiant — **elles cassent si le thread est supprimé**.
+pointent vers des threads du forum par identifiant - **elles cassent si le thread est supprimé**.
 
 ---
 
 ## 3. API
 
-### `/api/auth` — identité
+### `/api/auth` - identité
 
 `GET /microsoft/login` · `/microsoft/callback` · `/discord/login` · `/discord/callback` ·
 `/twitch/login` · `/twitch/callback` · `/me` · `/logout`, `DELETE /discord/unlink` ·
@@ -64,7 +64,7 @@ pointent vers des threads du forum par identifiant — **elles cassent si le thr
 
 Détail des flux : [Authentification et sessions](../architecture/authentication).
 
-### `/api/portal` — inscription à l'événement
+### `/api/portal` - inscription à l'événement
 
 `GET /me` (statut du portail), `POST /otp/create`, flux Discord et Microsoft dédiés,
 `POST /signup` (finalisation).
@@ -95,7 +95,7 @@ Toutes les routes exigent `requireAuth` **et** `authorize(...)` :
 | Tournoi | `DELETE /signups/:id`, `DELETE /teams/:id` | `ADMIN` |
 
 
-### `/api/plugin` — réservé au serveur Minecraft
+### `/api/plugin` - réservé au serveur Minecraft
 
 `GET /sync-teams` et `POST /events`, authentifiées par l'en-tête `x-plugin-secret`.
 Contrat détaillé : [Protocoles de communication](../architecture/communication-protocol).
@@ -115,7 +115,7 @@ Contrat détaillé : [Protocoles de communication](../architecture/communication
 | Vipères Vertes | `green` | | |
 
 Les comptes `ADMIN` et `STAFF` ayant lié leur compte Minecraft sont injectés automatiquement dans
-l'équipe `admin` — mais **jamais** s'ils appartiennent déjà à une équipe de tournoi : l'équipe
+l'équipe `admin` - mais **jamais** s'ils appartiennent déjà à une équipe de tournoi : l'équipe
 admin a la priorité la plus basse, il n'y a pas de transfert.
 
 ---
@@ -133,9 +133,9 @@ appel HTTP entre les deux services.
 | Variable | Rôle |
 | :--- | :--- |
 | `PORT`, `NODE_ENV` | Serveur |
-| `LE3_DATABASE_URL` *(ou `MONGO_URI`)* | MongoDB — **obligatoire**, `throw` si absente |
+| `LE3_DATABASE_URL` *(ou `MONGO_URI`)* | MongoDB - **obligatoire**, `throw` si absente |
 | `REDIS_URL` | Sessions + bus (défaut `redis://le3-redis:6379`) |
-| `LE3_SESSION_SECRET` *(ou `SESSION_SECRET`)* | Secret de session — doit être identique au Live |
+| `LE3_SESSION_SECRET` *(ou `SESSION_SECRET`)* | Secret de session - doit être identique au Live |
 | `LE3_COOKIE_DOMAIN` | Domaine du cookie (défaut `.3levent.fr`) |
 | `LE3_JWT_SECRET` | Vérification des JWT dans `protect` |
 | `LE3_PLUGIN_SECRET` | Secret partagé avec le plugin |

@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Plugins Minecraft — `LE3-Plugin-Core`
+# Plugins Minecraft - `LE3-Plugin-Core`
 
 Le noyau Java de l'événement. Il gère les équipes (en lecture seule), le système de succès par
 équipe et par joueur, les menus in-game et la synchronisation avec le site web.
@@ -34,7 +34,7 @@ serveur. Les signatures `META-INF/*.SF|DSA|RSA` sont exclues du JAR final.
 Le `fmt-maven-plugin` (phase `validate`) applique le **Google Java Style** automatiquement à
 chaque build : le formatage n'est pas un sujet de revue de code.
 
-Toutes les intégrations sont en `softdepend` — le plugin démarre et fonctionne sans elles, en
+Toutes les intégrations sont en `softdepend` - le plugin démarre et fonctionne sans elles, en
 journalisant un avertissement pour chaque hook absent.
 
 ---
@@ -88,10 +88,10 @@ Le plugin **ne crée pas** d'équipes. `TeamManager.syncTeamsFromSite()` effectu
 Les huit `slotKey` (`red`, `blue`, `orange`, `pink`, `green`, `purple`, `cyan`, `yellow`) sont
 déclarés dans `config.yml` sous `team_slots`, chacun avec :
 
-* `display_color_name` — nom coloré affiché in-game ;
-* `lp_group` — groupe LuckPerms correspondant (`team1` … `team8`) ;
-* `prefix` — préfixe LuckPerms pondéré ;
-* `permissions` — permissions cosmétiques attribuées aux membres.
+* `display_color_name` - nom coloré affiché in-game ;
+* `lp_group` - groupe LuckPerms correspondant (`team1` … `team8`) ;
+* `prefix` - préfixe LuckPerms pondéré ;
+* `permissions` - permissions cosmétiques attribuées aux membres.
 
 La synchronisation est rejouée sur `/le3core reload` et `/le3core sync`.
 
@@ -159,7 +159,7 @@ Deux règles absolues :
   documentée comme devant être appelée depuis un thread annexe.
 
 Repli automatique sur **SQLite** (`advancementscore.db`) si `database.type` n'est pas `mysql` ou si
-les identifiants manquent — pratique en local, à ne jamais laisser en production.
+les identifiants manquent - pratique en local, à ne jamais laisser en production.
 
 ---
 
@@ -181,13 +181,13 @@ Permissions fines : `le3core.team.info|list`, `le3core.achievement.give|add|set|
 
 `config.yml` couvre bien plus que la base de données :
 
-* `general` — chat d'équipe, préfixe, `npc_id` du PNJ Citizens.
-* `team_slots` — les huit équipes (voir §4).
-* `database` — `type`, `host`, `port`, `database`, `username`, `password`.
-* `api` — `sync_url` et `secret` (partagé avec `LE3_PLUGIN_SECRET` côté Core).
-* `menu` — emplacements (`slots`), matériaux et **layouts de lore** entièrement paramétrables,
+* `general` - chat d'équipe, préfixe, `npc_id` du PNJ Citizens.
+* `team_slots` - les huit équipes (voir §4).
+* `database` - `type`, `host`, `port`, `database`, `username`, `password`.
+* `api` - `sync_url` et `secret` (partagé avec `LE3_PLUGIN_SECRET` côté Core).
+* `menu` - emplacements (`slots`), matériaux et **layouts de lore** entièrement paramétrables,
   avec placeholders `%name%`, `%progress%`, `%threshold%`, `%percent%`, `%points%`, `%rewards%`.
-* `messages` — tous les messages joueurs, en français, avec codes couleur `&` et hexadécimaux
+* `messages` - tous les messages joueurs, en français, avec codes couleur `&` et hexadécimaux
   `&#RRGGBB`.
 
 ---
@@ -216,7 +216,7 @@ Détail : [GitHub Actions](../infrastructure/github-actions).
   `ConcurrentHashMap` pour tout état partagé (comme `pinnedAchievements`).
 * **Journalisation** : passer par `StyledLogger` (`info`, `success`, `warn`, `error`) avec des
   messages paramétrés `{0}`, jamais par concaténation.
-* **Messages joueurs** : toujours via la section `messages` de `config.yml`, jamais en dur — une
+* **Messages joueurs** : toujours via la section `messages` de `config.yml`, jamais en dur - une
   correction de texte ne doit pas exiger une recompilation.
 * **Nullabilité** : annoter avec `@NotNull` les paramètres des méthodes publiques.
 

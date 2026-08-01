@@ -11,7 +11,7 @@ Cloudflare en frontal pour le DNS, le proxy HTTP et la protection.
 Ce que le code prouve est marqué **vérifié**. Le reste décrit la topologie telle qu'elle est
 opérée et **n'est pas versionné** : il n'existe aujourd'hui aucun manifeste de déploiement dans
 les dépôts (pas de `docker-compose.yml` de production, pas de configuration de reverse proxy, pas
-de manifeste Cloudflare). Documenter — puis versionner — cette configuration est le chantier
+de manifeste Cloudflare). Documenter - puis versionner - cette configuration est le chantier
 d'infrastructure prioritaire.
 :::
 
@@ -44,12 +44,12 @@ Faits vérifiés dans le code :
 
 * Les trois applications déclarent `app.set('trust proxy', 1)` : exactement **un** proxy en amont.
   Une couche supplémentaire fausserait l'IP client et le drapeau `secure` du cookie.
-* Les cookies sont posés sur `.3levent.fr` en production — le partage de session Core ↔ Live
+* Les cookies sont posés sur `.3levent.fr` en production - le partage de session Core ↔ Live
   dépend de ce domaine parent commun.
 * CORS est en liste blanche : `['https://3levent.fr', 'https://live.3levent.fr']`.
 * La CSP du Core autorise `https://static.cloudflareinsights.com` : Cloudflare Web Analytics est
   actif sur le site public.
-* `REDIS_URL` vaut par défaut `redis://le3-redis:6379` — un nom d'hôte de réseau Docker.
+* `REDIS_URL` vaut par défaut `redis://le3-redis:6379` - un nom d'hôte de réseau Docker.
 
 ---
 
@@ -150,7 +150,7 @@ retardé de 10 secondes et les équipes ne sont pas chargées.
 
 ## 5. Documentation (`LE3-Documentation`)
 
-Docusaurus 3, publié sur `doc.3levent.fr` avec `deploymentBranch: 'gh-pages'` — donc GitHub Pages,
+Docusaurus 3, publié sur `doc.3levent.fr` avec `deploymentBranch: 'gh-pages'` - donc GitHub Pages,
 et non Cloudflare Pages.
 
 ```bash
@@ -162,12 +162,12 @@ npm run serve     # prévisualisation du build
 
 ## 6. Chantiers ouverts
 
-1. **Versionner l'infrastructure** — `docker-compose.prod.yml`, configuration du reverse proxy,
+1. **Versionner l'infrastructure** : `docker-compose.prod.yml`, configuration du reverse proxy,
    règles Cloudflare. Aujourd'hui, cette connaissance n'existe que dans la tête des opérateurs.
-2. **Automatiser le déploiement web** — voir [CI/CD](./github-actions) §5.
-3. **Sauvegardes** — aucune procédure automatisée n'existe pour MongoDB et MySQL. À définir, à
+2. **Automatiser le déploiement web** : voir [CI/CD](./github-actions) §5.
+3. **Sauvegardes** : aucune procédure automatisée n'existe pour MongoDB et MySQL. À définir, à
    tester par une restauration réelle, et à documenter ici.
-4. **Supervision** — le panel surveille le serveur Minecraft, mais rien ne surveille les trois
+4. **Supervision** : le panel surveille le serveur Minecraft, mais rien ne surveille les trois
    applications web ni Redis.
 
 ---

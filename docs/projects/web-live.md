@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Live Web — `3levent-live`
+# Live Web - `3levent-live`
 
 Le dashboard temps réel destiné aux spectateurs : classement des équipes, statut des streams
 Twitch et pronostics.
@@ -107,7 +107,7 @@ principale »*.
 
 :::danger Fail-fast plus strict que le Core
 Contrairement au Core, le Live **refuse de démarrer** si `LE3_SESSION_SECRET` *ou*
-`LE3_DATABASE_URL` manque — il n'y a pas de secret de repli. C'est le comportement souhaitable ;
+`LE3_DATABASE_URL` manque - il n'y a pas de secret de repli. C'est le comportement souhaitable ;
 le Core devrait s'aligner dessus.
 :::
 
@@ -136,9 +136,9 @@ sociales réelles des plateformes, là où le Core les a fusionnées. Voir
 | Variable | Rôle |
 | :--- | :--- |
 | `PORT`, `NODE_ENV` | Serveur (défaut `3001`) |
-| `LE3_DATABASE_URL` *(ou `MONGO_URI`)* | MongoDB — obligatoire |
+| `LE3_DATABASE_URL` *(ou `MONGO_URI`)* | MongoDB - obligatoire |
 | `REDIS_URL` | Sessions, bus, cache du classement |
-| `LE3_SESSION_SECRET` *(ou `SESSION_SECRET`)* | **Identique au Core** — obligatoire |
+| `LE3_SESSION_SECRET` *(ou `SESSION_SECRET`)* | **Identique au Core** : obligatoire |
 | `LE3_COOKIE_DOMAIN` | Domaine du cookie (défaut `.3levent.fr`) |
 | `LE3_JWT_SECRET` | Vérification JWT |
 | `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` | API Helix |

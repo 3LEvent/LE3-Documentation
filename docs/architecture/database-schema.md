@@ -36,7 +36,7 @@ tables) et le panel (éditeur en liste blanche). Aucune base MongoDB n'est parta
   `collection:`.
 * Champs en `snake_case` pour les données métier et les clés étrangères (`team_id`, `mc_uuid`,
   `authentik_sub`). Quelques champs de présentation historiques restent en `camelCase`
-  (`isPinned`, `isLocked`, `imageUrl`, `displayOrder`, `parentId`, `isCaptain`) — ne pas propager
+  (`isPinned`, `isLocked`, `imageUrl`, `displayOrder`, `parentId`, `isCaptain`) - ne pas propager
   ce style sur les nouveaux champs.
 * `timestamps: true` sur la quasi-totalité des schémas ; les journaux n'activent que `createdAt`.
 * Les identifiants Minecraft sont des UUID en `String`. Le Live les **normalise** (minuscules,
@@ -48,13 +48,13 @@ tables) et le panel (éditeur en liste blanche). Aucune base MongoDB n'est parta
 * Créées par `DatabaseManager.initializeTables()` au démarrage du plugin (`CREATE TABLE IF NOT
   EXISTS`). Il n'y a **pas** de système de migration.
 * Le plugin bascule automatiquement sur **SQLite** (`advancementscore.db`) si `database.type`
-  n'est pas `mysql` ou si les identifiants manquent — le schéma est identique, la syntaxe d'upsert
+  n'est pas `mysql` ou si les identifiants manquent - le schéma est identique, la syntaxe d'upsert
   diffère (`ON DUPLICATE KEY UPDATE` vs `ON CONFLICT`).
 * Encodage `utf8mb4`.
 
 ---
 
-## 3. MongoDB — base Core (`3levent`)
+## 3. MongoDB - base Core (`3levent`)
 
 ```mermaid
 erDiagram
@@ -156,7 +156,7 @@ Index composé `{ type: 1, occurred_at: -1 }`.
 
 ---
 
-## 4. MongoDB — base Live (`3levent-live`)
+## 4. MongoDB - base Live (`3levent-live`)
 
 Le Live ne lit **jamais** la base du Core ni celle du plugin. Il reconstruit localement un
 read-model à partir des événements du bus (`live-event-consumer.ts`).
@@ -173,7 +173,7 @@ lecture pour résoudre l'identité d'une session partagée.
 
 ---
 
-## 5. MongoDB — base Panel (`3levent-panel`)
+## 5. MongoDB - base Panel (`3levent-panel`)
 
 | Collection | Rôle | Particularité |
 | :--- | :--- | :--- |
@@ -196,7 +196,7 @@ Le modèle d'autorisation (`PANEL_PERMISSIONS`, `ACCESS_GROUP_CATALOGUE`) est d�
 
 ---
 
-## 6. MySQL — base du plugin
+## 6. MySQL - base du plugin
 
 Créée et maintenue par `DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions,
 timeout 5 s). Toutes les écritures passent par `runTaskAsynchronously` : jamais sur le thread
@@ -245,9 +245,9 @@ développement local, et celles autorisées par la liste blanche `EDITABLE_TABLE
 | :--- | :--- | :--- | :--- |
 | `le3:sess:<sid>` | Hash (connect-redis) | Session partagée Core ↔ Live, cookie `3levent.sid` | 7 jours (glissant) |
 | `le3panel:sess:<sid>` | Hash (connect-redis) | Session du panel, cookie `le3panel.sid` | 8 heures |
-| `le3:eventbus` | Canal Pub/Sub | Bus d'événements | — |
-| `le3:maintenance:main` | String | Maintenance de `3levent.fr` | — |
-| `le3:maintenance:live` | String | Maintenance de `live.3levent.fr` | — |
+| `le3:eventbus` | Canal Pub/Sub | Bus d'événements | - |
+| `le3:maintenance:main` | String | Maintenance de `3levent.fr` | - |
+| `le3:maintenance:live` | String | Maintenance de `live.3levent.fr` | - |
 
 ---
 
@@ -261,7 +261,7 @@ développement local, et celles autorisées par la liste blanche `EDITABLE_TABLE
    les anciens. C'est exactement le piège documenté pour la migration du panel vers Authentik
    (index `username_1` unique résiduel → erreur `E11000`). Vérifiez `db.<collection>.getIndexes()`
    après toute suppression de champ unique.
-4. **Sauvegardes** : à définir et à documenter ici — aucune procédure n'est aujourd'hui
+4. **Sauvegardes** : à définir et à documenter ici - aucune procédure n'est aujourd'hui
    automatisée dans les dépôts.
 
 ---
