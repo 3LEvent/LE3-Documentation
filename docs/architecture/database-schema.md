@@ -14,11 +14,11 @@ MySQL appartenant au plugin Minecraft, et Redis.
 
 | Stockage | Propriétaire | Contenu | Accès externe |
 | :--- | :--- | :--- | :--- |
-| **MongoDB Core** | `3levent` | Comptes, forum, inscriptions, journal du bus | aucun |
-| **MongoDB Live** | `3levent-live` | Read-model temps réel, pronostics | aucun |
-| **MongoDB Panel** | `3levent-panel` | Staff, rôles, logs, métriques, config, audit | aucun |
+| **MongoDB Core** | `LE3-Web-Main` | Comptes, forum, inscriptions, journal du bus | aucun |
+| **MongoDB Live** | `LE3-Web-Live` | Read-model temps réel, pronostics | aucun |
+| **MongoDB Panel** | `LE3-Web-Panel` | Staff, rôles, logs, métriques, config, audit | aucun |
 | **MySQL** | `LE3-Plugin-Core` | Points et progression des succès | Panel (éditeur audité) |
-| **Redis** | partagé | Sessions, bus d'événements, drapeaux | tous |
+| **Redis** | partagé | Sessions, bus d'événements, drapeaux, cache d'équipes | tous |
 
 :::warning Une seule base est partagée
 La base MySQL est la **seule** que deux services ouvrent : le plugin (propriétaire, qui crée les
@@ -32,29 +32,32 @@ tables) et le panel (éditeur en liste blanche). Aucune base MongoDB n'est parta
 ### MongoDB / Mongoose
 
 * Les noms de collections sont ceux que **Mongoose dérive automatiquement** du nom de modèle
-  (minuscules + pluriel) : `User` → `users`, `PanelRole` → `panelroles`. Aucun modèle ne force
-  `collection:`.
+  (minuscules + pluriel) : `User` → `users`, `PanelRole` → `panelroles`, `EventLog` → `eventlogs`.
+  Aucun modèle ne force `collection:`.
 * Champs en `snake_case` pour les données métier et les clés étrangères (`team_id`, `mc_uuid`,
   `authentik_sub`). Quelques champs de présentation historiques restent en `camelCase`
-  (`isPinned`, `isLocked`, `imageUrl`, `displayOrder`, `parentId`, `isCaptain`) - ne pas propager
+  (`isPinned`, `isLocked`, `imageUrl`, `displayOrder`, `parentId`, `isCaptain`) : ne pas propager
   ce style sur les nouveaux champs.
 * `timestamps: true` sur la quasi-totalité des schémas ; les journaux n'activent que `createdAt`.
+* Les types TypeScript sont **dérivés** du schéma avec `InferSchemaType`, jamais écrits à la main.
 * Les identifiants Minecraft sont des UUID en `String`. Le Live les **normalise** (minuscules,
   tirets retirés) avant écriture.
+* Mongoose est en **9.x** sur les trois applications.
 
 ### MySQL (plugin)
 
 * Tables sans préfixe : `teams`, `team_achievements`, `player_achievements`, `core_settings`.
 * Créées par `DatabaseManager.initializeTables()` au démarrage du plugin (`CREATE TABLE IF NOT
   EXISTS`). Il n'y a **pas** de système de migration.
-* Le plugin bascule automatiquement sur **SQLite** (`advancementscore.db`) si `database.type`
-  n'est pas `mysql` ou si les identifiants manquent - le schéma est identique, la syntaxe d'upsert
-  diffère (`ON DUPLICATE KEY UPDATE` vs `ON CONFLICT`).
+* **MySQL est le seul backend supporté.** Le repli SQLite a été retiré le 2026-08-02 : le pilote
+  n'était pas embarqué dans le JAR, et surtout un plugin qui écrit silencieusement dans un fichier
+  que ni le Panel ni les sites ne lisent paraît en bonne santé tout en perdant chaque score.
+  Identifiants manquants = refus de démarrer, avec un message explicite.
 * Encodage `utf8mb4`.
 
 ---
 
-## 3. MongoDB - base Core (`3levent`)
+## 3. MongoDB - base Core (`LE3-Web-Main`)
 
 ```mermaid
 erDiagram
@@ -106,7 +109,7 @@ Table pivot de l'identité : un compte agrège jusqu'à quatre identités extern
 | Champ | Type | Notes |
 | :--- | :--- | :--- |
 | `username` | String, unique | Pseudo du site |
-| `password` | String | **Requis uniquement** si aucun fournisseur OAuth n'est lié (`bcryptjs`) |
+| `password` | String | **Requis uniquement** si aucun fournisseur OAuth n'est lié (`bcryptjs` 3.x) |
 | `microsoft_id` | String, unique sparse | Connexion Microsoft = preuve de possession du compte Minecraft |
 | `mc_uuid` / `mc_ign` | String | UUID et pseudo Minecraft, alimentent `sync-teams` |
 | `discord_id` / `discord_handle` | String | Liaison Discord |
@@ -138,7 +141,7 @@ traduit en `slotKey` du plugin par `TEAM_SLOT_MAP`.
 
 ### `moderationlogs`
 
-Journal de modération : `admin_id`, `action`, `target_id`, `target_model`
+Journal de modération (modèle `ModerationLog`) : `admin_id`, `action`, `target_id`, `target_model`
 (`User|Thread|Comment|Category|System|Team`), `details`, `reason`, `ip_address`.
 `createdAt` seulement.
 
@@ -149,23 +152,24 @@ OTP de liaison Discord : `user_id` (unique), `otp_hash`, `method` (`DM|SLASH`), 
 
 ### `eventlogs`
 
-Journal du bus d'événements. Un document par enveloppe : `event_id` (unique, clé d'idempotence),
-`type`, `version`, `occurred_at`, `source`, `aggregate`, `correlation_id`, `causation_id`,
-`payload` (Mixed), `status` (`RECEIVED|PROCESSED|FAILED`), `processed_at`, `error_message`.
-Index composé `{ type: 1, occurred_at: -1 }`.
+Journal du bus d'événements (modèle `EventLog`). Un document par enveloppe : `event_id` (unique,
+clé d'idempotence), `type`, `version`, `occurred_at`, `source`, `aggregate`, `correlation_id`,
+`causation_id`, `payload` (Mixed), `status` (`RECEIVED|PROCESSED|FAILED`), `processed_at`,
+`error_message`. Deux index composés : `{ type: 1, occurred_at: -1 }` et
+`{ 'aggregate.type': 1, 'aggregate.id': 1, occurred_at: -1 }`.
 
 ---
 
-## 4. MongoDB - base Live (`3levent-live`)
+## 4. MongoDB - base Live (`LE3-Web-Live`)
 
 Le Live ne lit **jamais** la base du Core ni celle du plugin. Il reconstruit localement un
 read-model à partir des événements du bus (`live-event-consumer.ts`).
 
 | Collection | Champs | Alimentée par |
 | :--- | :--- | :--- |
-| `liveteamstates` | `slot_key` (unique), `name`, `points` | `plugin.teams.snapshot.v1`, `plugin.team.points.updated.v1` |
-| `liveplayerachievementstates` | `uuid` (normalisé), `achievement_count` | `plugin.achievement.granted.v1` (`$inc`) |
-| `livesettingstates` | `key`, `value` | `plugin.settings.updated.v1` (ex. `hide_scores`) |
+| `liveteamstates` | `slot_key` (unique), `name`, `points` | `plugin.teams.snapshot`, `plugin.team.points.updated` |
+| `liveplayerachievementstates` | `uuid` (normalisé), `achievement_count` | `plugin.achievement.granted` (`$inc`) |
+| `livesettingstates` | `key`, `value` | `plugin.settings.updated` (ex. `hide_scores`) |
 | `predictions` | `user_id`, `team_id` | Votes des spectateurs |
 
 Le Live embarque aussi des copies des schémas `User`, `Team` et `Signup` du Core, utilisées en
@@ -173,7 +177,7 @@ lecture pour résoudre l'identité d'une session partagée.
 
 ---
 
-## 5. MongoDB - base Panel (`3levent-panel`)
+## 5. MongoDB - base Panel (`LE3-Web-Panel`)
 
 | Collection | Rôle | Particularité |
 | :--- | :--- | :--- |
@@ -184,12 +188,17 @@ lecture pour résoudre l'identité d'une session partagée.
 | `siteconfigs` | Config du site | `maintenance_main`, `maintenance_live` (+ messages), `hide_scores`, `registrations_open`, `event_name`, `event_tagline`, `updated_by` |
 | `dbeditoraudits` | Audit de l'éditeur MySQL | `action` (`INSERT|UPDATE|DELETE`), `table_name`, `record_pk`, `before`, `after`, auteur |
 | `teamcaches` | Cache équipes | `slot_key` (unique), `name`, `points`, `member_count`, `lp_group` |
-| `teamachievementprogresses` | Cache progression | `team_id`, `achievement_id`, `progress`, `threshold`, `completed` |
 | `resourcelinks` | Hub de ressources | `kind` (`RESOURCE|TOOL`), `required_roles`, `display_order` |
-| `webhooks` | Webhooks sortants | `url`, `events[]`, `enabled`, `last_triggered_at` |
 
 Les collections *capped* garantissent une empreinte disque bornée : les plus anciens documents
 sont écrasés automatiquement, sans tâche de purge.
+
+Deux collections ont été **supprimées le 2026-08-02** en même temps que les événements
+`achievement.*` et les alertes Discord :
+
+* `teamachievementprogresses` : l'attribution des succès par équipe vit uniquement dans le plugin,
+  et rien ne lisait ce cache ;
+* `webhooks` : les alertes Discord automatiques sur logs critiques ont été retirées du panel.
 
 Le modèle d'autorisation (`PANEL_PERMISSIONS`, `ACCESS_GROUP_CATALOGUE`) est détaillé dans
 [Authentification et sessions](./authentication).
@@ -198,9 +207,9 @@ Le modèle d'autorisation (`PANEL_PERMISSIONS`, `ACCESS_GROUP_CATALOGUE`) est d�
 
 ## 6. MySQL - base du plugin
 
-Créée et maintenue par `DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions,
-timeout 5 s). Toutes les écritures passent par `runTaskAsynchronously` : jamais sur le thread
-principal.
+Créée et maintenue par `DatabaseManager` (HikariCP 7.1.0, pool `LE3Core-Pool`, 10 connexions,
+timeout 5 s, pilote `mysql-connector-j` 26.7.0). Toutes les écritures passent par
+`runTaskAsynchronously` : jamais sur le thread principal.
 
 ```sql
 CREATE TABLE IF NOT EXISTS teams (
@@ -248,6 +257,15 @@ développement local, et celles autorisées par la liste blanche `EDITABLE_TABLE
 | `le3:eventbus` | Canal Pub/Sub | Bus d'événements | - |
 | `le3:maintenance:main` | String | Maintenance de `3levent.fr` | - |
 | `le3:maintenance:live` | String | Maintenance de `live.3levent.fr` | - |
+| `le3:core:team:<slot>:progress` | Hash | Progression des succès d'une équipe, écrite par le plugin | 300 s |
+| `le3:core:team:<slot>:points` | String | Total de points d'une équipe, écrit par le plugin | 300 s |
+| Cache du classement Live | String | Réponse de `GET /api/live/leaderboard` | 5 s |
+
+Les deux familles `le3:core:team:*` sont écrites en *write-through* par le plugin Minecraft
+(préfixe configurable via `redis.cache.key_prefix`). Elles évitent un aller-retour MySQL à chaque
+connexion de joueur et donnent au reste de l'écosystème une lecture de l'état des équipes sans
+accès à la base du plugin. Leur TTL n'est qu'un filet de sécurité : la source de vérité reste
+MySQL, et une clé absente est un simple *cache miss*.
 
 ---
 
@@ -261,8 +279,6 @@ développement local, et celles autorisées par la liste blanche `EDITABLE_TABLE
    les anciens. C'est exactement le piège documenté pour la migration du panel vers Authentik
    (index `username_1` unique résiduel → erreur `E11000`). Vérifiez `db.<collection>.getIndexes()`
    après toute suppression de champ unique.
-4. **Sauvegardes** : à définir et à documenter ici - aucune procédure n'est aujourd'hui
-   automatisée dans les dépôts.
 
 ---
 

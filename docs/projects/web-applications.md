@@ -4,9 +4,9 @@ sidebar_position: 1
 
 # Applications Web - Stack commune
 
-Les trois applications web du 3LEvent (`3levent`, `3levent-live`, `3levent-panel`) partagent la
-même stack, les mêmes conventions et la même chaîne de build. Cette page décrit **ce qui leur est
-commun** ; les pages [Core Web](./web-core), [Live Web](./web-live) et
+Les trois applications web du 3LEvent (`LE3-Web-Main`, `LE3-Web-Live`, `LE3-Web-Panel`) partagent
+la même stack, les mêmes conventions et la même chaîne de build. Cette page décrit **ce qui leur
+est commun** ; les pages [Core Web](./web-core), [Live Web](./web-live) et
 [Staff Panel](./staff-panel) décrivent leurs spécificités.
 
 ---
@@ -18,10 +18,12 @@ commun** ; les pages [Core Web](./web-core), [Live Web](./web-live) et
 | Runtime | Node.js | `>=20` (Docker : `node:22-slim`) |
 | Langage | TypeScript strict, **ESM natif** (`"type": "module"`) | `5.9.x` |
 | Serveur | Express | `5.x` |
-| Base de données | MongoDB / Mongoose | `8.x` |
+| Base de données | MongoDB / Mongoose | `9.x` |
 | Sessions & bus | Redis + `connect-redis` | `redis:7` |
 | Sécurité HTTP | `helmet`, `cors` | - |
 | Journalisation HTTP | `morgan` | - |
+| Tests | Vitest | 17 tests de contrat par dépôt |
+| Lint | ESLint | `9.x` |
 | Frontend | HTML + TypeScript compilé, **aucun framework** | - |
 | CSS | Tailwind CSS via `@tailwindcss/cli` | `4.x` |
 | Exécution dev | `tsx --env-file=.env watch` | - |
@@ -33,6 +35,14 @@ et chargés en `<script type="module">`. Toute proposition d'introduire un frame
 discutée avant d'être implémentée : elle change la chaîne de build des trois applications.
 :::
 
+### Dépendances propres à chaque application
+
+| Application | Ajouts |
+| :--- | :--- |
+| `LE3-Web-Main` | `bcryptjs`, `jsonwebtoken`, `multer` |
+| `LE3-Web-Live` | aucune (le client Twitch utilise `fetch` natif) |
+| `LE3-Web-Panel` | `mysql2` (base du plugin), `js-yaml` (`achievements.yml`), `ws` |
+
 ---
 
 ## 2. Arborescence normalisée
@@ -43,6 +53,7 @@ discutée avant d'être implémentée : elle change la chaîne de build des troi
 │   ├── config/db-config.ts        # Connexion Mongoose
 │   ├── controllers/               # Logique métier, 1 fichier par domaine
 │   ├── events/ecosystem-event.ts  # Contrat du bus (copie locale)
+│   ├── events/ecosystem-event.test.ts
 │   ├── middleware/                # auth.ts, maintenance.ts
 │   ├── models/                    # Schémas Mongoose (kebab-case, suffixe -model)
 │   ├── routes/                    # Routeurs Express, suffixe -routes
@@ -88,6 +99,12 @@ Sur le panel, les routes de pages privées sont déclarées **avant** `express.s
 ordre exposerait les fichiers HTML privés aux visiteurs non authentifiés.
 :::
 
+:::caution Le Live n'implémente pas d'arrêt propre
+Le Core et le Panel ferment explicitement le bus, le client Redis de session et le pool MySQL sur
+`SIGINT` / `SIGTERM`. Le Live n'a pas de gestionnaire équivalent : ses connexions Redis sont
+fermées par le runtime à la sortie du processus.
+:::
+
 ---
 
 ## 4. Scripts npm
@@ -98,13 +115,17 @@ Identiques dans les trois dépôts :
 | :--- | :--- |
 | `npm run dev` | Backend en rechargement à chaud (`tsx --env-file=.env watch`) |
 | `npm run dev:css` | Tailwind en mode `--watch` (autre terminal) |
+| `npm run clean` | `rm -rf dist` |
 | `npm run build:backend` | `tsc -p backend/tsconfig.json` |
 | `npm run build:frontend` | `tsc -p public/tsconfig.json` |
 | `npm run build:css` | Tailwind minifié vers `public/css/style.css` |
 | `npm run copy-assets` | Copie HTML/CSS/images/polices vers `dist/` via `copyfiles` |
 | `npm run build` | `clean` + backend + frontend + css + assets |
 | `npm start` | `node --env-file=.env dist/backend/server.js` |
-| `npm run lint` | `eslint backend/**/*.ts` |
+| `npm run lint` | `eslint backend` |
+| `npm test` · `npm run test:watch` | Suite Vitest |
+
+Le panel ajoute `npm run docker:up`, `docker:down` et `seed:dev` pour son environnement local.
 
 ---
 
@@ -139,8 +160,8 @@ CMD ["node", "backend/server.js"]
 
 :::note Contenu attendu de l'image
 La commande est `node backend/server.js`, pas `dist/backend/server.js` : c'est le **contenu de
-`dist/`** qui est déployé à la racine du projet. Le `npm run build` doit donc avoir été exécuté
-avant la construction de l'image.
+`dist/`** qui est déployé à la racine du contexte de build. Le `npm run build` doit donc avoir été
+exécuté avant la construction de l'image.
 :::
 
 ---
