@@ -14,15 +14,26 @@ technique de ce portail est vérifiable dans le code des dépôts référencés 
 
 ## 1. Les services de l'écosystème
 
-L'écosystème est composé d'unités déployables indépendantes. Elles se coordonnent par un bus d'événements Redis et quelques appels HTTP
-authentifiés.
+L'écosystème est composé d'unités déployables indépendantes. Elles se coordonnent par un bus
+d'événements Redis, un cache Redis partagé et un appel HTTP authentifié.
 
 | Service | Dépôt | Rôle | Port | Domaine |
 | :--- | :--- | :--- | :--- | :--- |
-| **Core Web** | `3levent` | Site public : forum, inscriptions, profils, back-office | `3000` | `3levent.fr` |
-| **Live Web** | `3levent-live` | Dashboard temps réel : classement, Twitch, pronostics | `3001` | `live.3levent.fr` |
-| **Staff Panel** | `3levent-panel` | Monitoring, gestion in-game, éditeur BDD, IAM | `3200` | `panel.3levent.fr` |
+| **Core Web** | `LE3-Web-Main` | Site public : forum, inscriptions, profils, back-office | `3000` | `3levent.fr` |
+| **Live Web** | `LE3-Web-Live` | Dashboard temps réel : classement, Twitch, pronostics | `3001` | `live.3levent.fr` |
+| **Staff Panel** | `LE3-Web-Panel` | Monitoring, gestion in-game, éditeur BDD, IAM | `3200` | `panel.3levent.fr` |
 | **Plugin Core** | `LE3-Plugin-Core` | Plugin Paper : équipes, succès, progression | - | serveur Minecraft |
+
+Trois dépôts complètent l'organisation sans porter de service déployé :
+
+| Dépôt | Rôle |
+| :--- | :--- |
+| `LE3-Shared-Workflows` | Moteurs CI/CD réutilisables (`java-engine.yml`, `node-engine.yml`) |
+| `LE3-Documentation` | Ce portail, publié sur `doc.3levent.fr` |
+| `.github` | Standard d'organisation : `CONTRIBUTING.md`, CODEOWNERS, modèles d'issue et de PR |
+
+Soit **sept dépôts au total**. Les dix dépôts vides ou inutilisés ont été supprimés le
+2026-08-02.
 
 ---
 
@@ -36,11 +47,13 @@ structure de dossiers. Un développeur qui connaît l'une connaît les autres.
 | **Runtime** | Node.js | `>=20` (images Docker en `node:22-slim`) |
 | **Langage** | TypeScript strict, ESM natif | `5.9.x` |
 | **Serveur HTTP** | Express | `5.x` |
-| **Base de données** | MongoDB via Mongoose | `8.x` |
+| **Base de données** | MongoDB via Mongoose | `9.x` |
 | **Cache / Sessions / Bus** | Redis (`redis` + `connect-redis`) | `redis:7` |
 | **Frontend** | HTML statique + TypeScript compilé (`tsc`), **aucun framework** | - |
 | **Styles** | Tailwind CSS (CLI, directive `@theme`) | `4.x` |
-| **Plugin Minecraft** | Java + Paper API | Java 21, Paper `1.21.11` |
+| **Tests** | Vitest | 17 tests de contrat par application web |
+| **Plugin Minecraft** | Java + Paper API | Java 21, Paper `1.21.11-R0.1-SNAPSHOT` |
+| **Client Redis du plugin** | Jedis (shadé et relocalisé) | `5.2.0` |
 | **Build plugin** | Maven (shade + fmt-maven-plugin) | - |
 | **Exécution** | Docker | - |
 
@@ -90,7 +103,7 @@ Détail complet : [Standards de programmation](./guidelines/coding-standards).
 ### Sécurité
 
 * Aucun secret dans le code source ou dans un fichier commité.
-* Toute I/O du plugin Java (SQL, HTTP) est asynchrone : jamais sur le thread principal.
+* Toute I/O du plugin Java (SQL, HTTP, Redis) est asynchrone : jamais sur le thread principal.
 * Les comparaisons de secrets partagés utilisent une comparaison à temps constant
   (`secure-compare.ts`).
 
@@ -111,6 +124,7 @@ Branches `main` (production) et `develop` (intégration), branches de travail `f
 | Comprendre comment les services communiquent | [Vue d'ensemble](./architecture/overview) |
 | Monter un environnement local | [Configuration de l'environnement](./guidelines/setup) |
 | Travailler sur le site public | [Core Web](./projects/web-core) |
+| Travailler sur le dashboard spectateur | [Live Web](./projects/web-live) |
 | Travailler sur le panel staff | [Staff Panel](./projects/staff-panel) |
 | Travailler sur le plugin | [Plugins Minecraft](./projects/minecraft-plugins) |
 | Comprendre les données | [Schéma des données](./architecture/database-schema) |

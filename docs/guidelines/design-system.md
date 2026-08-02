@@ -25,7 +25,7 @@ L'identité repose sur trois couleurs, et trois seulement.
 | `--color-le3-blue` | `#0094FF` | Action primaire, liens, information |
 | `--color-le3-red` | `#E73344` | Accent, action secondaire, alerte |
 
-Sur le site principal (`3levent`), le minimalisme est poussé jusqu'au bout : les couleurs de
+Sur le site principal (`LE3-Web-Main`), le minimalisme est poussé jusqu'au bout : les couleurs de
 statut sont **absorbées** dans la palette de marque.
 
 ```css
@@ -41,13 +41,13 @@ pour ne pas casser le HTML existant. **Ne les utilisez pas dans du code neuf.**
 
 ## 2. Trois applications, trois variantes
 
-### `3levent` - clair, marque pure
+### `LE3-Web-Main` - clair, marque pure
 
 Surfaces `#FFFFFF` / `#F8FAFC`, texte `#1A2238`, bordures `#E2E8F0` / `#94A3B8`. Les couleurs
 sociales sont, elles aussi, ramenées à la palette de marque (Discord et Twitter en bleu, YouTube en
 rouge, Twitch en dark).
 
-### `3levent-panel` - clair, neutre « entreprise »
+### `LE3-Web-Panel` - clair, neutre « entreprise »
 
 Le panel garde les trois couleurs de marque **en accents seulement** et repose sur des neutres
 plus froids, plus lisibles pour de longues sessions de travail. Ses couleurs de statut sont
@@ -61,7 +61,7 @@ sémantiques, pas brandées :
 | `--color-border-subtle` | `#E6E9EE` | | `--color-text-main` | `#1F2733` |
 | `--color-border-strong` | `#CBD2DC` | | `--color-text-muted` | `#5B6675` |
 
-### `3levent-live` - sombre
+### `LE3-Web-Live` - sombre
 
 Le Live est la seule application au thème sombre. Il conserve la palette historique complète
 (`le3-yellow` `#FFCD00`, `le3-pink` `#F04A92`) et les **vraies** couleurs des plateformes

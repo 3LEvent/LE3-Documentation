@@ -39,12 +39,18 @@ cookie: {
 
 :::danger Ces trois valeurs sont solidaires
 `LE3_SESSION_SECRET`, le nom du cookie et le préfixe Redis doivent être **identiques** dans
-`3levent` et `3levent-live`. Toute divergence déconnecte silencieusement les joueurs en passant
-d'un sous-domaine à l'autre.
+`LE3-Web-Main` et `LE3-Web-Live`. Toute divergence déconnecte silencieusement les joueurs en
+passant d'un sous-domaine à l'autre, sans la moindre erreur au démarrage.
 :::
 
 Un middleware d'hydratation recopie `req.session.user` dans `req.user` sur chaque requête, de sorte
 que les contrôleurs n'aient jamais à connaître la mécanique de session.
+
+:::info Pas de session partagée en développement
+En local, le cookie n'a pas de domaine (`domain: undefined`) : `localhost:3000` et
+`localhost:3001` ne partagent donc pas la session. C'est attendu ; le partage se teste en
+pré-production, sur un domaine parent commun.
+:::
 
 ---
 
@@ -77,6 +83,9 @@ disponible : dans `users`, `password` n'est requis que si aucun fournisseur OAut
 Le gating des pages HTML est fait dans `server.ts` : `/admin` exige un rôle `STAFF` ou `ADMIN`,
 `/forum/create` exige une session, `/login` redirige vers `/profile` si déjà connecté.
 
+Côté Live, `protect` protège les deux routes de pronostic ; le classement et le statut de partie
+sont publics.
+
 ---
 
 ## 3. Authentification du staff (Panel, Authentik)
@@ -107,6 +116,11 @@ sequenceDiagram
 Les endpoints ne sont pas codés en dur : ils sont résolus depuis
 `<issuer>/.well-known/openid-configuration`. L'issuer doit se terminer par un slash.
 
+Routes complètes : `GET /api/auth/login`, `/callback`, `/dev-login`, `/me`, `/profile`,
+`POST /logout`, plus la liaison Discord facultative (`GET /discord/link`,
+`/discord/link/callback`, `DELETE /link/discord`). Discord sert **uniquement** à la liaison de
+compte depuis le profil, jamais à la connexion.
+
 ### Création de compte et attribution des droits
 
 À la première connexion, le compte est créé avec le statut `ACTIVE` et **aucun rôle**, donc aucune
@@ -116,6 +130,12 @@ rôle depuis la page IAM.
 L'identité (pseudo, nom affiché, e-mail, groupes) appartient à Authentik et est **resynchronisée à
 chaque connexion** : elle est en lecture seule dans le panel. La déconnexion ferme aussi la session
 Authentik (*RP-initiated logout*).
+
+:::warning Couper un accès ne se fait pas qu'en supprimant le compte
+Désactiver le membre (statut `DISABLED`) ou lui retirer son rôle suffit à bloquer le panel. Le
+**supprimer** ne suffit pas : tant qu'il reste attaché à l'application côté Authentik, une
+reconnexion recrée un compte, sans rôle. Retirez-le des deux côtés.
+:::
 
 ### Amorçage du premier administrateur
 
@@ -128,6 +148,23 @@ administrateurs en place.
 
 `GET /api/auth/dev-login` ouvre une session `SUPER_ADMIN` locale sans Authentik. Il exige les
 **deux** conditions simultanément : `NODE_ENV !== 'production'` **et** `LE3_DEV_AUTH_BYPASS=true`.
+
+### Migration depuis l'authentification locale
+
+À faire **une seule fois** sur une base qui contenait des comptes avec mot de passe. Mongoose crée
+les index manquants au démarrage mais ne supprime jamais les obsolètes : l'ancien index
+`username_1` reste `unique` et fait échouer la création du compte SSO en `E11000`, la connexion
+renvoyant alors `?error=account_conflict`.
+
+```js
+// mongosh sur la base du panel
+db.staffusers.deleteMany({ authentik_sub: { $exists: false } });
+db.staffusers.dropIndex('username_1');
+db.staffusers.dropIndex('email_1');
+```
+
+Puis redémarrer le service. `panelroles` et `siteconfigs` ne sont pas concernés : les rôles sont
+conservés.
 
 ---
 
@@ -143,15 +180,22 @@ Groupes d'accès (interface admin)  →  Permissions (appliquées par le code)  
 ### Permissions internes
 
 `VIEW_DASHBOARD`, `VIEW_LOGS`, `MANAGE_ACHIEVEMENTS`, `MANAGE_DATABASE`, `MANAGE_CMS`,
-`MANAGE_WEBHOOKS`, `MANAGE_IAM`, `ACCESS_DOCKER`, `ACCESS_PTERODACTYL`, `SUPER_ADMIN`.
+`MANAGE_IAM`, `SUPER_ADMIN`.
 
 Elles ne sont **pas** exposées dans l'interface : elles sont dérivées des groupes d'accès.
+
+:::info Chaque permission est appliquée par au moins une route
+`ACCESS_DOCKER` et `ACCESS_PTERODACTYL` ont été supprimées le 2026-08-02 : le groupe `MONITORING`
+les accordait, mais aucune route ne les vérifiait. Cocher ce groupe promettait donc un contrôle
+d'accès qui n'existait pas. Les outils externes sont désormais filtrés par le champ
+`required_roles` des liens de ressources.
+:::
 
 ### Groupes d'accès (`ACCESS_GROUP_CATALOGUE`)
 
 | Groupe | Libellé | Permissions accordées |
 | :--- | :--- | :--- |
-| `MONITORING` | Monitoring & Serveur | `VIEW_DASHBOARD`, `VIEW_LOGS`, `ACCESS_DOCKER`, `ACCESS_PTERODACTYL` |
+| `MONITORING` | Monitoring & Serveur | `VIEW_DASHBOARD`, `VIEW_LOGS` |
 | `IN_GAME` | Gestion In-Game | `MANAGE_ACHIEVEMENTS` |
 | `DATABASE` | Base de données | `MANAGE_DATABASE` |
 | `SITE_CONFIG` | Configuration du site | `MANAGE_CMS` |
@@ -175,7 +219,7 @@ demandées, ou `SUPER_ADMIN`. Un `403` renvoie explicitement la liste des permis
 
 1. **Pages** : les routes HTML privées sont déclarées **avant** `express.static`, pour qu'un
    fichier HTML privé ne puisse jamais être servi à un visiteur non authentifié.
-2. **Navigation** : le frontend masque les onglets auxquels le membre n'a pas droit - confort,
+2. **Navigation** : le frontend masque les onglets auxquels le membre n'a pas droit. Confort,
    pas sécurité.
 3. **API** : chaque route re-vérifie la permission côté serveur. C'est la seule barrière qui
    compte.

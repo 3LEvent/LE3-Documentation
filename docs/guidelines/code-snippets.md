@@ -100,13 +100,15 @@ sa longueur et son préfixe par mesure du temps de réponse.
 ### Publier
 
 ```ts
-import { createEcosystemEvent } from '../events/ecosystem-event.js';
+import { createEcosystemEvent, EventTypes } from '../events/ecosystem-event.js';
 
 const bus = req.app.locals.eventBus;
 
 if (bus) {
     void bus.publish(createEcosystemEvent({
-        type: 'plugin.teams.snapshot.v1',
+        // Constante typée, jamais une chaîne littérale : une faute de frappe
+        // produit un événement que personne ne recevra, sans aucune erreur.
+        type: EventTypes.TEAM_SNAPSHOT_PUBLISHED,
         aggregate: { type: 'plugin-sync', id: 'teams' },
         payload: { teams: payload },
         source: {
@@ -119,18 +121,20 @@ if (bus) {
 }
 ```
 
-Trois règles visibles dans ce fragment : la publication ne bloque pas la réponse HTTP (`void` +
-`.catch`), le bus peut être absent (on teste), et l'enveloppe passe **toujours** par
-`createEcosystemEvent`.
+Quatre règles visibles dans ce fragment : la publication ne bloque pas la réponse HTTP (`void` +
+`.catch`), le bus peut être absent (on teste), le type vient de `EventTypes`, et l'enveloppe passe
+**toujours** par `createEcosystemEvent`.
 
 ### Consommer
 
 ```ts
+import { EventTypes, type EcosystemEventEnvelope } from '../events/ecosystem-event.js';
+
 export const startMyConsumer = async (bus: RedisEventBus): Promise<void> => {
     await bus.subscribe(async (event: EcosystemEventEnvelope) => {
         try {
             switch (event.type) {
-                case 'plugin.team.points.updated.v1':
+                case EventTypes.TEAM_POINTS_UPDATED:
                     await handleTeamPointsUpdated(event.payload as PluginTeamPointsPayload);
                     break;
                 default:
@@ -284,14 +288,56 @@ public CompletableFuture<Integer> getTeamProgressAsync(@NotNull String teamId, @
 Un `CompletableFuture` qui ne se complète jamais gèle l'appelant : prévoyez systématiquement le
 chemin d'échec.
 
-### Upsert compatible MySQL et SQLite
+### Upsert MySQL
 
 ```java
-var sql = isMysql
-    ? "INSERT INTO core_settings (setting_key, setting_value) VALUES (?, ?) "
-      + "ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)"
-    : "INSERT INTO core_settings (setting_key, setting_value) VALUES (?, ?) "
-      + "ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value";
+var sql = "INSERT INTO core_settings (setting_key, setting_value) VALUES (?, ?)"
+        + " ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)";
+```
+
+MySQL est le seul backend du plugin : le repli SQLite et sa variante `ON CONFLICT` ont été retirés
+le 2026-08-02.
+
+### Opération Redis tolérante à la panne
+
+```java
+// `execute` renvoie un Optional vide si Redis est injoignable : un cache manquant
+// est une absence de donnée, jamais une erreur à propager.
+public Optional<Map<String, Integer>> getTeamProgress(@NotNull String teamId) {
+    return redis.execute(jedis -> jedis.hgetAll(progressKey(teamId)))
+            .filter(entries -> !entries.isEmpty())
+            .map(this::parseProgress);
+}
+```
+
+Toute méthode de `RedisCache` est réseau : elle s'appelle **hors du thread principal**, exactement
+comme une requête SQL.
+
+### Publier un événement depuis le plugin
+
+```java
+var eventBus = plugin.getEventBus();
+if (eventBus == null) return;   // Redis désactivé : le reste du code doit continuer à marcher
+
+var payload = new JsonObject();
+payload.addProperty("slotKey", teamId);
+payload.addProperty("points", points);
+
+// Constante de EcosystemEvent.Types, jamais une chaîne littérale.
+// publish() est asynchrone et ne lève jamais : une panne du bus n'interrompt pas le jeu.
+eventBus.publish(EcosystemEvent.Types.TEAM_POINTS_UPDATED, "team", teamId, payload);
+```
+
+### Réagir à un événement du bus
+
+```java
+eventBus.on(EcosystemEvent.Types.TEAM_SNAPSHOT_PUBLISHED, payload -> {
+    // Le handler est rappelé sur le thread principal : l'API Bukkit est utilisable ici.
+    if (teamManager.wasSyncRequestedRecently()) return;   // notre propre écho
+    teamManager.syncTeamsFromSite();
+});
+
+eventBus.start();   // à appeler après avoir enregistré tous les handlers
 ```
 
 ### Appel HTTP vers l'API du site

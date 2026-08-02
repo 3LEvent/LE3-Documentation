@@ -14,7 +14,9 @@ Ces règles sont dérivées du code réellement déployé. Elles sont ce qu'un r
 * **Anglais technique dans le code** : identifiants, commentaires, logs. Les messages destinés aux
   joueurs et au staff sont en **français**.
 * **Fail fast.** Valider les prérequis au démarrage et lever immédiatement. Les trois serveurs
-  `throw` si une variable critique manque, et `process.exit(1)` si la base est injoignable.
+  `throw` si une variable critique manque, et `process.exit(1)` si la base est injoignable. Côté
+  plugin, des identifiants MySQL absents désactivent le plugin plutôt que de le laisser tourner à
+  vide.
 * **Commenter le pourquoi, pas le quoi.** Les meilleurs commentaires de la base expliquent un
   choix : pourquoi le contrat d'événements est dupliqué, pourquoi la session du panel dure 8 h,
   pourquoi les pages privées sont déclarées avant `express.static`.
@@ -30,9 +32,15 @@ Ces règles sont dérivées du code réellement déployé. Elles sont ce qu'un r
 | Variables, fonctions | camelCase | `getTeamsForPlugin`, `isPluginAuthenticated` |
 | Constantes | UPPER_SNAKE_CASE | `EVENT_CHANNEL`, `PANEL_PERMISSIONS`, `TEAM_SLOT_MAP` |
 | Champs Mongoose | snake_case | `team_id`, `authentik_sub`, `mc_uuid` |
-| Types d'événements | `<domaine>.<entité>.<action>.v<n>` | `plugin.team.points.updated.v1` |
+| Types d'événements | `<domaine>.<entité>.<action>`, **sans** suffixe de version | `plugin.team.points.updated` |
 | Paquetages Java | lower.case | `fr.le3event.core.managers` |
-| Dépôts | `LE3-<Type>-<Nom>` | `LE3-Plugin-Core`, `LE3-App-DiscordBot` |
+| Dépôts | `LE3-<Type>-<Nom>` | `LE3-Plugin-Core`, `LE3-Web-Panel` |
+
+:::danger La version d'un événement ne vit que dans l'enveloppe
+Un suffixe `.v<n>` dans le `type` duplique le champ `version` de l'enveloppe, et deux endroits
+pour la même information finissent toujours par se contredire. Les types `plugin.*` ont perdu leur
+suffixe le 2026-08-02 ; un producteur qui en écrit encore un ne sera reçu par personne.
+:::
 
 Suffixes obligatoires côté backend : `-controller`, `-routes`, `-model`, `-service`, `-consumer`.
 Côté frontend : `-handler` pour un script de page, `utils.ts` pour le partagé.
@@ -106,9 +114,22 @@ filtrables dans la console du panel.
 ### Thread safety - la règle qui casse un serveur
 
 :::danger Ne jamais appeler l'API Bukkit depuis un thread asynchrone
-Et symétriquement : **jamais** de requête SQL ou d'appel HTTP sur le thread principal. Toute
-écriture passe par `Bukkit.getScheduler().runTaskAsynchronously(plugin, ...)`, toute lecture
-bloquante renvoie un `CompletableFuture`.
+Et symétriquement : **jamais** de requête SQL, d'appel HTTP ou d'opération Redis sur le thread
+principal. Toute écriture passe par `Bukkit.getScheduler().runTaskAsynchronously(plugin, ...)`,
+toute lecture bloquante renvoie un `CompletableFuture`.
+:::
+
+:::caution L'ordonnanceur refuse les tâches pendant la désactivation
+`runTaskAsynchronously` lève une `IllegalStateException` quand le plugin est en train de se
+désactiver. Une écriture émise à ce moment-là serait perdue en silence : `DatabaseManager` la
+rejoue donc **en ligne**, et les écritures de cache Redis sont simplement abandonnées puisque
+MySQL détient déjà la valeur de référence.
+:::
+
+:::caution Ne jamais indexer un état par `Player`
+Une clé `Player` retient l'entité entière en mémoire pour toute la durée de vie du serveur après
+la déconnexion du joueur. Indexez toujours par `UUID`, et libérez l'entrée dans
+`onPlayerQuit`, comme le font `AchievementMenu.clearPlayerState()` et `NPCMenu.clearPlayerState()`.
 :::
 
 ```java
@@ -175,7 +196,7 @@ Chaque fichier commence par un en-tête indiquant le service, le rôle et les st
  * LE3-Panel-Server - Telemetry Consumer
  * Subscribes to the shared Redis event bus and reacts to ecosystem events:
  * persists metrics/logs, updates progress caches, and broadcasts to the
- * realtime hub (SSE). Also triggers Discord webhook alerts on critical logs.
+ * realtime hub (SSE).
  * Standards: TypeScript 5.x, ESM
  */
 ```
@@ -189,10 +210,19 @@ Les méthodes publiques et les endpoints sont documentés en JSDoc/Javadoc (`@pa
 
 1. `npm run build` (ou `mvn clean package`) passe.
 2. `npm run lint` passe.
-3. Le contrat d'événements est **synchronisé dans les trois copies** s'il a été touché.
-4. La documentation est mise à jour si un comportement, une variable d'environnement ou un
-   endpoint a changé.
-5. Aucun secret, aucun `console.log` de debug, aucun code mort.
+3. `npm test` passe.
+4. Le contrat d'événements est **synchronisé dans les trois copies TypeScript et la copie Java**
+   s'il a été touché, avec `CONTRACT_REVISION` incrémenté partout.
+5. La documentation est mise à jour si un comportement, une variable d'environnement, un endpoint
+   ou un type d'événement a changé.
+6. Aucun secret, aucun `console.log` de debug, aucun code mort.
+
+:::warning Ne jamais supprimer du code sur la seule base d'une recherche
+Une variable lue par déstructuration (`const { MA_VARIABLE } = process.env`) n'apparaît pas dans
+une recherche de `process.env.MA_VARIABLE`. Vérifiez les références dans **tous** les dépôts de
+l'organisation, y compris les workflows et les fichiers de configuration. En cas de doute, listez
+la suppression dans la PR plutôt que de l'appliquer.
+:::
 
 ---
 

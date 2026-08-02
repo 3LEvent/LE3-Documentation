@@ -2,18 +2,18 @@
 sidebar_position: 3
 ---
 
-# Live Web - `3levent-live`
+# Live Web - `LE3-Web-Live`
 
 Le dashboard temps réel destiné aux spectateurs : classement des équipes, statut des streams
 Twitch et pronostics.
 
 | | |
 | :--- | :--- |
-| **Dépôt** | `3levent-live` |
+| **Dépôt** | `LE3-Web-Live` |
 | **Paquet npm** | `le3-live-server` |
 | **Port** | `3001` |
 | **Domaine** | `live.3levent.fr` |
-| **Base** | MongoDB dédiée (`LE3_DATABASE_URL`) |
+| **Base** | MongoDB dédiée (`LE3_MONGO_URI`) |
 
 Stack, arborescence et scripts : voir [Applications Web](./web-applications).
 
@@ -27,9 +27,9 @@ MongoDB (`live-event-consumer.ts`). Le classement est ensuite servi depuis cette
 locale.
 
 ```text
-plugin ──HTTP──► Core ──publish──► le3:eventbus ──► live-event-consumer ──► MongoDB Live
-                                                                                  │
-                                                          GET /api/live/leaderboard
+plugin ──publish──► le3:eventbus ──► live-event-consumer ──► MongoDB Live
+Core   ──publish──►                                                │
+                                            GET /api/live/leaderboard
 ```
 
 Avantage : le Live reste disponible et cohérent même si le Core est indisponible ou si le serveur
@@ -39,15 +39,27 @@ Minecraft redémarre.
 
 | Type | Payload | Projection |
 | :--- | :--- | :--- |
-| `plugin.teams.snapshot.v1` | `{ teams: [{ slotKey, name, members }] }` | upsert de `liveteamstates` (nom, points à 0 à la création) |
-| `plugin.team.points.updated.v1` | `{ slotKey, points }` | mise à jour des points |
-| `plugin.achievement.granted.v1` | `{ uuid, achievementKey?, slotKey? }` | `$inc` sur `liveplayerachievementstates` |
-| `plugin.settings.updated.v1` | `{ key, value }` | upsert de `livesettingstates` (ex. `hide_scores`) |
+| `plugin.teams.snapshot` | `{ teams: [{ slotKey, name, members }] }` | upsert de `liveteamstates` (nom, points à 0 à la création) |
+| `plugin.team.points.updated` | `{ slotKey, points }` | mise à jour des points |
+| `plugin.achievement.granted` | `{ uuid, achievementKey?, slotKey? }` | `$inc` sur `liveplayerachievementstates` |
+| `plugin.settings.updated` | `{ key, value }` | upsert de `livesettingstates` (ex. `hide_scores`) |
 
 Tout autre type est **ignoré volontairement** (`default: break`), ce qui permet d'ajouter des
 producteurs sans toucher à ce fichier.
 
 Les `slotKey` sont normalisés en minuscules, les UUID en minuscules sans tirets.
+
+### Événement publié
+
+Le Live publie `EventTypes.PREDICTION_CREATED` (`live.prediction.created`) à chaque vote
+enregistré, avec le payload `{ userId, username, teamId, teamName }`.
+
+:::note Aucun consommateur aujourd'hui
+Le type est déclaré dans les quatre copies du contrat pour qu'un service futur puisse s'y abonner
+sans modification du producteur. Il était publié en chaîne littérale suffixée `.v1` jusqu'à la
+révision de contrat `2026-08-02.2`, ce qui violait les deux règles de nommage de la page
+[Protocoles de communication](../architecture/communication-protocol).
+:::
 
 ---
 
@@ -56,17 +68,24 @@ Les `slotKey` sont normalisés en minuscules, les UUID en minuscules sans tirets
 ### `GET /api/live/leaderboard`
 
 Fusionne les profils et les noms d'équipe issus de MongoDB avec le read-model événementiel.
-**Mise en cache Redis 5 secondes** pour absorber les pics de trafic pendant l'événement.
+**Mise en cache Redis 5 secondes** (`EX: 5`) pour absorber les pics de trafic pendant l'événement.
 
 ### `GET /api/live/game-status`
 
-Renvoie l'épreuve en cours selon un calendrier d'événement automatisé.
+Renvoie l'épreuve en cours, sa description, ses modalités, son image, le nom de l'épreuve suivante
+et un compte à rebours en secondes.
+
+:::warning Le calendrier des épreuves est codé en dur
+`GAME_SCHEDULE` est une constante de `live-controller.ts` : chaque épreuve y porte ses dates de
+début et de fin en dur. Modifier le planning d'un événement demande une modification du code, un
+build et un redéploiement. Ce n'est ni en base ni dans le CMS.
+:::
 
 ### `POST /api/predictions/vote` · `GET /api/predictions/my-vote`
 
 Pronostic du spectateur sur l'équipe gagnante, protégé par `protect` (session partagée).
-La logique valide l'équipe demandée, refuse un second vote, persiste dans `predictions` puis
-déclenche un **webhook Discord** (`DISCORD_PREDICTION_WEBHOOK_URL`).
+La logique valide l'équipe demandée, refuse un second vote, persiste dans `predictions`, déclenche
+un **webhook Discord** (`DISCORD_PREDICTION_WEBHOOK_URL`) puis publie l'événement sur le bus.
 
 ---
 
@@ -102,13 +121,12 @@ Le frontend tient en trois fichiers : `live-api.ts` (appels réseau), `live-ui.t
 ## 5. Session partagée avec le Core
 
 Même cookie `3levent.sid`, même préfixe `le3:sess:`, même TTL de 7 jours, domaine
-`.3levent.fr`. Le commentaire du code est explicite : *« Doit être identique à l'app
-principale »*.
+`.3levent.fr`. Le middleware `protect` du Live est **purement basé sur la session** : il n'accepte
+pas de JWT, contrairement à son homonyme du Core.
 
-:::danger Fail-fast plus strict que le Core
-Contrairement au Core, le Live **refuse de démarrer** si `LE3_SESSION_SECRET` *ou*
-`LE3_DATABASE_URL` manque - il n'y a pas de secret de repli. C'est le comportement souhaitable ;
-le Core devrait s'aligner dessus.
+:::danger Démarrage fail-fast
+Le Live **refuse de démarrer** si `LE3_SESSION_SECRET` ou `LE3_MONGO_URI` manque : il n'existe
+aucun secret de repli. Le Core applique la même règle depuis le 2026-08-01.
 :::
 
 ---
@@ -136,18 +154,21 @@ sociales réelles des plateformes, là où le Core les a fusionnées. Voir
 | Variable | Rôle |
 | :--- | :--- |
 | `PORT`, `NODE_ENV` | Serveur (défaut `3001`) |
-| `LE3_DATABASE_URL` *(ou `MONGO_URI`)* | MongoDB - obligatoire |
+| `LE3_MONGO_URI` | MongoDB - **obligatoire**, `throw` si absente |
 | `REDIS_URL` | Sessions, bus, cache du classement |
-| `LE3_SESSION_SECRET` *(ou `SESSION_SECRET`)* | **Identique au Core** : obligatoire |
+| `LE3_SESSION_SECRET` | **Identique au Core** - obligatoire |
 | `LE3_COOKIE_DOMAIN` | Domaine du cookie (défaut `.3levent.fr`) |
-| `LE3_JWT_SECRET` | Vérification JWT |
 | `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` | API Helix |
 | `DISCORD_PREDICTION_WEBHOOK_URL` | Notification des pronostics |
 
-:::note Nommage incohérent
-Les variables Twitch du Live s'appellent `TWITCH_*` alors que celles du Core suivent la convention
-`LE3_TWITCH_*`. À harmoniser lors d'un prochain passage.
+:::note Deux variables sans le préfixe `LE3_`
+`TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET` échappent à la convention `LE3_` appliquée partout
+ailleurs, y compris aux variables Twitch du Core (`LE3_TWITCH_*`). C'est l'état déployé : renommer
+ces deux clés est une rupture, elle demande de mettre à jour le coffre Infisical et les conteneurs
+en même temps que le code.
 :::
+
+Modèle complet et commenté : [`.env.example`](https://github.com/3LEvent/LE3-Web-Live/blob/main/.env.example).
 
 ---
 
