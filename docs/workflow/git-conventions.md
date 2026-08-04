@@ -138,8 +138,8 @@ git push origin feat/ma-fonctionnalite
 `LE3-Web-Live`, `LE3-Web-Panel` et `LE3-Discord-Admin`, plus une copie Java dans le plugin
 (`fr.le3event.core.redis.EcosystemEvent`).
 
-Si vous le modifiez, vous modifiez **les quatre**, dans la même PR, et vous incrémentez
-`CONTRACT_REVISION`.
+Si vous le modifiez, vous modifiez **les cinq**, copie Java comprise, dans la même PR, et vous
+incrémentez `CONTRACT_REVISION`.
 
 Ces copies ont déjà divergé une fois. La divergence n'a cassé aucun build : elle a simplement fait
 que les événements émis par le Panel étaient typés `unknown` par les deux autres services. Un test
