@@ -26,7 +26,7 @@ supprimées le 2026-08-02.
 
 ---
 
-## 1. Les cinq modules
+## 1. Les modules
 
 ### Tableau de bord
 
@@ -122,6 +122,31 @@ C'est volontaire : une faute de frappe sur l'issuer ou le `client_id` verrouille
 monde** hors du panel, y compris l'administrateur qui vient de faire la modification, et sans
 possibilité de correction par l'interface. Ces clés se modifient uniquement dans l'environnement.
 :::
+
+### Calendrier
+
+`GET/POST /api/calendar`, `PUT /api/calendar/:id`, `DELETE /api/calendar/:id` et
+`POST /api/calendar/republish`. Le panel possède le programme des épreuves affiché sur
+`live.3levent.fr` : il vit dans sa propre base, comme le reste du contenu éditorial.
+
+Le site Live ne lit jamais la base du panel. Chaque mutation republie le calendrier complet dans
+la clé Redis partagée `le3:calendar:live`, **avec relecture après écriture** : un `SET` qui
+réussit contre une autre instance Redis que celle lue par Live donnerait un panel affichant
+« publié » pendant que le site garde l'ancien programme. C'est le même mécanisme, et le même
+contrôle, que la bascule de maintenance.
+
+Le calendrier est également republié au démarrage du panel, ce qui couvre un vidage de Redis ou
+un démarrage à froid.
+
+:::info Une écriture qui persiste sans publier répond 207
+Si l'événement est bien enregistré en base mais que la publication vers Live échoue, l'API
+renvoie **207** avec la raison, jamais un succès. L'opérateur voit que sa modification n'est pas
+encore visible du public.
+:::
+
+Toutes ces routes exigent **`MANAGE_CALENDAR`**, une permission distincte de `MANAGE_CMS` :
+confier le programme public à quelqu'un ne suppose pas de lui ouvrir la configuration du site,
+l'éditeur d'intégrations et les liens de ressources.
 
 ### Recherche
 

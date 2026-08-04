@@ -75,10 +75,25 @@ Fusionne les profils et les noms d'équipe issus de MongoDB avec le read-model �
 Renvoie l'épreuve en cours, sa description, ses modalités, son image, le nom de l'épreuve suivante
 et un compte à rebours en secondes.
 
-:::warning Le calendrier des épreuves est codé en dur
-`GAME_SCHEDULE` est une constante de `live-controller.ts` : chaque épreuve y porte ses dates de
-début et de fin en dur. Modifier le planning d'un événement demande une modification du code, un
-build et un redéploiement. Ce n'est ni en base ni dans le CMS.
+L'épreuve active et le compte à rebours sont dérivés du calendrier publié, plus d'aucune
+constante du code.
+
+### `GET /api/live/schedule`
+
+Renvoie le programme complet, chaque épreuve portant un statut `PAST`, `LIVE` ou `UPCOMING`
+calculé au moment de la requête. C'est cette route qui alimente la section calendrier de la page.
+
+:::info Le calendrier est édité depuis le panel
+Il était auparavant codé en dur dans une constante `GAME_SCHEDULE` de `live-controller.ts` :
+changer le planning demandait une modification du code et un redéploiement.
+
+Le panel possède désormais le calendrier dans sa propre base et le publie dans la clé Redis
+partagée `le3:calendar:live`. Live la lit à travers `services/calendar-service.ts`, avec un
+cache de cinq secondes, le même mécanisme que le garde de maintenance.
+
+**Aucune donnée de repli.** Si Redis est injoignable ou la clé absente, le site affiche un
+programme vide. Un planning de secours masquerait une publication ratée, c'est-à-dire
+exactement le défaut que cette architecture corrige.
 :::
 
 ### `POST /api/predictions/vote` · `GET /api/predictions/my-vote`

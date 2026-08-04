@@ -23,6 +23,7 @@ d'événements Redis, un cache Redis partagé et un appel HTTP authentifié.
 | **Live Web** | `LE3-Web-Live` | Dashboard temps réel : classement, Twitch, pronostics | `3001` | `live.3levent.fr` |
 | **Staff Panel** | `LE3-Web-Panel` | Monitoring, gestion in-game, éditeur BDD, IAM | `3200` | `panel.3levent.fr` |
 | **Plugin Core** | `LE3-Plugin-Core` | Plugin Paper : équipes, succès, progression | - | serveur Minecraft |
+| **Discord Bot** | `LE3-Discord-Bot` | Vérification OTP, équipes, tickets, salons vocaux privés | - | Discord |
 
 Trois dépôts complètent l'organisation sans porter de service déployé :
 
@@ -32,8 +33,8 @@ Trois dépôts complètent l'organisation sans porter de service déployé :
 | `LE3-Documentation` | Ce portail, publié sur `doc.3levent.fr` |
 | `.github` | Standard d'organisation : `CONTRIBUTING.md`, CODEOWNERS, modèles d'issue et de PR |
 
-Soit **sept dépôts au total**. Les dix dépôts vides ou inutilisés ont été supprimés le
-2026-08-02.
+Soit **huit dépôts au total**. `LE3-Discord-Bot` a été créé le 2026-08-04 ; les dix dépôts
+vides ou inutilisés avaient été supprimés le 2026-08-02.
 
 ---
 
@@ -44,16 +45,16 @@ structure de dossiers. Un développeur qui connaît l'une connaît les autres.
 
 | Composant | Technologie | Version |
 | :--- | :--- | :--- |
-| **Runtime** | Node.js | `>=20` (images Docker en `node:22-slim`) |
+| **Runtime** | Node.js | `>=20` sur les applications web, `>=22` sur le bot ; images Docker en `node:22-slim` |
 | **Langage** | TypeScript strict, ESM natif | `5.9.x` |
 | **Serveur HTTP** | Express | `5.x` |
 | **Base de données** | MongoDB via Mongoose | `9.x` |
 | **Cache / Sessions / Bus** | Redis (`redis` + `connect-redis`) | `redis:7` |
 | **Frontend** | HTML statique + TypeScript compilé (`tsc`), **aucun framework** | - |
 | **Styles** | Tailwind CSS (CLI, directive `@theme`) | `4.x` |
-| **Tests** | Vitest | 17 tests de contrat par application web |
+| **Tests** | Vitest | 17 tests sur Main et Panel, 23 sur Live, 22 sur le bot |
 | **Plugin Minecraft** | Java + Paper API | Java 21, Paper `1.21.11-R0.1-SNAPSHOT` |
-| **Client Redis du plugin** | Jedis (shadé et relocalisé) | `5.2.0` |
+| **Client Redis du plugin** | Jedis (shadé et relocalisé) | `7.5.3` |
 | **Build plugin** | Maven (shade + fmt-maven-plugin) | - |
 | **Exécution** | Docker | - |
 
