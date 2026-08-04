@@ -24,6 +24,7 @@ d'événements Redis, un cache Redis partagé et un appel HTTP authentifié.
 | **Staff Panel** | `LE3-Web-Panel` | Monitoring, gestion in-game, éditeur BDD, IAM | `3200` | `panel.3levent.fr` |
 | **Plugin Core** | `LE3-Plugin-Core` | Plugin Paper : équipes, succès, progression | - | serveur Minecraft |
 | **Discord Bot** | `LE3-Discord-Bot` | Vérification OTP, équipes, tickets, salons vocaux privés | - | Discord |
+| **Discord Admin** | `LE3-Discord-Admin` | Alertes d'infrastructure, exploitation, accès du staff | - | Discord |
 
 Trois dépôts complètent l'organisation sans porter de service déployé :
 
@@ -33,8 +34,8 @@ Trois dépôts complètent l'organisation sans porter de service déployé :
 | `LE3-Documentation` | Ce portail, publié sur `doc.3levent.fr` |
 | `.github` | Standard d'organisation : `CONTRIBUTING.md`, CODEOWNERS, modèles d'issue et de PR |
 
-Soit **huit dépôts au total**. `LE3-Discord-Bot` a été créé le 2026-08-04 ; les dix dépôts
-vides ou inutilisés avaient été supprimés le 2026-08-02.
+Soit **neuf dépôts au total**. `LE3-Discord-Bot` et `LE3-Discord-Admin` ont été créés le
+2026-08-04 ; les dix dépôts vides ou inutilisés avaient été supprimés le 2026-08-02.
 
 ---
 

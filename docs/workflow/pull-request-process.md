@@ -28,7 +28,7 @@ Avant de soumettre une Pull Request, le contributeur valide localement :
    dans la PR.
 5. **Documentation** : mise à jour si un comportement, une variable d'environnement, un endpoint
    ou un type d'événement a changé.
-6. **Contrat du bus** : si `ecosystem-event.ts` est touché, les **trois copies TypeScript et la
+6. **Contrat du bus** : si `ecosystem-event.ts` est touché, les **quatre copies TypeScript et la
    copie Java** sont synchronisées dans la même PR, avec `CONTRACT_REVISION` incrémenté.
 
 Pour la documentation, `npm run build` est indispensable : `onBrokenLinks: 'throw'` fait échouer

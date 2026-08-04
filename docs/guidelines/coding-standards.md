@@ -211,7 +211,7 @@ Les méthodes publiques et les endpoints sont documentés en JSDoc/Javadoc (`@pa
 1. `npm run build` (ou `mvn clean package`) passe.
 2. `npm run lint` passe.
 3. `npm test` passe.
-4. Le contrat d'événements est **synchronisé dans les trois copies TypeScript et la copie Java**
+4. Le contrat d'événements est **synchronisé dans les quatre copies TypeScript et la copie Java**
    s'il a été touché, avec `CONTRACT_REVISION` incrémenté partout.
 5. La documentation est mise à jour si un comportement, une variable d'environnement, un endpoint
    ou un type d'événement a changé.
