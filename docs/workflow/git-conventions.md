@@ -134,8 +134,8 @@ git push origin feat/ma-fonctionnalite
 
 ### Le contrat du bus d'événements
 
-`backend/events/ecosystem-event.ts` existe en **trois copies identiques**, dans `LE3-Web-Main`,
-`LE3-Web-Live` et `LE3-Web-Panel`, plus une copie Java dans le plugin
+`backend/events/ecosystem-event.ts` existe en **quatre copies identiques**, dans `LE3-Web-Main`,
+`LE3-Web-Live`, `LE3-Web-Panel` et `LE3-Discord-Admin`, plus une copie Java dans le plugin
 (`fr.le3event.core.redis.EcosystemEvent`).
 
 Si vous le modifiez, vous modifiez **les quatre**, dans la même PR, et vous incrémentez

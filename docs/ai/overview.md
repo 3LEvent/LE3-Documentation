@@ -52,7 +52,7 @@ une propriété de l'écosystème qui rend l'erreur coûteuse et silencieuse.
 | :--- | :--- |
 | Commiter sur `main` ou `develop` | Le processus de PR est le seul garde-fou : le plan GitHub Free ne permet aucune protection de branche sur les dépôts privés |
 | Supprimer du code jugé « inutilisé » sans preuve | Une lecture par déstructuration de `process.env` ou une référence dans un autre dépôt n'apparaît pas dans un grep naïf |
-| Modifier le contrat du bus d'événements dans un seul dépôt | `ecosystem-event.ts` existe en trois copies identiques, plus une copie Java. Les désynchroniser ne produit **aucune erreur** au démarrage |
+| Modifier le contrat du bus d'événements dans un seul dépôt | `ecosystem-event.ts` existe en quatre copies identiques, plus une copie Java. Les désynchroniser ne produit **aucune erreur** au démarrage |
 | Toucher aux secrets, les afficher, les déplacer | Voir la page Gestion des secrets. Une valeur affichée une fois est une valeur à rotationner |
 | Exécuter une suppression en base de production | Sauvegarde préalable et validation humaine, sans exception |
 | Affirmer qu'une branche est fusionnée sans comparer les arbres | Les fusions se font en squash : comparer les intitulés de commits ne prouve rien |
