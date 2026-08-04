@@ -32,6 +32,20 @@
     "@docusaurus/types": "^3.10.2",
     "typescript": "~5.6.2"
   },
+  "//overrides": [
+    "Deux alertes Dependabot portent sur des dependances transitives de Docusaurus,",
+    "sans correctif publie en amont. Elles n'existent qu'a la construction et au",
+    "developpement : rien de tout cela n'atteint le site statique livre.",
+    "L'override d'uuid est volontairement limite a sockjs. Le declarer a la racine",
+    "ramenait aussi mermaid de la version 14 a la version 11, alors que sa copie",
+    "n'est pas concernee : ce serait degrader une dependance saine pour rien."
+  ],
+  "overrides": {
+    "serialize-javascript": "^7.0.5",
+    "sockjs": {
+      "uuid": "^11.1.1"
+    }
+  },
   "browserslist": {
     "production": [
       ">0.5%",
