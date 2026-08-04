@@ -56,6 +56,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Intelligence artificielle',
+      className: 'sidebar-icon-ai',
+      collapsed: true,
+      items: [
+        'ai/overview',
+        'ai/prompting',
+        'ai/review',
+        'ai/bmad',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Infrastructure',
       className: 'sidebar-icon-infra',
       collapsed: true,
