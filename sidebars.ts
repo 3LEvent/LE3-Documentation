@@ -8,6 +8,21 @@ const sidebars: SidebarsConfig = {
       label: 'Introduction',
     },
     {
+      // Place en tete a dessein : c'est la premiere chose que cherche quelqu'un
+      // qui arrive, et il arrive sans aucun acces. Le reste du site suppose au
+      // contraire un compte et un contexte.
+      type: 'category',
+      label: 'Onboarding',
+      className: 'sidebar-icon-onboarding',
+      collapsed: false,
+      items: [
+        'onboarding/overview',
+        'onboarding/staff',
+        'onboarding/developpeur',
+        'onboarding/administrateur',
+      ],
+    },
+    {
       type: 'category',
       label: 'Architecture',
       className: 'sidebar-icon-architecture',
