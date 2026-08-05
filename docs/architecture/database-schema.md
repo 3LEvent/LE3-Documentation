@@ -20,7 +20,7 @@ MySQL appartenant au plugin Minecraft, et Redis.
 | **MySQL** | `LE3-Plugin-Core` | Points et progression des succès | Panel (éditeur audité) |
 | **Redis** | partagé | Sessions, bus d'événements, drapeaux, cache d'équipes | tous |
 
-:::warning Une seule base est partagée
+:::warning[Une seule base est partagée]
 La base MySQL est la **seule** que deux services ouvrent : le plugin (propriétaire, qui crée les
 tables) et le panel (éditeur en liste blanche). Aucune base MongoDB n'est partagée entre services.
 :::

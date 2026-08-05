@@ -17,7 +17,7 @@ de base de données, gestion des accès et CMS.
 
 Stack, arborescence et scripts : voir [Applications Web](./web-applications).
 
-:::info Le panel ne publie rien sur le bus
+:::info[Le panel ne publie rien sur le bus]
 C'est un **consommateur pur** : il reçoit la télémétrie et les mises à jour de roster, et
 n'émet aucun événement. Son seul canal d'écriture vers les autres services est constitué des clés
 Redis `le3:maintenance:*`. Les commandes `achievement.*.requested` qu'il publiait ont été
@@ -44,7 +44,7 @@ pour le frontend :
 
 Routes : `GET /api/dashboard/metrics`, `/logs`, `/stream`, `/resources`.
 
-:::caution Les intervalles du moniteur Pterodactyl sont bruyants
+:::caution[Les intervalles du moniteur Pterodactyl sont bruyants]
 Chaque `spark tps` et chaque `list` envoyés par le moniteur s'affichent dans la console du serveur
 de jeu. Les valeurs par défaut (`60000` ms et `300000` ms) sont un compromis ; les baisser rend les
 logs illisibles pour les administrateurs connectés en console.
@@ -57,7 +57,7 @@ miroir désigné par `LE3_ACHIEVEMENTS_CONFIG_PATH`), avec filtres par jour et p
 
 Routes : `GET /api/achievements`, `/days`, `/worlds`, `/:id/yaml`.
 
-:::warning Ce module est en lecture seule
+:::warning[Ce module est en lecture seule]
 Il n'existe **aucune** route d'attribution ou de progression de succès dans le panel. Les succès
 sont accordés uniquement en jeu, par `/achievement give|add|set` ou par les déclencheurs du
 plugin. L'attribution en un clic et l'assignation d'effets par équipe ont été retirées le
@@ -117,7 +117,7 @@ LE3_PLUGIN_MYSQL_HOST / _PORT / _DATABASE / _USER / _PASSWORD
 LE3_PTERODACTYL_URL / _API_KEY / _SERVER_ID
 ```
 
-:::danger Les clés `LE3_AUTHENTIK_*` ne sont pas éditables depuis le CMS
+:::danger[Les clés `LE3_AUTHENTIK_*` ne sont pas éditables depuis le CMS]
 C'est volontaire : une faute de frappe sur l'issuer ou le `client_id` verrouillerait **tout le
 monde** hors du panel, y compris l'administrateur qui vient de faire la modification, et sans
 possibilité de correction par l'interface. Ces clés se modifient uniquement dans l'environnement.
@@ -138,7 +138,7 @@ contrôle, que la bascule de maintenance.
 Le calendrier est également republié au démarrage du panel, ce qui couvre un vidage de Redis ou
 un démarrage à froid.
 
-:::info Une écriture qui persiste sans publier répond 207
+:::info[Une écriture qui persiste sans publier répond 207]
 Si l'événement est bien enregistré en base mais que la publication vers Live échoue, l'API
 renvoie **207** avec la raison, jamais un succès. L'opérateur voit que sa modification n'est pas
 encore visible du public.

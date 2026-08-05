@@ -87,18 +87,18 @@ L'ordre compte : plusieurs étapes dépendent des précédentes.
 7. Construction des menus, enregistrement des listeners, des commandes et des placeholders,
    puis démarrage du souscripteur Redis. Purge du cache du menu des succès.
 
-:::danger Un échec de base de données arrête `onEnable` immédiatement
+:::danger[Un échec de base de données arrête `onEnable` immédiatement]
 `initializeDatabase()` renvoie `false`, désactive le plugin, et l'appelant **retourne sur-le-champ**.
 Tout ce qui suit déréférence le `DatabaseManager` : continuer ne ferait que transformer une erreur
 de configuration lisible en cascade de `NullPointerException`.
 :::
 
-:::note Redis, à l'inverse, n'arrête rien
+:::note[Redis, à l'inverse, n'arrête rien]
 Une section `redis` mal formée est signalée en `ERROR`, le cache et le bus sont désactivés, et le
 serveur démarre quand même. Le plugin fonctionne sur MySQL seul.
 :::
 
-:::caution La synchronisation initiale est bloquante
+:::caution[La synchronisation initiale est bloquante]
 `syncTeamsFromSite().join()` bloque le thread principal au démarrage, volontairement : les équipes
 doivent être prêtes avant l'arrivée du premier joueur. Si le site est injoignable, le démarrage
 est retardé jusqu'au timeout de 10 secondes de la requête HTTP, et aucune équipe n'est chargée.
@@ -123,7 +123,7 @@ Les huit `slotKey` d'équipe (`red`, `blue`, `orange`, `pink`, `green`, `purple`
 * `prefix` - préfixe LuckPerms pondéré (ex. `prefix.100.%img_team1% `) ;
 * `permissions` - permissions cosmétiques attribuées aux membres (chapeaux, sacs).
 
-:::warning Le slot `admin` n'est pas optionnel
+:::warning[Le slot `admin` n'est pas optionnel]
 `plugin-api-controller.ts` côté Core injecte dans ce slot chaque compte `ADMIN`/`STAFF` ayant lié
 un profil Minecraft. Tant qu'il manquait de `config.yml`, la synchronisation écartait tout le
 staff avec un simple avertissement, sans erreur visible. Ajouté le 2026-08-02.
@@ -201,7 +201,7 @@ auprès d'un PNJ).
 Le type `MANUAL` n'a pas de listener : c'est la valeur par défaut, réservée aux succès attribués
 uniquement par commande.
 
-:::note Deux types dépendent d'un plugin tiers
+:::note[Deux types dépendent d'un plugin tiers]
 `NPC_INTERACTION` n'est actif que si **Citizens** est installé : `NpcInteractionListener` n'est
 alors pas enregistré, et l'avertissement `[Hook] Citizens not found` est journalisé au démarrage.
 Les succès de ce type restent visibles dans le menu, mais rien ne peut les faire progresser.
@@ -313,7 +313,7 @@ Expansion PlaceholderAPI d'identifiant `le3`, enregistrée uniquement si Placeho
 | `%le3_total_achievements%` · `%le3_total_points%` | Totaux possibles |
 | `%le3_current_day%` | Jour d'événement courant |
 
-:::info Les compteurs sont lus en RAM, jamais en base
+:::info[Les compteurs sont lus en RAM, jamais en base]
 PlaceholderAPI résout les placeholders **sur le thread principal**. Les compteurs de succès par
 joueur sont donc maintenus en mémoire par `AchievementManager` et rafraîchis en une requête
 groupée par équipe à chaque synchronisation du roster. Une résolution de placeholder ne déclenche
@@ -384,13 +384,13 @@ redis:
 que le `REDIS_URL` des trois applications web. Le schéma `rediss://` force TLS. La forme
 `redis://:motdepasse@hote` (sans nom d'utilisateur) est reconnue comme le `requirepass` habituel.
 
-:::danger Cette valeur doit être identique sur les quatre services
+:::danger[Cette valeur doit être identique sur les quatre services]
 Une divergence entre le `redis.uri` du plugin et le `REDIS_URL` des applications web ne produit
 **aucune erreur au démarrage**. Elle se manifeste par un panel vide en temps réel et un classement
 Live figé, des heures plus tard.
 :::
 
-:::warning La section `redis` n'est pas relue par `/le3core reload`
+:::warning[La section `redis` n'est pas relue par `/le3core reload`]
 Rebâtir le pool et le thread d'écoute sous trafic est une reconnexion, pas un rechargement. Un
 changement dans cette section demande un **redémarrage du serveur**. Tout le reste de `config.yml`
 est bien rechargé à chaud.
@@ -410,7 +410,7 @@ Redis ; en cas de *cache miss*, elle est chargée depuis MySQL puis réécrite d
 Le cache est vidé équipe par équipe à chaque re-synchronisation du roster, pour qu'un instantané
 périmé ne survive jamais à un renommage ou à un vidage d'équipe.
 
-:::danger Toute méthode de `RedisCache` est réseau
+:::danger[Toute méthode de `RedisCache` est réseau]
 Elles s'appellent **hors du thread principal**, sans exception, exactement comme une requête SQL.
 Une panne Redis dégrade en *cache miss*, jamais en exception : un `Optional` vide signifie
 « inconnu », une map vide signifie « connu, sans progression ».
@@ -422,7 +422,7 @@ Le plugin **publie** `team.roster.updated`, `plugin.team.points.updated`,
 `plugin.achievement.granted` et `plugin.settings.updated`, et **souscrit** à
 `plugin.teams.snapshot`.
 
-:::danger Piège de rebouclage sur `plugin.teams.snapshot`
+:::danger[Piège de rebouclage sur `plugin.teams.snapshot`]
 Le Core publie ce type chaque fois qu'il répond à `GET /api/plugin/sync-teams`, et le plugin est
 le seul appelant de cet endpoint. Se re-synchroniser à chaque snapshot produirait donc une boucle
 infinie : sync → snapshot → sync → …
@@ -504,13 +504,13 @@ Permissions fines : `le3core.team.info`, `le3core.team.list`, `le3core.achieveme
 
 Seule `/team` déclare une complétion de tabulation (`info`, `list`, `members`).
 
-:::info Préfixe de permission aligné le 2026-08-02
+:::info[Préfixe de permission aligné le 2026-08-02]
 Le code vérifiait `advancementscore.copyid` et `advancementscore.accessday.<jour>`, deux nœuds qui
 n'existaient dans aucun `plugin.yml` : les accorder n'avait donc aucun effet. Tout est désormais
 sous le préfixe `le3core.`.
 :::
 
-:::caution `/achievement give` refuse un pseudo inconnu
+:::caution[`/achievement give` refuse un pseudo inconnu]
 Un quatrième argument qui ne correspond à aucun joueur en ligne est traité comme une faute de
 frappe, pas comme une demande de créditer l'émetteur : la commande échoue avec
 `messages.player_not_found` plutôt que d'attribuer le succès au mauvais joueur.

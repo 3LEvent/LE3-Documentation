@@ -7,7 +7,7 @@ sidebar_position: 1
 L'organisation 3LEvent applique une stratégie de gestion de version stricte pour garantir la
 stabilité du code et la clarté de l'historique.
 
-:::danger Aucune protection de branche n'est active sur les dépôts privés
+:::danger[Aucune protection de branche n'est active sur les dépôts privés]
 Ce n'est pas un oubli : sur le plan GitHub Free, les *rulesets* et la protection de branche ne
 sont pas disponibles pour un dépôt privé. Rien n'empêche techniquement de pousser sur `main`, de
 fusionner une PR rouge ou de forcer un `push --force`. La CI affiche un état, elle ne bloque rien.
@@ -38,7 +38,7 @@ develop  ──┬─→  feat/ma-fonctionnalite  ──PR──→  develop  �
 
 `LE3-Shared-Workflows` et `.github` n'ont que `main`.
 
-:::danger `develop` est écrasée à chaque publication du plugin
+:::danger[`develop` est écrasée à chaque publication du plugin]
 Le workflow `publish.yml` exécute `git reset --hard origin/main` puis `git push --force`
 sur `develop` après chaque publication. **Tout travail présent sur `develop` et absent de `main`
 est définitivement perdu.** Ne travaillez jamais directement sur `develop` : créez toujours une
@@ -86,7 +86,7 @@ Le corps du commit explique le **pourquoi**, pas le **quoi** : le diff dit déj�
 * `feat(bus): add plugin.quest.completed event type`
 * `docs(readme): update installation instructions`
 
-:::info Le code est en anglais, la documentation d'équipe en français
+:::info[Le code est en anglais, la documentation d'équipe en français]
 Identifiants, commentaires **et messages de commit** sont rédigés en anglais technique. Seules la
 documentation destinée à l'équipe et les chaînes affichées aux joueurs ou au staff sont en
 français.

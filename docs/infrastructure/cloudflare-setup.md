@@ -7,7 +7,7 @@ sidebar_position: 3
 L'écosystème est **auto-hébergé** : des conteneurs Docker derrière un reverse proxy, avec
 Cloudflare en frontal pour le DNS, le proxy HTTP et la protection.
 
-:::warning Portée de cette page
+:::warning[Portée de cette page]
 Ce que le code prouve est marqué **vérifié**. Le reste décrit la topologie telle qu'elle est
 opérée et **n'est pas versionné** : il n'existe aucun manifeste de déploiement dans les dépôts,
 pas de `docker-compose.yml` de production, pas de configuration de reverse proxy, pas de manifeste
@@ -78,7 +78,7 @@ Faits vérifiés dans le code :
 | Rate limiting | `/api/live/leaderboard` est la route la plus sollicitée pendant l'événement |
 | Bot management | Limitation du scraping du classement |
 
-:::note Le cache applicatif absorbe déjà les pics
+:::note[Le cache applicatif absorbe déjà les pics]
 `GET /api/live/leaderboard` est mis en cache **5 secondes** dans Redis, côté application. Une
 règle de cache Cloudflare sur cette route doit rester **inférieure ou égale** à cette durée, sous
 peine d'afficher un classement figé pendant l'événement.
@@ -140,7 +140,7 @@ publics :
 [LE3-PANEL] Maintenance synchronised -> 3levent: OFF, 3levent-live: OFF
 ```
 
-:::danger Si cette ligne manque, le Redis n'est pas partagé
+:::danger[Si cette ligne manque, le Redis n'est pas partagé]
 Le panel et les sites publics ne parlent alors pas au même Redis. Conséquence : le mode
 maintenance, le bus d'événements et le cache d'équipes ne circulent plus, sans qu'aucune erreur
 ne soit levée nulle part.

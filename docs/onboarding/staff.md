@@ -21,7 +21,7 @@ notre fournisseur d'identité.
 
 Renseigne ton nom d'utilisateur, ton adresse e-mail et un mot de passe.
 
-:::tip Un seul mot de passe pour tout
+:::tip[Un seul mot de passe pour tout]
 Ce compte est le **seul** que tu auras à retenir. Le panel, et tout ce qui viendra après, s'y
 connectent sans jamais te redemander de créer un mot de passe. Choisis-le en conséquence, et
 mets-le dans un gestionnaire de mots de passe.
@@ -76,7 +76,7 @@ le panel avec la confirmation.
 Tes rôles Discord apparaissent alors automatiquement, sans que personne n'ait à les attribuer
 à la main.
 
-:::warning L'ordre compte
+:::warning[L'ordre compte]
 Si tu fais cette étape **avant** qu'un administrateur t'ait donné ton rôle, la liaison
 réussira mais ne te donnera aucun rôle Discord : il n'y a rien à répercuter. Il faudra la
 refaire, ou attendre la synchronisation suivante.

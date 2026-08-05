@@ -60,7 +60,7 @@ Stack, arborescence et scripts : voir [Applications Web](./web-applications).
 | `/direct` | `live.3levent.fr` |
 | `/rules`, `/cgu`, `/credits` | threads du forum, par identifiant |
 
-:::caution Les trois dernières redirections sont fragiles
+:::caution[Les trois dernières redirections sont fragiles]
 `/rules`, `/cgu` et `/credits` pointent vers des threads du forum **par `ObjectId`**. Supprimer ou
 recréer l'un de ces threads casse la redirection sans le moindre avertissement.
 :::

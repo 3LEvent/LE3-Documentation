@@ -58,7 +58,7 @@ cp .env.example .env
 Ouvre `.env` et renseigne les valeurs. **Aucun secret de production ne doit y figurer** :
 utilise des valeurs de test locales.
 
-:::danger Un secret manquant doit faire échouer le démarrage
+:::danger[Un secret manquant doit faire échouer le démarrage]
 Si l'application refuse de démarrer en te disant qu'une variable manque, **ne code pas de
 valeur de repli** pour contourner le problème. C'est une règle de l'écosystème, pas une gêne
 temporaire : une valeur de repli silencieuse a déjà produit une redirection de déconnexion
@@ -102,7 +102,7 @@ npm run build
 Commits en **anglais**, format Conventional Commits. La documentation d'équipe, elle, s'écrit
 en français.
 
-:::warning Trois pièges qui ne produisent aucune erreur
+:::warning[Trois pièges qui ne produisent aucune erreur]
 **Le contrat du bus d'événements** existe en cinq copies, quatre en TypeScript et une en Java.
 Si tu en modifies une, tu modifies les cinq dans la même pull request. Une copie oubliée ne
 casse aucun build : les messages sont simplement ignorés par les abonnés.
