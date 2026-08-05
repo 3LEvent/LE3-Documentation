@@ -64,7 +64,7 @@ Utilisez toujours la fabrique `createEcosystemEvent()` (TypeScript) ou `Ecosyste
 (Java) plutôt que de construire l'objet à la main : elles remplissent `eventId`, `occurredAt`,
 `environment` et `correlationId` avec les bonnes valeurs par défaut.
 
-:::danger Pas de suffixe `.v<n>` dans le type
+:::danger[Pas de suffixe `.v<n>` dans le type]
 La version vit **uniquement** dans le champ `version` de l'enveloppe. Deux endroits pour la même
 information finissent toujours par se contredire. Les types `plugin.*` ont perdu leur suffixe
 `.v1` le 2026-08-02 ; tout code qui en écrit un ne recevra jamais rien.
@@ -114,7 +114,7 @@ synchronisation et à chaque variation de score. `PLAYER_ACHIEVEMENT_GRANTED` es
 | :--- | :--- | :--- | :--- |
 | `TEAM_SNAPSHOT_PUBLISHED` | `plugin.teams.snapshot` | `{ teams: [{ slotKey, name, members[] }] }` | Live (read-model équipes), **plugin** (re-synchronisation, hors auto-écho) |
 
-:::warning Boucle de rebouclage sur `plugin.teams.snapshot`
+:::warning[Boucle de rebouclage sur `plugin.teams.snapshot`]
 Ce type est publié en réponse à `GET /api/plugin/sync-teams`, dont le plugin est le seul appelant.
 Se re-synchroniser à chaque snapshot produirait une boucle infinie : sync → snapshot → sync → …
 
@@ -136,13 +136,13 @@ de cette fenêtre a été déclenché par quelqu'un d'autre et provoque bien une
 | :--- | :--- | :--- | :--- |
 | `PREDICTION_CREATED` | `live.prediction.created` | `{ userId, username, teamId, teamName }` | aucun consommateur |
 
-:::note Un type sans consommateur reste un type du contrat
+:::note[Un type sans consommateur reste un type du contrat]
 Il est déclaré dans les quatre copies pour qu'un service futur puisse s'y abonner sans toucher au
 producteur. Jusqu'à la révision `2026-08-02.2` il était publié en chaîne littérale suffixée `.v1`,
 en violation des deux règles ci-dessus.
 :::
 
-:::info Types supprimés le 2026-08-02
+:::info[Types supprimés le 2026-08-02]
 Les types `achievement.progress.updated`, `achievement.granted` et les trois commandes
 `achievement.*.requested` ont été retirés du contrat. Les succès sont attribués **uniquement**
 dans le plugin ; le Panel n'en est plus qu'un annuaire en lecture seule, et plus aucun service ne

@@ -77,7 +77,7 @@ partagée. Aucun `LE3_JWT_SECRET` n'y est lu.
 | `LE3_PTERODACTYL_URL` / `_API_KEY` / `_SERVER_ID` | critique | Clé **client** `ptlc_…` |
 | `LE3_ACHIEVEMENTS_CONFIG_PATH`, `LE3_PANEL_URL`, `LE3_PANEL_ALLOWED_ORIGIN` | config | |
 
-:::warning Onze de ces clés sont modifiables depuis le CMS du panel
+:::warning[Onze de ces clés sont modifiables depuis le CMS du panel]
 `PATCH /api/cms/env` écrit `LE3_DISCORD_*`, `LE3_PLUGIN_MYSQL_*` et `LE3_PTERODACTYL_*`. Les clés
 `LE3_AUTHENTIK_*` en sont volontairement exclues : une faute de frappe sur l'issuer verrouillerait
 tout le monde hors du panel, sans possibilité de correction par l'interface.
@@ -93,7 +93,7 @@ tout le monde hors du panel, sans possibilité de correction par l'interface.
 | `api.secret` | **critique** | Doit valoir exactement `LE3_PLUGIN_SECRET` côté Core |
 | `redis.uri` (ou `redis.password`) | **critique** | Doit valoir exactement `REDIS_URL` des trois applications web |
 
-:::danger `config.yml` est versionné et embarqué dans chaque JAR publié
+:::danger[`config.yml` est versionné et embarqué dans chaque JAR publié]
 Les valeurs livrées dans le dépôt sont vides, et **doivent le rester**. Un identifiant commité ici
 se retrouve dans un paquet GitHub, où le supprimer ne le révoque pas. Voir `ROTATION.md`, entrée
 R-10.
@@ -112,7 +112,7 @@ sont absents : il n'existe aucun repli silencieux.
 | `LE3_PLUGIN_SECRET` ↔ `api.secret` | Core et plugin |
 | `REDIS_URL` ↔ `redis.uri` | les quatre services (bus et cache communs) |
 
-:::danger Une divergence ne provoque aucune erreur au démarrage
+:::danger[Une divergence ne provoque aucune erreur au démarrage]
 Elle se manifeste plus tard, et ailleurs : des joueurs déconnectés en changeant de sous-domaine,
 une synchronisation d'équipes en `401`, ou un panel qui n'affiche plus rien en temps réel. C'est
 précisément pour cette raison que ces trois valeurs vivent dans un projet Infisical dédié,
@@ -132,7 +132,7 @@ Infisical ne transite par GitHub.
 Runbook complet de mise en place et procédure de bascule des conteneurs : documents
 `docs/infisical-setup.md` et `docs/deploy-infisical.md` du workspace.
 
-:::danger Les clés maîtresses d'Infisical restent à rotationner
+:::danger[Les clés maîtresses d'Infisical restent à rotationner]
 `ROTATION.md` liste les secrets à révoquer par ordre de criticité. Plusieurs entrées sont encore
 ouvertes, dont les clés maîtresses du coffre lui-même. Elles doivent être traitées **avant** toute
 migration réelle des secrets de production vers Infisical, sans quoi le coffre hérite du problème

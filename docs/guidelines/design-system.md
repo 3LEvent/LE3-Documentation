@@ -8,7 +8,7 @@ Le design system du 3LEvent est implémenté en **Tailwind CSS v4**, sans fichie
 JavaScript : les tokens sont déclarés dans la directive `@theme` de `public/src/input.css`, dans
 chaque application.
 
-:::warning `tailwind.config.js` n'est plus la source de vérité
+:::warning[`tailwind.config.js` n'est plus la source de vérité]
 Chaque dépôt contient encore un `tailwind.config.js` hérité de Tailwind v3. En v4, **c'est
 `public/src/input.css` qui fait foi**. Modifier une couleur dans le fichier JS n'a aucun effet.
 :::
@@ -74,7 +74,7 @@ Le Live est la seule application au thème sombre. Il conserve la palette histor
 | `--color-live-card` | `#202840` | Lignes du classement |
 | `--color-live-border` | `#ffffff1a` | Bordures (blanc 10 %) |
 
-:::caution Les palettes divergent volontairement
+:::caution[Les palettes divergent volontairement]
 N'harmonisez pas les trois `input.css` sans décision explicite : le contexte d'usage n'est pas le
 même (vitrine publique, outil de travail, overlay de diffusion).
 :::
@@ -146,7 +146,7 @@ npm run dev:css     # @tailwindcss/cli --watch
 npm run build:css   # --minify vers public/css/style.css
 ```
 
-:::danger `public/css/style.css` est généré
+:::danger[`public/css/style.css` est généré]
 Ne l'éditez jamais à la main : il est écrasé à chaque build. Toute modification de style se fait
 dans `public/src/input.css`.
 :::

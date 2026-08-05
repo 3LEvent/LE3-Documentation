@@ -54,7 +54,7 @@ Les `slotKey` sont normalisés en minuscules, les UUID en minuscules sans tirets
 Le Live publie `EventTypes.PREDICTION_CREATED` (`live.prediction.created`) à chaque vote
 enregistré, avec le payload `{ userId, username, teamId, teamName }`.
 
-:::note Aucun consommateur aujourd'hui
+:::note[Aucun consommateur aujourd'hui]
 Le type est déclaré dans les quatre copies du contrat pour qu'un service futur puisse s'y abonner
 sans modification du producteur. Il était publié en chaîne littérale suffixée `.v1` jusqu'à la
 révision de contrat `2026-08-02.2`, ce qui violait les deux règles de nommage de la page
@@ -83,7 +83,7 @@ constante du code.
 Renvoie le programme complet, chaque épreuve portant un statut `PAST`, `LIVE` ou `UPCOMING`
 calculé au moment de la requête. C'est cette route qui alimente la section calendrier de la page.
 
-:::info Le calendrier est édité depuis le panel
+:::info[Le calendrier est édité depuis le panel]
 Il était auparavant codé en dur dans une constante `GAME_SCHEDULE` de `live-controller.ts` :
 changer le planning demandait une modification du code et un redéploiement.
 
@@ -139,7 +139,7 @@ Même cookie `3levent.sid`, même préfixe `le3:sess:`, même TTL de 7 jours, do
 `.3levent.fr`. Le middleware `protect` du Live est **purement basé sur la session** : il n'accepte
 pas de JWT, contrairement à son homonyme du Core.
 
-:::danger Démarrage fail-fast
+:::danger[Démarrage fail-fast]
 Le Live **refuse de démarrer** si `LE3_SESSION_SECRET` ou `LE3_MONGO_URI` manque : il n'existe
 aucun secret de repli. Le Core applique la même règle depuis le 2026-08-01.
 :::
@@ -176,7 +176,7 @@ sociales réelles des plateformes, là où le Core les a fusionnées. Voir
 | `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` | API Helix |
 | `DISCORD_PREDICTION_WEBHOOK_URL` | Notification des pronostics |
 
-:::note Deux variables sans le préfixe `LE3_`
+:::note[Deux variables sans le préfixe `LE3_`]
 `TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET` échappent à la convention `LE3_` appliquée partout
 ailleurs, y compris aux variables Twitch du Core (`LE3_TWITCH_*`). C'est l'état déployé : renommer
 ces deux clés est une rupture, elle demande de mettre à jour le coffre Infisical et les conteneurs

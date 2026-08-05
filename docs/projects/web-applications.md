@@ -28,7 +28,7 @@ est commun** ; les pages [Core Web](./web-core), [Live Web](./web-live) et
 | CSS | Tailwind CSS via `@tailwindcss/cli` | `4.x` |
 | Exécution dev | `tsx --env-file=.env watch` | - |
 
-:::warning Pas de framework frontend
+:::warning[Pas de framework frontend]
 Il n'y a ni Angular, ni React, ni Vue, ni bundler. Les pages sont des fichiers `.html` servis par
 Express ; le comportement vient de fichiers `public/js/*.ts` compilés par `tsc` en JavaScript ESM
 et chargés en `<script type="module">`. Toute proposition d'introduire un framework doit être
@@ -94,12 +94,12 @@ plusieurs étapes dépendent de l'ordre.
 10. Gestionnaire d'erreurs global (JSON sous `/api/`, HTML sinon).
 11. Écoute + arrêt propre sur `SIGINT` / `SIGTERM`.
 
-:::danger Ordre des routes du Panel
+:::danger[Ordre des routes du Panel]
 Sur le panel, les routes de pages privées sont déclarées **avant** `express.static`. Inverser cet
 ordre exposerait les fichiers HTML privés aux visiteurs non authentifiés.
 :::
 
-:::caution Le Live n'implémente pas d'arrêt propre
+:::caution[Le Live n'implémente pas d'arrêt propre]
 Le Core et le Panel ferment explicitement le bus, le client Redis de session et le pool MySQL sur
 `SIGINT` / `SIGTERM`. Le Live n'a pas de gestionnaire équivalent : ses connexions Redis sont
 fermées par le runtime à la sortie du processus.
@@ -158,7 +158,7 @@ COPY . .
 CMD ["node", "backend/server.js"]
 ```
 
-:::note Contenu attendu de l'image
+:::note[Contenu attendu de l'image]
 La commande est `node backend/server.js`, pas `dist/backend/server.js` : c'est le **contenu de
 `dist/`** qui est déployé à la racine du contexte de build. Le `npm run build` doit donc avoir été
 exécuté avant la construction de l'image.

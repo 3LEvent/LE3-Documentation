@@ -60,7 +60,7 @@ ne sont **pas** attribués automatiquement avec le rôle : ils se demandent, et 
 Le raccourci vers chacun d'eux apparaît sur la page d'accueil du panel, filtré selon ton rôle.
 Tu n'as aucune adresse à retenir.
 
-:::danger Ce que ces accès exposent vraiment
+:::danger[Ce que ces accès exposent vraiment]
 Certains outils d'exploitation touchent au magasin de sessions de l'écosystème. Un accès en
 lecture y suffit à rejouer la session de n'importe quel membre du staff.
 

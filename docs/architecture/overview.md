@@ -48,7 +48,7 @@ flowchart TD
     PANEL -->|"lecture/écriture auditée"| MYSQL
 ```
 
-:::note Le plugin publie directement sur Redis depuis le 2026-08-02
+:::note[Le plugin publie directement sur Redis depuis le 2026-08-02]
 Le plugin Java embarque désormais **Jedis** (shadé sous `fr.le3event.core.libs.jedis`) et parle à
 Redis sans intermédiaire : il publie sur `le3:eventbus`, souscrit au même canal, et alimente le
 cache partagé `le3:core:team:*`.
@@ -57,7 +57,7 @@ Le relais HTTP `POST /api/plugin/events` du Core existe toujours, mais le plugin
 Il reste la seule voie possible pour un producteur sans accès direct à Redis.
 :::
 
-:::caution Redis est optionnel côté plugin, obligatoire côté web
+:::caution[Redis est optionnel côté plugin, obligatoire côté web]
 Avec `redis.enabled: false` dans son `config.yml`, ou pendant une panne Redis, le plugin continue
 de tourner sur MySQL seul : seules la vue temps réel du Panel et celle du Live sont perdues. Les
 trois applications web, elles, ouvrent Redis au démarrage et ne démarrent pas sans lui.

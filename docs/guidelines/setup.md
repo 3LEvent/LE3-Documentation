@@ -20,7 +20,7 @@ Ce guide décrit la mise en place d'un poste de travail pour contribuer aux dép
 | **Maven** | 3.9+ | plugin Minecraft |
 | **Terminal** | zsh, bash ou PowerShell 7 | tous |
 
-:::info Pas de CLI de framework frontend
+:::info[Pas de CLI de framework frontend]
 Aucun CLI d'Angular, React ou Vue n'est requis : le frontend est compilé par `tsc` et
 `@tailwindcss/cli`, tous deux installés localement par `npm install`.
 :::
@@ -97,7 +97,7 @@ démonstration.
 
 Pointez ensuite les `.env` des autres applications sur ces mêmes instances.
 
-:::danger `REDIS_URL` doit être identique partout
+:::danger[`REDIS_URL` doit être identique partout]
 Le bus d'événements, les drapeaux de maintenance et le cache d'équipes reposent tous dessus. Une
 valeur différente entre deux services ne provoque **aucune erreur** : les messages partent
 simplement dans le vide.
@@ -148,7 +148,7 @@ Style à chaque build. Ne combattez pas le formateur : commitez le résultat.
 7. Facultatif : `general.environment: development`, pour que le Panel distingue votre télémétrie
    de celle de production.
 
-:::warning Le démarrage du plugin dépend du site
+:::warning[Le démarrage du plugin dépend du site]
 `syncTeamsFromSite().join()` bloque `onEnable` jusqu'à la réponse du Core. Si votre Core local
 n'est pas lancé, le serveur démarre avec **10 secondes de retard** et aucune équipe chargée. C'est
 le comportement attendu, pas un bug.
@@ -170,7 +170,7 @@ Le mode strict est **complet** et non négociable : `noUncheckedIndexedAccess`,
 `exactOptionalPropertyTypes`, `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`,
 `noFallthroughCasesInSwitch`, `useUnknownInCatchVariables`.
 
-:::note `verbatimModuleSyntax: false` est volontaire
+:::note[`verbatimModuleSyntax: false` est volontaire]
 Ce réglage est nécessaire pour que `esModuleInterop` fonctionne avec Express et Morgan. Ne le
 passez pas à `true` sans corriger tous les imports par défaut concernés.
 :::
@@ -210,12 +210,12 @@ npm run build  # vérifie aussi les liens : onBrokenLinks = 'throw'
 npm run serve  # prévisualisation du build
 ```
 
-:::warning Toujours builder avant d'ouvrir une PR
+:::warning[Toujours builder avant d'ouvrir une PR]
 `onBrokenLinks: 'throw'` fait échouer le build sur le moindre lien interne cassé. Un
 `npm run build` local évite un aller-retour de revue.
 :::
 
-:::caution Docusaurus et le Core se disputent le port 3000
+:::caution[Docusaurus et le Core se disputent le port 3000]
 `npm start` occupe le port 3000 par défaut, exactement comme `LE3-Web-Main`. Lancez-le avec
 `npm start -- --port 3100` si le Core tourne déjà.
 :::

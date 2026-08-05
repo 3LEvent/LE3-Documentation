@@ -37,7 +37,7 @@ cookie: {
 }
 ```
 
-:::danger Ces trois valeurs sont solidaires
+:::danger[Ces trois valeurs sont solidaires]
 `LE3_SESSION_SECRET`, le nom du cookie et le préfixe Redis doivent être **identiques** dans
 `LE3-Web-Main` et `LE3-Web-Live`. Toute divergence déconnecte silencieusement les joueurs en
 passant d'un sous-domaine à l'autre, sans la moindre erreur au démarrage.
@@ -46,7 +46,7 @@ passant d'un sous-domaine à l'autre, sans la moindre erreur au démarrage.
 Un middleware d'hydratation recopie `req.session.user` dans `req.user` sur chaque requête, de sorte
 que les contrôleurs n'aient jamais à connaître la mécanique de session.
 
-:::info Pas de session partagée en développement
+:::info[Pas de session partagée en développement]
 En local, le cookie n'a pas de domaine (`domain: undefined`) : `localhost:3000` et
 `localhost:3001` ne partagent donc pas la session. C'est attendu ; le partage se teste en
 pré-production, sur un domaine parent commun.
@@ -131,7 +131,7 @@ L'identité (pseudo, nom affiché, e-mail, groupes) appartient à Authentik et e
 chaque connexion** : elle est en lecture seule dans le panel. La déconnexion ferme aussi la session
 Authentik (*RP-initiated logout*).
 
-:::warning Couper un accès ne se fait pas qu'en supprimant le compte
+:::warning[Couper un accès ne se fait pas qu'en supprimant le compte]
 Désactiver le membre (statut `DISABLED`) ou lui retirer son rôle suffit à bloquer le panel. Le
 **supprimer** ne suffit pas : tant qu'il reste attaché à l'application côté Authentik, une
 reconnexion recrée un compte, sans rôle. Retirez-le des deux côtés.
@@ -184,7 +184,7 @@ Groupes d'accès (interface admin)  →  Permissions (appliquées par le code)  
 
 Elles ne sont **pas** exposées dans l'interface : elles sont dérivées des groupes d'accès.
 
-:::info Chaque permission est appliquée par au moins une route
+:::info[Chaque permission est appliquée par au moins une route]
 `ACCESS_DOCKER` et `ACCESS_PTERODACTYL` ont été supprimées le 2026-08-02 : le groupe `MONITORING`
 les accordait, mais aucune route ne les vérifiait. Cocher ce groupe promettait donc un contrôle
 d'accès qui n'existait pas. Les outils externes sont désormais filtrés par le champ

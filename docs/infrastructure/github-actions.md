@@ -7,7 +7,7 @@ sidebar_position: 2
 L'automatisation est centralisée dans le dépôt **`LE3-Shared-Workflows`** : chaque projet appelle
 un moteur de build partagé plutôt que de redéfinir sa logique.
 
-:::note Couverture complète
+:::note[Couverture complète]
 Les cinq dépôts de code ont une CI. Les trois applications web appellent le moteur partagé
 `node-engine.yml` (lint, tests, build, rapport de vulnérabilités) et disposent d'un workflow de
 déploiement continu, inerte tant que la variable `DEPLOY_ENABLED` n'est pas positionnée.
@@ -34,13 +34,13 @@ gh api repos/3LEvent/LE3-Shared-Workflows/actions/permissions/access
 # {"access_level":"organization"}
 ```
 
-:::danger C'est le dépôt partagé qui autorise, pas les appelants qui demandent
+:::danger[C'est le dépôt partagé qui autorise, pas les appelants qui demandent]
 Rien n'est configuré côté appelant. Repasser ce réglage à `none` **casserait la CI des quatre
 dépôts consommateurs d'un coup**, avec une erreur qui ressemble à un fichier manquant plutôt qu'à
 un refus de permission.
 :::
 
-:::caution Les appelants pointent sur `@main`, une branche mobile
+:::caution[Les appelants pointent sur `@main`, une branche mobile]
 Un commit sur `LE3-Shared-Workflows` s'applique immédiatement partout, sans revue côté
 consommateur. Toute modification d'un moteur doit être traitée comme un changement en production
 sur cinq dépôts.
@@ -104,7 +104,7 @@ qu'**après** une publication réussie.
 `sync-develop.yml` a été supprimé le 2026-08-01. Il faisait exactement la même chose, sur le
 même déclencheur : deux `git push --force` concurrents sur la même branche.
 
-:::danger `develop` est écrasée à chaque publication
+:::danger[`develop` est écrasée à chaque publication]
 `publish.yml` exécute `git reset --hard origin/main` puis `git push --force` sur `develop`.
 Toute modification présente sur `develop` mais absente de `main` est **définitivement
 perdue**. Ne laissez jamais de travail non fusionné vivre sur `develop` : créez une branche
@@ -130,7 +130,7 @@ des mois, y compris le cron hebdomadaire.
 Aucune action tierce n'est utilisée : Semgrep est installé via `pipx`, osv-scanner depuis son
 binaire de release. Les résultats vont dans le résumé de job et dans un artefact conservé 30 jours.
 
-:::warning Les résultats n'apparaissent pas dans l'onglet Security
+:::warning[Les résultats n'apparaissent pas dans l'onglet Security]
 L'onglet Security exige lui aussi Advanced Security. Les rapports SARIF et JSON ne sont lisibles
 que dans le résumé du run et dans les artefacts. Personne ne sera notifié à votre place : il faut
 ouvrir le run.
@@ -152,7 +152,7 @@ ils posent un `::warning::` quand ils trouvent quelque chose.
 | `main` | `publish` (GitHub Packages, puis resync de `develop`), `security`, `deploy` si activé |
 | tag `v*` | `release` (Release GitHub + checksums) |
 
-:::danger La CI ne bloque rien sur les dépôts privés
+:::danger[La CI ne bloque rien sur les dépôts privés]
 Le plan GitHub Free ne permet **aucune protection de branche ni aucun ruleset** sur un dépôt
 privé. Rien n'empêche techniquement de pousser sur `main`, de fusionner une PR rouge ou de forcer
 un `push --force`. La CI affiche un état ; c'est la discipline qui l'applique. Seul
@@ -178,7 +178,7 @@ Le moteur enchaîne `npm ci`, `npm run lint`, `npm test`, `npm run build`, puis 
 rapport `npm audit`. Ses entrées : `node-version` (défaut `22`), `run-lint`, `run-tests`,
 `run-audit`.
 
-:::note `npm audit` ne fait pas échouer le build
+:::note[`npm audit` ne fait pas échouer le build]
 Une alerte publiée pendant la nuit sur une dépendance transitive rendrait rouge une PR sans
 rapport avec elle. C'est Dependabot qui ouvre le correctif ; cette étape rend l'état visible dans
 le résumé et pose un `::warning::` s'il existe des alertes critiques ou hautes. Le lint et les

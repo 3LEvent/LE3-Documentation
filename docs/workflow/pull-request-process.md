@@ -8,7 +8,7 @@ Toute modification du code source, de la configuration ou de la documentation pa
 Request. Ce processus garantit la qualité du code, la sécurité de l'infrastructure et le partage
 de connaissances au sein de l'équipe.
 
-:::warning Aucune règle de ce document n'est appliquée par GitHub
+:::warning[Aucune règle de ce document n'est appliquée par GitHub]
 Le plan Free ne permet pas de protection de branche sur un dépôt privé : ni revue obligatoire, ni
 CI bloquante, ni interdiction de push direct. Tout ce qui suit repose sur la discipline. Voir
 [Conventions Git](./git-conventions).
@@ -53,7 +53,7 @@ privés. À défaut, fournissez :
 * **Pourquoi** : contexte ou lien vers un ticket.
 * **Comment tester** : étapes pour vérifier le bon fonctionnement.
 
-:::note Le modèle de PR ne s'applique pas à `LE3-Documentation`
+:::note[Le modèle de PR ne s'applique pas à `LE3-Documentation`]
 Le dépôt `.github` est **privé**. Les modèles d'issue et de PR d'un dépôt `.github` privé ne
 s'appliquent qu'aux dépôts privés de l'organisation. `LE3-Documentation` étant public, il n'en
 hérite pas.
@@ -95,7 +95,7 @@ Chaque PR nécessite au moins une approbation d'un autre développeur.
   propre.
 * **Nettoyage** : supprimez la branche immédiatement après la fusion.
 
-:::danger Une PR fusionnée vers `main` détruit `develop` sur le plugin
+:::danger[Une PR fusionnée vers `main` détruit `develop` sur le plugin]
 `publish.yml` resynchronise `develop` sur `main` par `git reset --hard` puis `git push --force`.
 Assurez-vous qu'aucun travail non fusionné ne vit sur `develop` avant de fusionner vers `main`.
 :::
