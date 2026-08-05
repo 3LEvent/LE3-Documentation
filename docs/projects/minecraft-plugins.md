@@ -14,7 +14,7 @@ Le noyau Java de l'événement. Il gère les équipes (en lecture seule), le sys
 | **Nom du JAR** | `LE3CorePlugin-<version>.jar` |
 | **Nom du plugin** | `LE3CorePlugin` |
 | **Classe principale** | `fr.le3event.core.LE3CorePlugin` |
-| **Java / API** | Java 21 · Paper `1.21.11-R0.1-SNAPSHOT` (`api-version: 1.21`) |
+| **Java / API** | Java 25 · Paper `26.2.build.98-stable` (`api-version: 26.2`) |
 | **Auteurs** | 3LEvent |
 
 ---
@@ -23,10 +23,10 @@ Le noyau Java de l'événement. Il gère les équipes (en lecture seule), le sys
 
 | Dépendance | Portée | Rôle |
 | :--- | :--- | :--- |
-| `paper-api` `1.21.11-R0.1-SNAPSHOT` | `provided` | API serveur |
+| `paper-api` `26.2.build.98-stable` | `provided` | API serveur |
 | `HikariCP` 7.1.0 | `compile` (shadée) | Pool de connexions SQL |
 | `mysql-connector-j` 26.7.0 | `compile` (shadée) | Pilote MySQL |
-| `jedis` 5.2.0 | `compile` (shadée) | Client Redis : cache partagé et bus d'événements |
+| `jedis` 7.5.3 | `compile` (shadée) | Client Redis : cache partagé et bus d'événements |
 | `PlaceholderAPI` 2.12.3 | `provided` | Expansion `%le3_*%` |
 | `LuckPerms` 5.5 | `provided` | Groupes, préfixes et permissions d'équipe |
 | `VaultAPI` 1.7.1 | `provided` | Économie (récompenses `money`) |
@@ -562,7 +562,7 @@ Détail : [GitHub Actions](../infrastructure/github-actions).
 
 ## 15. Standards de développement Java
 
-* **Java 21** : `var`, records et pattern matching sont encouragés ; l'API dépréciée de Paper est à
+* **Java 25** : `var`, records et pattern matching sont encouragés ; l'API dépréciée de Paper est à
   éviter.
 * **Thread safety** : jamais d'appel à l'API Bukkit depuis un thread asynchrone ; jamais de SQL,
   de HTTP ou de Redis sur le thread principal. Tout état partagé utilise une `ConcurrentHashMap`.

@@ -134,7 +134,7 @@ Style à chaque build. Ne combattez pas le formateur : commitez le résultat.
 
 ### Serveur de test local
 
-1. Un serveur **Paper 1.21.x** local.
+1. Un serveur **Paper 26.2.x** local, démarré sur une JVM 25 ou plus.
 2. Copier `target/LE3CorePlugin-1.0.0-SNAPSHOT.jar` dans `plugins/`.
 3. Démarrer une fois pour générer `plugins/LE3CorePlugin/config.yml`, `achievements.yml`,
    `data.yml`.
