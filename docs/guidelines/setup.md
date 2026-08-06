@@ -16,7 +16,7 @@ Ce guide décrit la mise en place d'un poste de travail pour contribuer aux dép
 | **Node.js** | **20 LTS ou supérieur** | applications web, documentation |
 | **npm** | fourni avec Node | applications web, documentation |
 | **Docker + Docker Compose** | récent | services locaux (Mongo, Redis, MySQL) |
-| **JDK 21** (Temurin) | 21 | plugin Minecraft |
+| **JDK 25** (Temurin) | 25 | plugin Minecraft |
 | **Maven** | 3.9+ | plugin Minecraft |
 | **Terminal** | zsh, bash ou PowerShell 7 | tous |
 
@@ -126,15 +126,20 @@ cd LE3-Plugin-Core
 mvn clean package        # JAR shadé dans target/
 ```
 
-`JAVA_HOME` doit pointer sur le **JDK 21**, la version utilisée par `java-engine.yml` en CI et
-déclarée dans `<java.version>` du `pom.xml`. Les trois doivent rester alignés.
+`JAVA_HOME` doit pointer sur le **JDK 25**, la version déclarée dans `<java.version>` du `pom.xml`
+et passée par `build-verify.yml` au moteur partagé. Les trois doivent rester alignés.
+
+Un JDK plus ancien ne suffit pas : `paper-api` 26.2 est compilé pour Java 25, et un javac 21
+refuse de lire ses classes avec `class file has wrong version 69.0, should be 65.0`. Noter que
+`java-engine.yml` garde `21` comme défaut pour les autres dépôts : c'est `build-verify.yml` qui
+impose `25` côté plugin, via `with: java-version`.
 
 Le `fmt-maven-plugin` s'exécute en phase `validate` et **reformate les sources** au Google Java
 Style à chaque build. Ne combattez pas le formateur : commitez le résultat.
 
 ### Serveur de test local
 
-1. Un serveur **Paper 1.21.x** local.
+1. Un serveur **Paper 26.2.x** local, démarré sur une JVM 25 ou plus.
 2. Copier `target/LE3CorePlugin-1.0.0-SNAPSHOT.jar` dans `plugins/`.
 3. Démarrer une fois pour générer `plugins/LE3CorePlugin/config.yml`, `achievements.yml`,
    `data.yml`.

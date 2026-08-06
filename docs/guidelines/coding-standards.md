@@ -106,7 +106,7 @@ filtrables dans la console du panel.
 
 ### Version et style
 
-* **Java 21** : `var`, records et pattern matching encouragés.
+* **Java 25** : `var`, records et pattern matching encouragés.
 * Formatage imposé par `fmt-maven-plugin` (Google Java Style) en phase `validate`. Le style n'est
   pas un sujet de revue.
 * `@NotNull` sur les paramètres des méthodes publiques.

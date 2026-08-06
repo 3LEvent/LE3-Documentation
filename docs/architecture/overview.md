@@ -22,7 +22,7 @@ ignorés sans erreur.
 
 ```mermaid
 flowchart TD
-    MC["Serveur Minecraft<br/>LE3-Plugin-Core (Java 21 / Paper)"]
+    MC["Serveur Minecraft<br/>LE3-Plugin-Core (Java 25 / Paper)"]
     CORE["Core Web - LE3-Web-Main<br/>3levent.fr"]
     LIVE["Live Web - LE3-Web-Live<br/>live.3levent.fr"]
     PANEL["Staff Panel - LE3-Web-Panel<br/>panel.3levent.fr"]
@@ -104,7 +104,7 @@ d'écriture vers les autres services est constitué des clés Redis `le3:mainten
 
 ### Plugin Core - dépôt `LE3-Plugin-Core`
 
-Le noyau Java du serveur de jeu (Paper `1.21.11`, Java 21).
+Le noyau Java du serveur de jeu (Paper `26.2`, Java 25).
 
 * Équipes en **lecture seule** : la composition vient du site via l'API, jamais l'inverse.
 * Système de succès par équipe et par joueur, avec progression persistée en MySQL.
