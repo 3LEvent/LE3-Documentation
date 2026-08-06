@@ -60,7 +60,7 @@ Cinq workflows sont actifs dans `LE3-Plugin-Core`.
 | `release.yml` | LE3-Plugin-Release | tag `v*` | `mvn -B clean package`, checksums SHA-256, Release GitHub |
 | `security.yml` | LE3-Security-Scan | push/PR `main`+`develop`, cron `25 4 * * 5`, manuel | Semgrep OSS + osv-scanner |
 
-Tous utilisent **JDK 21 Temurin** (`actions/setup-java`, épinglée par SHA) et un groupe de
+Tous utilisent **JDK 25 Temurin** (`actions/setup-java`, épinglée par SHA) et un groupe de
 concurrence `${{ github.workflow }}-${{ github.ref }}` avec `cancel-in-progress: true`, pour ne pas
 empiler les builds sur des push successifs.
 
