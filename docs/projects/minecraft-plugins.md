@@ -145,6 +145,15 @@ staff avec un simple avertissement, sans erreur visible. Ajouté le 2026-08-02.
 La synchronisation est rejouée sur `/le3core reload`, sur `/le3core sync`, et à la réception d'un
 événement `plugin.teams.snapshot` externe sur le bus (voir §10).
 
+:::note[Roster de secours quand le site ne répond pas]
+Depuis le 2026-09-15, chaque synchronisation réussie est enregistrée dans la table
+`team_roster_snapshot`. Si le site est injoignable au démarrage, le plugin charge ce dernier roster
+au lieu de démarrer sans équipe : erreur dans les logs, `/le3core status` affiche « FALLBACK », et
+chaque membre du staff est prévenu à sa connexion. Les changements faits sur le site pendant la
+panne n'arrivent qu'à la prochaine synchronisation réussie. Une re-synchronisation qui échoue alors
+qu'un roster est déjà chargé garde ce roster.
+:::
+
 ---
 
 ## 5. Système de succès
@@ -162,6 +171,7 @@ achievement_equip_diamond_helmet:
   points: 5                       # points accordés à l'équipe
   world: "world"                  # monde où le succès est actif
   day: 1                          # jour d'événement
+  hidden: false                   # optionnel ; true = étape de quête invisible
   rewards:                        # section optionnelle
     xp: 100
     money: 50.0                   # nécessite Vault
@@ -169,6 +179,13 @@ achievement_equip_diamond_helmet:
     effects: ["SPEED:30:1"]       # EFFET:DURÉE_SEC:AMPLIFICATEUR
     commands: ["broadcast %player% has completed a challenge!"]
 ```
+
+Un succès **caché** (`hidden: true`, depuis le 2026-09-15) progresse et se complète comme les
+autres, mais n'apparaît ni dans les menus, ni dans les totaux (`%le3_total_*%`), ni dans les
+compteurs par joueur ; il ne déclenche ni toast ni `plugin.achievement.granted`. C'est l'étape
+d'une quête : « casser 200 bûches » réutilise `BLOCK_BREAK` sans polluer la liste, et la quête
+récompense l'équipe avec un succès visible. `CustomAchievementCompleteEvent` est bien levé, c'est
+ce que le plugin de quêtes écoute.
 
 Valeurs par défaut appliquées à la lecture : `material: BARRIER` (et avertissement si le matériau
 est invalide ou de l'air), `type: MANUAL`, `threshold: 1`, `points: 0`, `world: world`, `day: 1`.
@@ -346,10 +363,11 @@ serveur s'applique à l'autre par le bus. Le masque est un seul réglage pour to
 
 ## 9. Persistance
 
-`DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions max, timeout 5 s) crée cinq
+`DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions max, timeout 5 s) crée six
 tables au démarrage : `teams`, `team_achievements`, `player_achievements`, `core_settings` et,
 depuis le 2026-09-15, `point_awards`, journal des crédits de points hors succès (mini-jeux,
-corrections du staff), garanti sans double crédit par une clé `(award_id, team_id)`.
+corrections du staff), garanti sans double crédit par une clé `(award_id, team_id)`, et
+`team_roster_snapshot`, dernier roster reçu du site.
 Détail : [Schéma des données](../architecture/database-schema).
 
 Si l'une des tables ne peut pas être créée, le plugin **se désactive** au démarrage (depuis le
