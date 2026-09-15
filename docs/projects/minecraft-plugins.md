@@ -438,12 +438,21 @@ souscrite n'accepte plus aucune autre commande. Les reconnexions sont automatiqu
 10 secondes. Les handlers sont rappelés **sur le thread principal**, ils peuvent donc toucher
 l'API Bukkit sans risque.
 
-Un message qui n'est pas du JSON valide, qui ne valide pas l'enveloppe, ou qui provient du plugin
-lui-même (`source.service == "minecraft-plugin"`) est écarté avant d'atteindre un handler.
+Un message qui n'est pas du JSON valide, qui ne valide pas l'enveloppe, ou qui provient de cette
+instance même (`source.service == "minecraft-plugin"` **et** `source.instanceId` égal au sien) est
+écarté avant d'atteindre un handler. Un message de l'autre serveur du plugin est, lui, traité :
+c'est ce qui permet au serveur principal et au serveur mini-jeux de se tenir au courant.
 
-Chaque enveloppe publiée porte `source.instanceId` = `<nom du serveur>-<port>` et
+Chaque enveloppe publiée porte `source.instanceId` = `general.instance_id` et
 `source.environment` = `general.environment` du `config.yml`. Mettez cette dernière valeur à
 `development` sur un serveur de test, pour que le Panel distingue la télémétrie de préproduction.
+
+:::danger[`general.instance_id` est obligatoire et distinct sur chaque serveur]
+Le plugin tourne sur deux serveurs, `main` et `minigames`, que Paper nomme tous les deux `paper`.
+Seule cette clé les distingue sur le bus et dans la base partagée. Vide ou absente, le plugin
+refuse de démarrer avec un message explicite. Un `config.yml` existant ne reçoit pas la clé tout
+seul : l'ajouter à la main avant de déposer un jar qui l'exige.
+:::
 
 L'enveloppe JSON est définie par `fr.le3event.core.redis.EcosystemEvent`, jumelle Java de
 `ecosystem-event.ts`, avec la même `CONTRACT_REVISION`. Voir
@@ -524,7 +533,7 @@ frappe, pas comme une demande de créditer l'émetteur : la commande échoue ave
 
 | Section | Contenu |
 | :--- | :--- |
-| `general` | `enable_team_chat`, `team_chat_prefix`, `npc_id` du PNJ Citizens, `environment` (tag des événements du bus) |
+| `general` | `instance_id` (**obligatoire**, `main` ou `minigames`, identité du serveur sur le bus), `enable_team_chat`, `team_chat_prefix`, `npc_id` du PNJ Citizens, `environment` (tag des événements du bus) |
 | `general_rewards` | Récompenses ajoutées à **chaque** complétion, en plus de celles du succès |
 | `team_slots` | Les neuf slots (voir §4) |
 | `database` | `host`, `port`, `database`, `username`, `password`. Les trois derniers sont obligatoires |
