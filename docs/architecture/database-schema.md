@@ -250,6 +250,18 @@ CREATE TABLE IF NOT EXISTS point_awards (      -- depuis le 2026-09-15
 );
 ```
 
+```sql
+CREATE TABLE IF NOT EXISTS team_roster_snapshot (  -- depuis le 2026-09-15
+    id              TINYINT      NOT NULL PRIMARY KEY,  -- toujours 1
+    payload         TEXT         NOT NULL,              -- tableau `data` du site, tel quel
+    synced_at       TIMESTAMP    NOT NULL,
+    source_instance VARCHAR(64)  NOT NULL
+);
+```
+
+`team_roster_snapshot` garde la dernière réponse du site : un serveur qui démarre pendant une panne
+du site charge ce roster au lieu de démarrer sans équipe, en le disant.
+
 `point_awards` est le journal des crédits de points qui ne viennent pas d'un succès : résultat
 d'un mini-jeu, correction du staff. L'insertion, la mise à jour de `teams.points` et la relecture
 du total forment **une seule transaction** : un rejeu sous la même clé ne change rien, et c'est ce
@@ -261,7 +273,8 @@ rétroactivement les lignes déjà écrites.
 
 Les quatre premières tables sont exactement celles reproduites par `scripts/mysql-init.sql` du
 panel pour le développement local, et celles autorisées par la liste blanche `EDITABLE_TABLES` de
-l'éditeur. `point_awards` n'y figure pas, volontairement : un journal ne s'édite pas.
+l'éditeur. `point_awards` et `team_roster_snapshot` n'y figurent pas, volontairement : un journal et
+une sauvegarde ne s'éditent pas.
 
 ---
 
