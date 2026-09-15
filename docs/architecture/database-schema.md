@@ -259,6 +259,26 @@ CREATE TABLE IF NOT EXISTS team_roster_snapshot (  -- depuis le 2026-09-15
 );
 ```
 
+```sql
+CREATE TABLE IF NOT EXISTS team_overrides (          -- depuis le 2026-09-15
+    id          INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    player_uuid CHAR(36)     NOT NULL,
+    player_name VARCHAR(16)  NOT NULL,
+    team_id     VARCHAR(255) NULL,                   -- NULL = retiré de toute équipe
+    until_kind  VARCHAR(16)  NOT NULL,               -- RELEASED ou MATCH
+    reason      VARCHAR(255) NOT NULL,
+    actor       VARCHAR(64)  NOT NULL,
+    created_at  TIMESTAMP    NOT NULL,
+    released_at TIMESTAMP    NULL,                   -- renseigné à la levée, la ligne reste
+    released_by VARCHAR(64)  NULL,                   -- acteur, 'site' quand le site a rattrapé
+    INDEX idx_team_overrides_active (player_uuid, released_at)
+);
+```
+
+`team_overrides` porte les affectations manuelles (`/team assign`) et leur journal : au plus une
+ligne active par joueur, les lignes levées restent. `core_settings.team_sync_paused` fige la
+synchronisation avec le site pour les deux serveurs.
+
 `team_roster_snapshot` garde la dernière réponse du site : un serveur qui démarre pendant une panne
 du site charge ce roster au lieu de démarrer sans équipe, en le disant.
 
@@ -273,8 +293,8 @@ rétroactivement les lignes déjà écrites.
 
 Les quatre premières tables sont exactement celles reproduites par `scripts/mysql-init.sql` du
 panel pour le développement local, et celles autorisées par la liste blanche `EDITABLE_TABLES` de
-l'éditeur. `point_awards` et `team_roster_snapshot` n'y figurent pas, volontairement : un journal et
-une sauvegarde ne s'éditent pas.
+l'éditeur. `point_awards`, `team_roster_snapshot` et `team_overrides` n'y figurent pas, volontairement :
+un journal et une sauvegarde ne s'éditent pas, et une affectation se fait par commande.
 
 ---
 
