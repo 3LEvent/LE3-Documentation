@@ -102,6 +102,8 @@ serveur démarre quand même. Le plugin fonctionne sur MySQL seul.
 `syncTeamsFromSite().join()` bloque le thread principal au démarrage, volontairement : les équipes
 doivent être prêtes avant l'arrivée du premier joueur. Si le site est injoignable, le démarrage
 est retardé jusqu'au timeout de 10 secondes de la requête HTTP, et aucune équipe n'est chargée.
+`/le3core reload`, lui, relance la synchronisation sans bloquer : elle tourne sur le thread
+`LE3Core-TeamSync` du plugin, arrêté proprement à la désactivation.
 :::
 
 À l'arrêt (`onDisable`) : sauvegarde de `data.yml`, arrêt du souscripteur Redis, fermeture du pool
@@ -174,11 +176,12 @@ est invalide ou de l'air), `type: MANUAL`, `threshold: 1`, `points: 0`, `world: 
 Une section `general_rewards` de `config.yml` est appliquée **en plus** des récompenses propres au
 succès, à chaque complétion.
 
-### Les 50 types de déclencheurs
+### Les 51 types de déclencheurs
 
-Un listener dédié par type, dans `listeners/advancements/`. Quarante-neuf sont enregistrés
-inconditionnellement par `EventListenerRegistrar` ; le cinquantième (`NpcInteractionListener`)
-n'est enregistré que si Citizens est présent.
+Cinquante-et-un types, dont `MANUAL` qui n'a pas de listener. Un listener dédié par type, dans
+`listeners/advancements/` : quarante-neuf sont enregistrés inconditionnellement par
+`EventListenerRegistrar` ; le cinquantième (`NpcInteractionListener`) n'est enregistré que si
+Citizens est présent. Aucun n'est enregistré quand `achievements.enabled` vaut `false`.
 
 **Blocs et objets** : `BLOCK_BREAK`, `BLOCK_PLACE`, `BLOCK_MODIFY`, `CRAFT`, `SMELT`, `REPAIR`,
 `ENCHANT`, `ITEM_DROP`, `ITEM_PICKUP`, `USE`, `BUCKET_FILL`, `HOE_LAND`, `FERTILIZE_PLANTS`,
@@ -227,6 +230,19 @@ progression, ce qui garantit que les trois couches ne peuvent pas diverger.
 Un `CustomAchievementProgressEvent` est levé pour chaque membre en ligne à chaque progression
 réelle. Les deux événements Bukkit portent le joueur, le succès, l'équipe, et pour la progression
 les valeurs avant/après.
+
+### Interrupteur et gel
+
+Deux mécanismes distincts coupent la progression :
+
+* **`achievements.enabled: false`** dans `config.yml`, pour le serveur mini-jeux : aucun listener de
+  déclencheur, aucun menu, aucun PNJ ne sont enregistrés, `/achievement` répond que les succès ne
+  sont pas disponibles. Les définitions restent chargées (la synchronisation du roster en a
+  besoin) et `/achievement give|add|set` restent utilisables par le staff.
+* **Le gel à l'exécution** (`AchievementManager.setProgressEnabled(false)`), actionné par le plugin
+  qui connaît la phase de l'événement : la progression déclenchée par le jeu est **ignorée**, pas
+  mise en attente, avec une seule ligne de log par période de gel. `/achievement set` passe outre :
+  une correction du staff n'est jamais accidentelle.
 
 ### Accès par jour
 
@@ -322,7 +338,9 @@ aucune requête MySQL.
 
 Quand le **mode glitch** est actif (`/le3core hidescores`), tous les scores et les noms des
 classements sont préfixés de `&k` (texte brouillé). Le drapeau est persisté dans `data.yml`, dans
-`core_settings` en MySQL, et diffusé sur le bus en `plugin.settings.updated`.
+`core_settings` en MySQL, et diffusé sur le bus en `plugin.settings.updated`. **`core_settings`
+fait foi** : au démarrage, la valeur partagée remplace la valeur locale, et un basculement sur un
+serveur s'applique à l'autre par le bus. Le masque est un seul réglage pour tout l'événement.
 
 ---
 
@@ -331,6 +349,9 @@ classements sont préfixés de `&k` (texte brouillé). Le drapeau est persisté 
 `DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions max, timeout 5 s) crée quatre
 tables au démarrage : `teams`, `team_achievements`, `player_achievements`, `core_settings`.
 Détail : [Schéma des données](../architecture/database-schema).
+
+Si l'une des tables ne peut pas être créée, le plugin **se désactive** au démarrage (depuis le
+2026-09-15) : un plugin sans tables aurait l'air de fonctionner et perdrait chaque score.
 
 Deux règles absolues :
 
@@ -418,8 +439,14 @@ Une panne Redis dégrade en *cache miss*, jamais en exception : un `Optional` vi
 
 ### Bus d'événements (`EcosystemEventBus`)
 
+Le total porté par `plugin.team.points.updated` est **relu en base juste après l'écriture**, jamais
+pris en RAM : deux serveurs créditent la même table, et chacun recharge ses points quand l'autre
+publie un crédit. Le classement du Live reste juste quel que soit le serveur qui a crédité.
+
 Le plugin **publie** `team.roster.updated`, `plugin.team.points.updated`,
-`plugin.achievement.granted` et `plugin.settings.updated`, et **souscrit** à
+`plugin.achievement.granted`, `plugin.settings.updated` et `server.metrics.heartbeat`, et
+**souscrit** aux `plugin.team.points.updated` et `plugin.settings.updated` de l'autre serveur du
+plugin ainsi qu'à
 `plugin.teams.snapshot`.
 
 :::danger[Piège de rebouclage sur `plugin.teams.snapshot`]
@@ -534,6 +561,7 @@ frappe, pas comme une demande de créditer l'émetteur : la commande échoue ave
 | Section | Contenu |
 | :--- | :--- |
 | `general` | `instance_id` (**obligatoire**, `main` ou `minigames`, identité du serveur sur le bus), `enable_team_chat`, `team_chat_prefix`, `npc_id` du PNJ Citizens, `environment` (tag des événements du bus) |
+| `achievements` | `enabled` (défaut `true`) : à `false`, aucun déclencheur, menu ni PNJ ; valeur du serveur mini-jeux |
 | `general_rewards` | Récompenses ajoutées à **chaque** complétion, en plus de celles du succès |
 | `team_slots` | Les neuf slots (voir §4) |
 | `database` | `host`, `port`, `database`, `username`, `password`. Les trois derniers sont obligatoires |
