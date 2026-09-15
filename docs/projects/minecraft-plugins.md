@@ -145,6 +145,29 @@ staff avec un simple avertissement, sans erreur visible. Ajouté le 2026-08-02.
 La synchronisation est rejouée sur `/le3core reload`, sur `/le3core sync`, et à la réception d'un
 événement `plugin.teams.snapshot` externe sur le bus (voir §10).
 
+### Affectations manuelles
+
+Le site décide des équipes ; l'affectation manuelle (depuis le 2026-09-15) est le pansement pour
+les deux cas où il ne peut pas dire la vérité à temps : un joueur arrivé en cours de route sans
+équipe, et une synchronisation qui se comporte mal. Permission `le3core.team.assign`, console
+autorisée.
+
+| Commande | Effet |
+| :--- | :--- |
+| `/team assign <team> <player> [--until match] [raison]` | Place le joueur dans l'équipe, quoi que dise le site. Refusé au-delà de six membres, pour le slot `admin` et pour une équipe inconnue. `--until match` : levée à la fin du mini-jeu en cours (branché par le plugin de mini-jeux) |
+| `/team unassign <player> [raison]` | Retire le joueur de toute équipe |
+| `/team release <player>` ou `--all` | Lève une affectation, ou toutes : le site redevient la référence |
+| `/team sync pause` / `resume` / `now` | Fige la synchronisation avec le site (sur les deux serveurs), la reprend, ou la force |
+| `/team reset-to-site` | Lève tout, reprend la synchronisation, synchronise : retour à l'état du site |
+| `/team overrides` | Liste les affectations avec ce que dit le site pour chacune, signale les conflits et la pause |
+
+Garanties : une affectation survit à toutes les synchronisations (le site est appliqué, puis les
+affectations par-dessus) ; elle se lève d'elle-même quand le site finit par donner la même équipe ;
+elle est journalisée (`team_overrides`, avec qui, pourquoi, et comment elle s'est terminée) ; les
+deux serveurs la voient, immédiatement par le bus ou au plus tard à leur prochaine synchronisation ;
+les points ne se fusionnent jamais. Le regroupement de deux équipes incomplètes se fait sur le
+site, pas en jeu.
+
 :::note[Roster de secours quand le site ne répond pas]
 Depuis le 2026-09-15, chaque synchronisation réussie est enregistrée dans la table
 `team_roster_snapshot`. Si le site est injoignable au démarrage, le plugin charge ce dernier roster
@@ -363,11 +386,12 @@ serveur s'applique à l'autre par le bus. Le masque est un seul réglage pour to
 
 ## 9. Persistance
 
-`DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions max, timeout 5 s) crée six
+`DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions max, timeout 5 s) crée sept
 tables au démarrage : `teams`, `team_achievements`, `player_achievements`, `core_settings` et,
 depuis le 2026-09-15, `point_awards`, journal des crédits de points hors succès (mini-jeux,
-corrections du staff), garanti sans double crédit par une clé `(award_id, team_id)`, et
-`team_roster_snapshot`, dernier roster reçu du site.
+corrections du staff), garanti sans double crédit par une clé `(award_id, team_id)`,
+`team_roster_snapshot`, dernier roster reçu du site, et `team_overrides`, affectations manuelles et
+leur journal.
 Détail : [Schéma des données](../architecture/database-schema).
 
 Si l'une des tables ne peut pas être créée, le plugin **se désactive** au démarrage (depuis le
