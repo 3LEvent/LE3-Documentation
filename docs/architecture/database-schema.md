@@ -237,14 +237,31 @@ CREATE TABLE IF NOT EXISTS core_settings (
     setting_key   VARCHAR(255) PRIMARY KEY,  -- ex. hide_scores
     setting_value VARCHAR(255)
 );
+
+CREATE TABLE IF NOT EXISTS point_awards (      -- depuis le 2026-09-15
+    award_id        VARCHAR(100) NOT NULL,     -- minigame:<matchId>, correction:<uuid>
+    team_id         VARCHAR(255) NOT NULL,
+    points          INT          NOT NULL,     -- signé : une correction peut retirer
+    reason          VARCHAR(255) NOT NULL,
+    source_instance VARCHAR(64)  NOT NULL,     -- general.instance_id du serveur émetteur
+    actor           VARCHAR(64)  NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (award_id, team_id)
+);
 ```
+
+`point_awards` est le journal des crédits de points qui ne viennent pas d'un succès : résultat
+d'un mini-jeu, correction du staff. L'insertion, la mise à jour de `teams.points` et la relecture
+du total forment **une seule transaction** : un rejeu sous la même clé ne change rien, et c'est ce
+qui protège d'un double crédit après un crash.
 
 `completed` est calculé à l'écriture : `progress >= threshold`, le seuil venant de
 `achievements.yml` et non de la base. Modifier un seuil dans le YAML ne recalcule donc **pas**
 rétroactivement les lignes déjà écrites.
 
-Ces quatre tables sont exactement celles reproduites par `scripts/mysql-init.sql` du panel pour le
-développement local, et celles autorisées par la liste blanche `EDITABLE_TABLES` de l'éditeur.
+Les quatre premières tables sont exactement celles reproduites par `scripts/mysql-init.sql` du
+panel pour le développement local, et celles autorisées par la liste blanche `EDITABLE_TABLES` de
+l'éditeur. `point_awards` n'y figure pas, volontairement : un journal ne s'édite pas.
 
 ---
 

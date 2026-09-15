@@ -346,8 +346,10 @@ serveur s'applique à l'autre par le bus. Le masque est un seul réglage pour to
 
 ## 9. Persistance
 
-`DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions max, timeout 5 s) crée quatre
-tables au démarrage : `teams`, `team_achievements`, `player_achievements`, `core_settings`.
+`DatabaseManager` (HikariCP, pool `LE3Core-Pool`, 10 connexions max, timeout 5 s) crée cinq
+tables au démarrage : `teams`, `team_achievements`, `player_achievements`, `core_settings` et,
+depuis le 2026-09-15, `point_awards`, journal des crédits de points hors succès (mini-jeux,
+corrections du staff), garanti sans double crédit par une clé `(award_id, team_id)`.
 Détail : [Schéma des données](../architecture/database-schema).
 
 Si l'une des tables ne peut pas être créée, le plugin **se désactive** au démarrage (depuis le
@@ -618,3 +620,32 @@ Détail : [GitHub Actions](../infrastructure/github-actions).
 * **[Protocoles de communication](../architecture/communication-protocol)**
 * **[Snippets de code](../guidelines/code-snippets)**
 * **[Gestion des secrets](../infrastructure/secrets-management)**
+
+---
+
+## 16. API pour les autres plugins
+
+Depuis le 2026-09-15, le Core expose un service Bukkit `LE3Core` (paquetage
+`fr.le3event.core.api`), enregistré en fin de démarrage et retiré à l'arrêt. C'est le seul contrat
+que les plugins de l'événement (`LE3EventPlugin`, `LE3MinigamesPlugin`, `LE3ExplorationPlugin`)
+peuvent utiliser, avec les constantes de types du bus (`EcosystemEvent.Types`). Tout le reste du
+plugin est interne et change sans préavis.
+
+```java
+var registration = Bukkit.getServicesManager().getRegistration(LE3Core.class);
+if (registration == null || registration.getProvider().apiMajor() != LE3Core.API_MAJOR) {
+  // refuser de démarrer : Core absent ou API incompatible
+}
+LE3Core core = registration.getProvider();
+```
+
+| Interface | Ce qu'elle donne |
+| :--- | :--- |
+| `Teams` | Équipe d'un joueur par UUID (utilisable dès le pre-login), statut staff (slot `admin`), membres, nom, points, resynchronisation, origine du roster |
+| `Achievements` | Interrupteur du serveur, gel de la progression, attribution d'un succès à une équipe (idempotente, joueur hors ligne crédité), complétion |
+| `Bus` | Publication sur `le3:eventbus` sous l'identité du serveur, abonnement avec plusieurs handlers par type, disponibilité de Redis |
+| `Storage` | Pool MySQL partagé, exécution hors thread principal, création de table au démarrage |
+| `EventSource` | Source d'un événement reçu, avec `isSiblingPlugin()` pour reconnaître l'autre serveur du plugin |
+
+`API_MAJOR` est incrémenté à chaque changement incompatible : un consommateur construit contre
+une autre version majeure refuse de démarrer au lieu d'échouer plus tard sur une méthode absente.
