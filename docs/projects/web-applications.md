@@ -19,11 +19,11 @@ est commun** ; les pages [Core Web](./web-core), [Live Web](./web-live) et
 | Langage | TypeScript strict, **ESM natif** (`"type": "module"`) | `5.9.x` |
 | Serveur | Express | `5.x` |
 | Base de données | MongoDB / Mongoose | `9.x` |
-| Sessions & bus | Redis + `connect-redis` | `redis:7` |
+| Sessions & bus | Redis (client `redis` 6.x + `connect-redis`) | - |
 | Sécurité HTTP | `helmet`, `cors` | - |
 | Journalisation HTTP | `morgan` | - |
-| Tests | Vitest | 17 tests de contrat par dépôt |
-| Lint | ESLint | `9.x` |
+| Tests | Vitest | contrat du bus + tests unitaires (au 2026-09-15 : 29 Main, 29 Live, 49 Panel) |
+| Lint | ESLint | `10.x` |
 | Frontend | HTML + TypeScript compilé, **aucun framework** | - |
 | CSS | Tailwind CSS via `@tailwindcss/cli` | `4.x` |
 | Exécution dev | `tsx --env-file=.env watch` | - |

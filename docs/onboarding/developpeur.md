@@ -43,7 +43,7 @@ préviendra.
 | :--- | :--- | :--- |
 | Node.js | 22 | Les applications web et les deux bots |
 | Docker | récent | Dépendances locales du panel |
-| Java + Maven | 21 | Uniquement pour le plugin Minecraft |
+| Java + Maven | Java 25, Maven 3.9 | Uniquement pour le plugin Minecraft |
 | Git | récent | |
 
 ## Étape 4 : lancer un projet en local

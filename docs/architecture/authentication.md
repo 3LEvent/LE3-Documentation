@@ -180,7 +180,7 @@ Groupes d'accès (interface admin)  →  Permissions (appliquées par le code)  
 ### Permissions internes
 
 `VIEW_DASHBOARD`, `VIEW_LOGS`, `MANAGE_ACHIEVEMENTS`, `MANAGE_DATABASE`, `MANAGE_CMS`,
-`MANAGE_IAM`, `SUPER_ADMIN`.
+`MANAGE_CALENDAR`, `MANAGE_IAM`, `SUPER_ADMIN`.
 
 Elles ne sont **pas** exposées dans l'interface : elles sont dérivées des groupes d'accès.
 
@@ -199,6 +199,7 @@ d'accès qui n'existait pas. Les outils externes sont désormais filtrés par le
 | `IN_GAME` | Gestion In-Game | `MANAGE_ACHIEVEMENTS` |
 | `DATABASE` | Base de données | `MANAGE_DATABASE` |
 | `SITE_CONFIG` | Configuration du site | `MANAGE_CMS` |
+| `CALENDAR` | Calendrier | `MANAGE_CALENDAR` |
 | `ADMINISTRATION` | Administration (IAM) | `MANAGE_IAM` |
 | `SUPER_ADMIN` | Super Admin | `SUPER_ADMIN` (accès total) |
 

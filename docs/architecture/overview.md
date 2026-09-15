@@ -99,8 +99,9 @@ L'outil interne du staff, derrière SSO Authentik.
 * CMS : configuration du site, mode maintenance par site, édition de `achievements.yml`, liens de
   ressources, réglage des intégrations (`.env` éditables).
 
-Le panel est un **consommateur pur** du bus : il ne publie aucun événement. Son seul canal
-d'écriture vers les autres services est constitué des clés Redis `le3:maintenance:*`.
+Le panel est un **consommateur pur** du bus : il ne publie aucun événement. Ses canaux
+d'écriture vers les autres services sont des clés Redis : `le3:maintenance:*` (maintenance par
+site) et `le3:calendar:live` (calendrier des épreuves, lu par le Live et le bot d'administration).
 
 ### Plugin Core - dépôt `LE3-Plugin-Core`
 
@@ -147,11 +148,12 @@ Détail des collections et des tables : [Schéma des données](./database-schema
 
 ### Duplication assumée du contrat
 
-Le fichier `backend/events/ecosystem-event.ts` est **volontairement dupliqué** dans les trois
-applications, et porté en Java par `fr.le3event.core.redis.EcosystemEvent`. Chaque service reste
-une unité déployable autonome ; en contrepartie, toute modification du contrat doit être
-répercutée dans les quatre copies dans la même pull request, avec `CONTRACT_REVISION` incrémenté.
-Un test de contrat (17 tests Vitest par application) rend l'écart visible en CI.
+Le fichier `backend/events/ecosystem-event.ts` est **volontairement dupliqué** dans les quatre
+dépôts TypeScript (Main, Live, Panel, Discord-Admin), et porté en Java par
+`fr.le3event.core.redis.EcosystemEvent`. Chaque service reste une unité déployable autonome ; en
+contrepartie, toute modification du contrat doit être répercutée dans les cinq copies dans la
+même pull request, avec `CONTRACT_REVISION` incrémenté. Un test de contrat dans chaque dépôt rend
+l'écart visible en CI.
 
 ### Sécurité par défaut
 

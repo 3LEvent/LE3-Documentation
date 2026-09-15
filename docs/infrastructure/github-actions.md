@@ -8,15 +8,17 @@ L'automatisation est centralisée dans le dépôt **`LE3-Shared-Workflows`** : c
 un moteur de build partagé plutôt que de redéfinir sa logique.
 
 :::note[Couverture complète]
-Les cinq dépôts de code ont une CI. Les trois applications web appellent le moteur partagé
-`node-engine.yml` (lint, tests, build, rapport de vulnérabilités) et disposent d'un workflow de
-déploiement continu, inerte tant que la variable `DEPLOY_ENABLED` n'est pas positionnée.
+Les sept dépôts de code ont une CI. Les trois applications web et les deux bots Discord appellent
+le moteur partagé `node-engine.yml` (lint, tests, build, rapport de vulnérabilités) ; les
+applications web disposent en plus d'un workflow de déploiement continu, inerte tant que la
+variable `DEPLOY_ENABLED` n'est pas positionnée.
 `LE3-Documentation` a son propre `deploy.yml` vers GitHub Pages.
 :::
 
 | Dépôt | Workflows |
 | :--- | :--- |
 | `LE3-Web-Main`, `LE3-Web-Live`, `LE3-Web-Panel` | `build-verify.yml`, `deploy.yml` |
+| `LE3-Discord-Bot`, `LE3-Discord-Admin` | `build-verify.yml` |
 | `LE3-Plugin-Core` | `build-verify.yml`, `deploy-dev.yml`, `publish.yml`, `release.yml`, `security.yml` |
 | `LE3-Documentation` | `deploy.yml` |
 | `LE3-Shared-Workflows` | `java-engine.yml`, `node-engine.yml` (moteurs, jamais déclenchés seuls) |
@@ -35,7 +37,7 @@ gh api repos/3LEvent/LE3-Shared-Workflows/actions/permissions/access
 ```
 
 :::danger[C'est le dépôt partagé qui autorise, pas les appelants qui demandent]
-Rien n'est configuré côté appelant. Repasser ce réglage à `none` **casserait la CI des quatre
+Rien n'est configuré côté appelant. Repasser ce réglage à `none` **casserait la CI des six
 dépôts consommateurs d'un coup**, avec une erreur qui ressemble à un fichier manquant plutôt qu'à
 un refus de permission.
 :::
@@ -43,7 +45,7 @@ un refus de permission.
 :::caution[Les appelants pointent sur `@main`, une branche mobile]
 Un commit sur `LE3-Shared-Workflows` s'applique immédiatement partout, sans revue côté
 consommateur. Toute modification d'un moteur doit être traitée comme un changement en production
-sur cinq dépôts.
+sur six dépôts.
 :::
 
 ---
@@ -185,8 +187,9 @@ le résumé et pose un `::warning::` s'il existe des alertes critiques ou hautes
 tests, eux, sont bloquants.
 :::
 
-Chaque application exécute une suite **Vitest de 17 tests** couvrant le contrat du bus
-d'événements.
+Chaque dépôt TypeScript exécute une suite **Vitest** : le test de contrat du bus d'événements,
+plus des tests unitaires ciblés (limiteur de débit, jeton Microsoft, calendrier, permissions,
+selon le dépôt). Le plugin exécute ses tests JUnit dans `java-engine.yml`.
 
 ### Déploiement continu
 

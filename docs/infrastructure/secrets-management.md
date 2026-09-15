@@ -23,7 +23,7 @@ Aucun secret ne doit apparaître en clair dans le code source ni dans un fichier
 
 ## 2. Nomenclature
 
-Les variables suivent `LE3_[SERVICE]_[NOM]`. Trois exceptions subsistent, toutes documentées avec
+Les variables suivent `LE3_[SERVICE]_[NOM]`. Six exceptions subsistent, toutes documentées avec
 leur service : `REDIS_URL`, `TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET` (Live),
 `DISCORD_ROLE_INSCRIT_ID` et `DISCORD_TEAM_ROLES_IDS` (Core),
 `DISCORD_PREDICTION_WEBHOOK_URL` (Live).
@@ -77,10 +77,15 @@ partagée. Aucun `LE3_JWT_SECRET` n'y est lu.
 | `LE3_PTERODACTYL_URL` / `_API_KEY` / `_SERVER_ID` | critique | Clé **client** `ptlc_…` |
 | `LE3_ACHIEVEMENTS_CONFIG_PATH`, `LE3_PANEL_URL`, `LE3_PANEL_ALLOWED_ORIGIN` | config | |
 
-:::warning[Onze de ces clés sont modifiables depuis le CMS du panel]
-`PATCH /api/cms/env` écrit `LE3_DISCORD_*`, `LE3_PLUGIN_MYSQL_*` et `LE3_PTERODACTYL_*`. Les clés
-`LE3_AUTHENTIK_*` en sont volontairement exclues : une faute de frappe sur l'issuer verrouillerait
-tout le monde hors du panel, sans possibilité de correction par l'interface.
+:::warning[Onze de ces clés sont modifiables depuis le CMS du panel, en développement seulement]
+`PATCH /api/cms/env` écrit `LE3_DISCORD_*`, `LE3_PLUGIN_MYSQL_*` et `LE3_PTERODACTYL_*` dans le
+`.env` local. **En production, l'écriture est refusée** (depuis le 2026-09-15) : les valeurs vivent
+dans Infisical, un `.env` écrit par le panel disparaîtrait au redémarrage suivant. Le formulaire
+est alors en lecture seule, et les trois secrets (`LE3_DISCORD_CLIENT_SECRET`,
+`LE3_PLUGIN_MYSQL_PASSWORD`, `LE3_PTERODACTYL_API_KEY`) ne sont jamais renvoyés au navigateur,
+seulement leur présence. Les clés `LE3_AUTHENTIK_*` en sont volontairement exclues : une faute de
+frappe sur l'issuer verrouillerait tout le monde hors du panel, sans possibilité de correction par
+l'interface.
 :::
 
 ### `LE3-Plugin-Core`
@@ -134,9 +139,10 @@ Runbook complet de mise en place et procédure de bascule des conteneurs : docum
 
 :::danger[Les clés maîtresses d'Infisical restent à rotationner]
 `ROTATION.md` liste les secrets à révoquer par ordre de criticité. Plusieurs entrées sont encore
-ouvertes, dont les clés maîtresses du coffre lui-même. Elles doivent être traitées **avant** toute
-migration réelle des secrets de production vers Infisical, sans quoi le coffre hérite du problème
-qu'il est censé résoudre.
+ouvertes, dont les clés maîtresses du coffre lui-même. La bascule des conteneurs sur Infisical a été
+faite le 2026-08-03 **sans** attendre cette rotation, sur décision de Kiyoni : le coffre sert la
+production en chiffrant avec une `ENCRYPTION_KEY` divulguée. R-9 n'est plus un préalable, c'est
+une dette active.
 :::
 
 ---
@@ -220,8 +226,8 @@ Corrigé le 2026-08-01 : les deux applications refusent maintenant de démarrer 
 
 1. **Révoquer immédiatement** : régénérer le jeton, le mot de passe ou la clé. C'est la seule
    étape qui compte vraiment : purger l'historique Git ne fait rien si la valeur reste valide.
-2. **Mettre à jour** la valeur dans Infisical et dans les `.env` de production, puis redémarrer
-   les conteneurs concernés.
+2. **Mettre à jour** la valeur dans Infisical, puis redémarrer les conteneurs concernés : aucun
+   `.env` applicatif ne subsiste sur le serveur, les conteneurs relisent le coffre au démarrage.
 3. **Auditer** les accès sur la période d'exposition (logs MongoDB, MySQL, Discord, Twitch).
 4. **Nettoyer l'historique** si nécessaire, avec `git filter-repo` ou `bfg-repo-cleaner`, après
    avoir prévenu tous les contributeurs, car cela réécrit les hachages.

@@ -46,14 +46,14 @@ structure de dossiers. Un développeur qui connaît l'une connaît les autres.
 
 | Composant | Technologie | Version |
 | :--- | :--- | :--- |
-| **Runtime** | Node.js | `>=20` sur les applications web, `>=22` sur le bot ; images Docker en `node:22-slim` |
+| **Runtime** | Node.js | `>=20` sur les applications web, `>=22` sur les deux bots ; images Docker en `node:22-slim` |
 | **Langage** | TypeScript strict, ESM natif | `5.9.x` |
 | **Serveur HTTP** | Express | `5.x` |
 | **Base de données** | MongoDB via Mongoose | `9.x` |
 | **Cache / Sessions / Bus** | Redis (`redis` + `connect-redis`) | `redis:7` |
 | **Frontend** | HTML statique + TypeScript compilé (`tsc`), **aucun framework** | - |
 | **Styles** | Tailwind CSS (CLI, directive `@theme`) | `4.x` |
-| **Tests** | Vitest | 17 tests sur Main et Panel, 23 sur Live, 22 sur le bot |
+| **Tests** | Vitest, JUnit | un test de contrat du bus par dépôt TypeScript, plus des tests unitaires (au 2026-09-15 : 29 Main, 29 Live, 49 Panel, 12 bot joueurs, 34 bot admin) ; 61 tests JUnit sur le plugin |
 | **Plugin Minecraft** | Java + Paper API | Java 25, Paper `26.2.build.98-stable` |
 | **Client Redis du plugin** | Jedis (shadé et relocalisé) | `7.5.3` |
 | **Build plugin** | Maven (shade + fmt-maven-plugin) | - |
