@@ -23,7 +23,7 @@ Avant de soumettre une Pull Request, le contributeur valide localement :
 1. **Build** : `npm run build` (web, documentation) ou `mvn clean package` (plugin), sans erreur.
 2. **Lint** : `npm run lint`. Pour le plugin, `fmt-maven-plugin` reformate automatiquement au
    build ; commitez le résultat.
-3. **Tests** : `npm test`. Les trois applications web ont une suite Vitest de 17 tests.
+3. **Tests** : `npm test`. Chaque dépôt TypeScript a une suite Vitest (contrat du bus et tests unitaires) ; `mvn verify` pour le plugin.
 4. **Vérification manuelle** : rejouez le chemin que vous avez modifié et décrivez la procédure
    dans la PR.
 5. **Documentation** : mise à jour si un comportement, une variable d'environnement, un endpoint

@@ -63,6 +63,11 @@ npm run serve   # sert le build localement
 ```text
 docs/
 ├── intro.md                    # Point d'entrée : services, stack, standards
+├── onboarding/
+│   ├── overview.md             # Par où commencer selon son rôle
+│   ├── staff.md                # Staff : panel, Discord, bonnes pratiques
+│   ├── developpeur.md          # Développeur : poste, dépôts, premiers pas
+│   └── administrateur.md       # Administrateur : serveur, secrets, déploiement
 ├── architecture/
 │   ├── overview.md             # Vue d'ensemble, découplage, bus partagé
 │   ├── database-schema.md      # Cinq espaces de stockage, collections, tables
@@ -73,7 +78,9 @@ docs/
 │   ├── web-core.md             # LE3-Web-Main
 │   ├── web-live.md             # LE3-Web-Live
 │   ├── staff-panel.md          # LE3-Web-Panel
-│   └── minecraft-plugins.md    # LE3-Plugin-Core
+│   ├── minecraft-plugins.md    # LE3-Plugin-Core
+│   ├── discord-bot.md          # LE3-Discord-Bot
+│   └── discord-admin.md        # LE3-Discord-Admin
 ├── guidelines/
 │   ├── setup.md                # Montage d'un poste de travail
 │   ├── coding-standards.md     # Règles vérifiées en revue
@@ -83,6 +90,11 @@ docs/
 │   ├── secrets-management.md   # Catalogue, Infisical, procédure de fuite
 │   ├── github-actions.md       # CI/CD, moteurs partagés
 │   └── cloudflare-setup.md     # Déploiement et hébergement
+├── ai/
+│   ├── overview.md             # Travailler avec les agents IA sur l'écosystème
+│   ├── prompting.md            # Formuler une demande
+│   ├── review.md               # Relire une contribution générée
+│   └── bmad.md                 # BMAD-METHOD
 └── workflow/
     ├── git-conventions.md      # Branches, commits, règles coûteuses
     └── pull-request-process.md # Prérequis, revue, fusion

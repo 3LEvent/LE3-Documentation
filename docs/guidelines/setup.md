@@ -30,7 +30,7 @@ Vérification rapide :
 ```bash
 node -v        # v20.x ou plus
 npm -v
-java -version  # 21.x
+java -version  # 25.x
 mvn -v
 docker --version
 ```
@@ -67,7 +67,7 @@ Le frontend TypeScript n'a **pas** de mode watch dédié : après modification d
 ```bash
 npm run build     # clean + backend + frontend + css + copie des assets
 npm run lint      # eslint backend
-npm test          # suite Vitest (17 tests de contrat)
+npm test          # suite Vitest (contrat du bus et tests unitaires)
 npm start         # node --env-file=.env dist/backend/server.js
 ```
 

@@ -13,11 +13,13 @@ Il n'en existe pas d'autre : aucun service n'ouvre la base d'un autre, aucun n'i
 
 | Canal | Producteurs | Consommateurs | Transport |
 | :--- | :--- | :--- | :--- |
-| **Bus d'événements** | Plugin, Core, Live | Plugin, Core, Live, Panel | Redis Pub/Sub, canal `le3:eventbus` |
+| **Bus d'événements** | Plugin, Main, Live | Plugin, Main, Live, Panel, Discord-Admin | Redis Pub/Sub, canal `le3:eventbus` |
 | **API Plugin** | Plugin Minecraft | Core | HTTPS + en-tête `x-plugin-secret` |
 | **API navigateur** | Frontends `public/js/*.ts` | Core, Live, Panel | `fetch` + cookie de session |
 | **Flux temps réel** | Panel | Navigateurs staff | SSE (`GET /api/dashboard/stream`) |
-| **Drapeaux partagés** | Panel | Core, Live | Clés Redis `le3:maintenance:*` |
+| **Drapeaux partagés** | Panel, Discord-Admin | Main, Live | Clés Redis `le3:maintenance:*` |
+| **Calendrier publié** | Panel | Live, Discord-Admin | Clé Redis `le3:calendar:live` |
+| **Suivi des déploiements** | Serveur (`deploy.sh`) | Discord-Admin | Canal Redis `le3:admin:deploy` |
 | **Cache partagé** | Plugin | Écosystème | Clés Redis `le3:core:team:*` |
 
 ---
@@ -72,15 +74,16 @@ information finissent toujours par se contredire. Les types `plugin.*` ont perdu
 
 ### Contrat dupliqué : règle d'or
 
-`ecosystem-event.ts` existe en trois exemplaires (Core, Live, Panel) et les copies doivent rester
-**identiques au caractère près**, pas seulement compatibles. Un test de contrat
-(`ecosystem-event.test.ts`, lui aussi dupliqué à l'identique, 17 tests Vitest) fige la liste des
-`EventTypes` : toute modification appliquée à un seul dépôt fait échouer la CI des deux autres.
+`ecosystem-event.ts` existe en quatre exemplaires (Main, Live, Panel, Discord-Admin) et les copies
+doivent rester **identiques au caractère près**, pas seulement compatibles. Un test de contrat
+(`ecosystem-event.test.ts`, lui aussi dupliqué à l'identique) fige la liste des `EventTypes` :
+toute modification appliquée à un seul dépôt fait échouer la CI des trois autres.
 
 Vérification manuelle :
 
 ```bash
-md5 repos/LE3-Web-{Main,Live,Panel}/backend/events/ecosystem-event.ts
+md5 repos/LE3-Web-{Main,Live,Panel}/backend/events/ecosystem-event.ts \
+    repos/LE3-Discord-Admin/backend/events/ecosystem-event.ts
 # une seule empreinte attendue
 ```
 
@@ -128,7 +131,7 @@ de cette fenêtre a été déclenché par quelqu'un d'autre et provoque bien une
 | Constante | Type | Effet |
 | :--- | :--- | :--- |
 | `METRICS_HEARTBEAT` | `server.metrics.heartbeat` | Persisté dans `servermetrics` + diffusé en SSE |
-| `LOG_ENTRY_CREATED` | `log.entry.created` | Persisté dans `serverlogs` + diffusé en SSE |
+| `LOG_ENTRY_CREATED` | `log.entry.created` | Persisté dans `serverlogs` + diffusé en SSE ; relayé dans Discord par le bot d'administration. **Aucun émetteur aujourd'hui** : le plugin ne publie pas ses logs, l'émetteur est prévu dans `LE3EventPlugin` |
 
 **Publié par le Live** :
 
@@ -137,7 +140,7 @@ de cette fenêtre a été déclenché par quelqu'un d'autre et provoque bien une
 | `PREDICTION_CREATED` | `live.prediction.created` | `{ userId, username, teamId, teamName }` | aucun consommateur |
 
 :::note[Un type sans consommateur reste un type du contrat]
-Il est déclaré dans les quatre copies pour qu'un service futur puisse s'y abonner sans toucher au
+Il est déclaré dans les cinq copies pour qu'un service futur puisse s'y abonner sans toucher au
 producteur. Jusqu'à la révision `2026-08-02.2` il était publié en chaîne littérale suffixée `.v1`,
 en violation des deux règles ci-dessus.
 :::
@@ -289,8 +292,9 @@ pour le frontend.
 
 ## 6. Drapeaux Redis partagés (maintenance)
 
-Le mode maintenance est piloté par site depuis le CMS du panel et transite **uniquement** par
-Redis. Aucun appel HTTP entre le panel et les sites publics.
+Le mode maintenance est piloté par site depuis le CMS du panel, ou par `/site maintenance` du bot
+d'administration, et transite **uniquement** par Redis. Aucun appel HTTP entre le panel et les
+sites publics. Le bot écrit la clé, la relit, puis `siteconfigs` du panel, source de vérité.
 
 | Clé Redis | Lue par |
 | :--- | :--- |
@@ -332,9 +336,10 @@ vidage d'une équipe.
 
 1. Choisir un `type` suivant `<domaine>.<entité>.<action>`. **Pas de suffixe `.v<n>`** : la
    version vit dans le champ `version` de l'enveloppe.
-2. Le déclarer dans `EventTypes`, dans les **trois** copies du contrat, et dans
+2. Le déclarer dans `EventTypes`, dans les **quatre** copies TypeScript du contrat, et dans
    `EcosystemEvent.Types` côté plugin. Incrémenter `CONTRACT_REVISION` dans la même PR.
-3. Mettre à jour `ecosystem-event.test.ts` dans les trois dépôts : le test fige la liste des types.
+3. Mettre à jour `ecosystem-event.test.ts` dans les quatre dépôts TypeScript et
+   `EcosystemEventTest` côté plugin : les tests figent la liste des types.
 4. Publier via `createEcosystemEvent()` ou `EcosystemEvent.envelope()`, jamais un objet construit
    à la main.
 5. Ajouter un `case` dans le consommateur concerné. Ne rien changer chez les autres : ils

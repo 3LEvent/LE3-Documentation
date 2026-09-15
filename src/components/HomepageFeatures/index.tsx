@@ -17,8 +17,8 @@ const FeatureList: FeatureItem[] = [
         Icon: FaCloud,
         description: (
             <>
-                Interfaces haute performance développées sous <b>Angular 17+</b>.
-                Gestion du trafic et sécurité périmétrique assurées par l'infrastructure <b>Cloudflare</b>.
+                Trois applications <b>Node 22 / Express 5</b> en TypeScript strict, sans framework
+                frontend, reliées par un bus Redis. Trafic et sécurité périmétrique assurés par <b>Cloudflare</b>.
             </>
         ),
     },
@@ -27,8 +27,8 @@ const FeatureList: FeatureItem[] = [
         Icon: FaServer,
         description: (
             <>
-                Backends robustes basés sur <b>Java 21</b>. Développement de plugins
-                Paper hautement optimisés avec une gestion stricte de la performance et de la latence.
+                Plugin <b>Paper 26.2</b> en <b>Java 25</b>, MySQL pour la vérité, Redis pour le
+                temps réel. Équipes synchronisées depuis le site, succès et points par équipe.
             </>
         ),
     },

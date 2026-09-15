@@ -86,9 +86,11 @@ peine d'afficher un classement figé pendant l'événement.
 
 ### Ce que Cloudflare ne fait PAS ici
 
-Pas de **Pages**, pas de **Workers**, pas de **Tunnels**. Aucun `wrangler.toml`, aucune dépendance
-`wrangler`, aucun script de déploiement Cloudflare n'existe dans les dépôts. Cloudflare est utilisé
-comme frontal réseau, pas comme plateforme d'exécution.
+Pas de **Pages**, pas de **Workers**. Aucun `wrangler.toml`, aucune dépendance `wrangler`, aucun
+script de déploiement Cloudflare n'existe dans les dépôts. Cloudflare est utilisé comme frontal
+réseau, pas comme plateforme d'exécution. Un **Tunnel** (`cloudflared`, conteneur sur l'hôte)
+expose en revanche les services internes sans publier de port : Infisical, Authentik et
+RedisInsight passent par lui (runbook `docs/deploy-serveur.md` du workspace).
 
 ---
 
@@ -102,7 +104,7 @@ npm ci
 npm run build          # → dist/backend, dist/public, CSS, assets
 # déployer le contenu de dist/ à la racine du contexte de build
 docker build -t le3-<app>:<version> .
-docker run -d --env-file .env -p <port>:<port> le3-<app>:<version>
+# en production : ~/docker/deploy.sh (compose + `infisical run`), aucun .env sur le serveur
 ```
 
 Points d'attention :

@@ -4,9 +4,10 @@ sidebar_position: 2
 
 # Schéma des Données
 
-L'écosystème **3LEvent** ne possède pas une base unique, mais **cinq espaces de stockage** aux
-responsabilités strictement séparées : trois bases MongoDB (une par application web), une base
-MySQL appartenant au plugin Minecraft, et Redis.
+L'écosystème **3LEvent** ne possède pas une base unique, mais **six espaces de stockage** aux
+responsabilités séparées : quatre bases MongoDB (celle du site, partagée par Main et Live ; celle
+du panel ; celle du bot joueurs ; celle du bot d'administration), une base MySQL appartenant au
+plugin Minecraft, et Redis.
 
 ---
 
@@ -14,15 +15,20 @@ MySQL appartenant au plugin Minecraft, et Redis.
 
 | Stockage | Propriétaire | Contenu | Accès externe |
 | :--- | :--- | :--- | :--- |
-| **MongoDB Core** | `LE3-Web-Main` | Comptes, forum, inscriptions, journal du bus | aucun |
-| **MongoDB Live** | `LE3-Web-Live` | Read-model temps réel, pronostics | aucun |
-| **MongoDB Panel** | `LE3-Web-Panel` | Staff, rôles, logs, métriques, config, audit | aucun |
+| **MongoDB site** | `LE3-Web-Main` | Comptes, forum, inscriptions, journal du bus ; le Live y ajoute son read-model temps réel et les pronostics | `LE3-Web-Live` (mêmes `users`, `teams`, `signups`), les deux bots en lecture, le bot joueurs en écriture ciblée (`verifications`, `signups`, `teams`) |
+| **MongoDB Panel** | `LE3-Web-Panel` | Staff, rôles, logs, métriques, config, calendrier, audit | `LE3-Discord-Admin` : lecture de `staffusers` et `panelroles`, écriture de `siteconfigs` |
+| **MongoDB bot** (`3levent-bot`) | `LE3-Discord-Bot` | Tickets, salons vocaux, réglages de guilde | aucun |
+| **MongoDB admin** | `LE3-Discord-Admin` | Journal d'audit, état des alertes | aucun |
 | **MySQL** | `LE3-Plugin-Core` | Points et progression des succès | Panel (éditeur audité) |
 | **Redis** | partagé | Sessions, bus d'événements, drapeaux, cache d'équipes | tous |
 
-:::warning[Une seule base est partagée]
-La base MySQL est la **seule** que deux services ouvrent : le plugin (propriétaire, qui crée les
-tables) et le panel (éditeur en liste blanche). Aucune base MongoDB n'est partagée entre services.
+:::warning[Deux bases sont partagées]
+La base MySQL est ouverte par le plugin (propriétaire, qui crée les tables) et par le panel
+(éditeur en liste blanche). La base MongoDB du site est ouverte par Main (propriétaire des
+schémas), par Live, qui y déclare des copies de `User`, `Team` et `Signup` plus ses propres
+collections, et par les deux bots, dont les modèles sont des copies conformes qui n'ajoutent jamais
+un champ. Toute modification de schéma sur `users`, `teams` ou `signups` concerne donc quatre
+dépôts.
 :::
 
 ---
@@ -185,7 +191,8 @@ lecture pour résoudre l'identité d'une session partagée.
 | `panelroles` | Rôles panel | `slug` (unique), `name`, `color`, `priority`, `access_groups`, `permissions` (dérivées et cachées), `is_system` |
 | `serverlogs` | Logs serveur | **Capped** 25 Mo / 50 000 documents |
 | `servermetrics` | Métriques | **Capped** 15 Mo / 100 000 documents |
-| `siteconfigs` | Config du site | `maintenance_main`, `maintenance_live` (+ messages), `hide_scores`, `registrations_open`, `event_name`, `event_tagline`, `updated_by` |
+| `siteconfigs` | Config du site | Singleton `key: 'global'` : `maintenance_main`, `maintenance_live` (+ messages), `registrations_open`, `updated_by`. Les champs `hide_scores`, `event_name`, `event_tagline`, `maintenance_mode` et `maintenance_message`, jamais lus, ont été retirés du schéma le 2026-09-15 ; `hide_scores` vit dans `core_settings` du plugin |
+| `calendarevents` | Calendrier des épreuves | `slug` (unique), `name`, `description`, `modalities`, `image_url`, `starts_at`, `ends_at`, `is_published` ; les épreuves publiées sont recopiées dans la clé Redis `le3:calendar:live` |
 | `dbeditoraudits` | Audit de l'éditeur MySQL | `action` (`INSERT|UPDATE|DELETE`), `table_name`, `record_pk`, `before`, `after`, auteur |
 | `teamcaches` | Cache équipes | `slot_key` (unique), `name`, `points`, `member_count`, `lp_group` |
 | `resourcelinks` | Hub de ressources | `kind` (`RESOURCE|TOOL`), `required_roles`, `display_order` |
@@ -302,11 +309,14 @@ un journal et une sauvegarde ne s'éditent pas, et une affectation se fait par c
 
 | Clé / motif | Type | Usage | TTL |
 | :--- | :--- | :--- | :--- |
-| `le3:sess:<sid>` | Hash (connect-redis) | Session partagée Core ↔ Live, cookie `3levent.sid` | 7 jours (glissant) |
+| `le3:sess:<sid>` | Hash (connect-redis) | Session partagée Main ↔ Live, cookie `3levent.sid` | 7 jours (glissant) |
 | `le3panel:sess:<sid>` | Hash (connect-redis) | Session du panel, cookie `le3panel.sid` | 8 heures |
 | `le3:eventbus` | Canal Pub/Sub | Bus d'événements | - |
 | `le3:maintenance:main` | String | Maintenance de `3levent.fr` | - |
 | `le3:maintenance:live` | String | Maintenance de `live.3levent.fr` | - |
+| `le3:calendar:live` | String (JSON `{ events: [...] }`) | Calendrier publié par le panel, lu par le Live et le bot d'administration | - |
+| `le3:admin:deploy` | Canal Pub/Sub | Progression des déploiements de `deploy.sh`, suivie par le bot d'administration | - |
+| `le3:ratelimit:<nom>:<sujet>` | String (compteur) | Limiteur de débit de Main (connexion, inscription, OTP) | fenêtre du limiteur |
 | `le3:core:team:<slot>:progress` | Hash | Progression des succès d'une équipe, écrite par le plugin | 300 s |
 | `le3:core:team:<slot>:points` | String | Total de points d'une équipe, écrit par le plugin | 300 s |
 | Cache du classement Live | String | Réponse de `GET /api/live/leaderboard` | 5 s |

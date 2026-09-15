@@ -67,7 +67,7 @@ Elle ne remplace pas la relecture, elle en fixe le minimum.
 Certaines parties de l'écosystème ont la propriété désagréable de **casser sans erreur**. Une
 faute y est invisible jusqu'à ce qu'elle coûte cher.
 
-**Le contrat du bus d'événements.** Trois copies TypeScript identiques et une copie Java. Une
+**Le contrat du bus d'événements.** Quatre copies TypeScript identiques et une copie Java. Une
 divergence ne lève aucune exception : le message est simplement ignoré par les abonnés, et le
 symptôme apparaît ailleurs, plus tard.
 
