@@ -91,8 +91,9 @@ MythicMobs décrit la créature, ce plugin décrit l'événement autour.
 
 L'**item de tracking**, obtenu au bout de la quête du boss, est une boussole à deux modes que le
 shift-clic fait basculer : le boss tant qu'il est en vie, sinon le point de repère de son repaire.
-La distance est annoncée par paliers nommés, jamais en nombre de blocs. Le droit à l'item appartient
-à l'équipe : un joueur qui le perd ou qui rejoint plus tard en reçoit un à sa prochaine connexion.
+La distance est annoncée par paliers nommés, jamais en nombre de blocs. La boussole appartient au
+joueur qui a fini la quête : chaque joueur qui en veut une joue la quête à son tour, et celui qui
+perd la sienne reparle au PNJ pour en récupérer une.
 
 ---
 
@@ -120,7 +121,7 @@ sienne si l'équipe en décide une, et elle arrivera comme un module de plus.
 | `/exploration objective start <joueur> <épreuve>` | Démarre une épreuve pour l'équipe du joueur |
 | `/exploration objective reset <équipe> <épreuve>` | Remet une épreuve à zéro pour une équipe |
 | `/exploration boss spawn\|remove <boss>` | Apparition et retrait manuels |
-| `/exploration tracker give <joueur> <boss>` | Récompense BeautyQuests : le traqueur pour l'équipe |
+| `/exploration tracker give <joueur> <boss>` | Récompense BeautyQuests : le traqueur pour ce joueur |
 | `/exploration grant <joueur> <succès>` | Récompense BeautyQuests : le succès pour l'équipe |
 
 ---
