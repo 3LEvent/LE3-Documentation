@@ -117,9 +117,27 @@ Les règles qui suivent valent pour tous les jeux, et le moteur les applique, pa
 | :--- | :--- |
 | `manual` | Le staff saisit le classement. Sert de secours pour un jeu qui ne serait pas prêt |
 | `spleef` | Trois manches sur un disque de neige à couches : pelle, boules de neige, sol fissuré |
+| `balls_of_steel` | On mine des sphères de minerai réparties en anneaux, on rapporte le butin sur la plateforme de son équipe. La trêve tient cinq minutes, le cœur de la carte s'ouvre plus tard. Un kill ne rapporte rien, le butin transporté tombe au sol |
+| `territory` | On peint le sol en marchant et en tirant. La manche est notée sur la moyenne de la surface possédée, mesurée toutes les trente secondes, et non sur la surface finale |
+| `pack` | Chaque équipe chasse une équipe et est chassée par une autre, tout le long de la manche. Les coups portés hors de sa paire ne font rien |
 
-La sélection jouable d'une édition vit dans `LE3-Editions/<édition>/minigames/selection.yml` :
-`/mg launch` refuse un jeu absent de cette liste.
+Quatre vrais jeux sont donc livrés, ce qui est le minimum d'une édition, `manual` restant derrière
+eux. La sélection jouable d'une édition vit dans
+`LE3-Editions/<édition>/minigames/selection.yml` : `/mg launch` refuse un jeu absent de cette liste.
+
+### Ce que ces jeux ont en commun
+
+Trois choix reviennent dans les trois nouveaux jeux, et méritent d'être connus avant d'en écrire un
+quatrième.
+
+- **Aucun jeu ne compense l'effectif lui-même**, sauf Territoire qui le fait sur la mesure parce
+  que le pourcentage affiché aux joueurs doit être le score. Partout ailleurs, le jeu renvoie une
+  mesure brute et le moteur applique la politique déclarée dans `GameSpec`.
+- **Une escalade est une entrée de `timeline:`**, jamais un minuteur écrit dans le jeu. Le staff
+  peut ainsi l'annoncer et une édition peut la déplacer sans toucher au code.
+- **Ce qui doit être fermé est fermé par de la matière**, pas par une région protégée : le cœur de
+  Balls Of Steel et le mur central de Territoire sont en bedrock, et la timeline le retire. Un
+  joueur voit la différence depuis le terrain.
 
 ---
 
