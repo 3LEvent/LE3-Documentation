@@ -202,7 +202,7 @@ Cinq workflows sont actifs dans le dépôt :
 | `deploy-dev.yml` | push `develop`, manuel | JAR de dev en artefact GitHub (rétention 7 jours) |
 | `publish.yml` | push `main`, manuel | `mvn deploy` vers GitHub Packages, puis resynchronise `develop` sur `main` |
 | `release.yml` | tag `v*` | Build de production, checksums SHA-256, Release GitHub |
-| `security.yml` | push/PR `main`/`develop` + hebdomadaire | CodeQL `java-kotlin`, requêtes `security-extended` |
+| `security.yml` | push/PR `main`/`develop` + hebdomadaire | Semgrep OSS et osv-scanner (le code scanning de GitHub exige Advanced Security, absent du plan) |
 
 Détail : [GitHub Actions](../infrastructure/github-actions).
 
@@ -210,7 +210,7 @@ Détail : [GitHub Actions](../infrastructure/github-actions).
 
 ## 10. Standards de développement Java
 
-* **Java 21** : `var`, records et pattern matching sont encouragés ; l'API dépréciée de Paper est à
+* **Java 25** : `var`, records et pattern matching sont encouragés ; l'API dépréciée de Paper est à
   éviter.
 * **Thread safety** : jamais d'appel à l'API Bukkit depuis un thread asynchrone ; utiliser
   `ConcurrentHashMap` pour tout état partagé (comme `pinnedAchievements`).
