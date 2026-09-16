@@ -120,9 +120,10 @@ Les règles qui suivent valent pour tous les jeux, et le moteur les applique, pa
 | `balls_of_steel` | On mine des sphères de minerai réparties en anneaux, on rapporte le butin sur la plateforme de son équipe. La trêve tient cinq minutes, le cœur de la carte s'ouvre plus tard. Un kill ne rapporte rien, le butin transporté tombe au sol |
 | `territory` | On peint le sol en marchant et en tirant. La manche est notée sur la moyenne de la surface possédée, mesurée toutes les trente secondes, et non sur la surface finale |
 | `pack` | Chaque équipe chasse une équipe et est chassée par une autre, tout le long de la manche. Les coups portés hors de sa paire ne font rien |
+| `core` | Chaque équipe défend un noyau dans sa base et attaque ceux de deux adversaires, atteints par des portails. Les bases sont des copies : les portails décident qui affronte qui, pas la géographie |
 
-Quatre vrais jeux sont donc livrés, ce qui est le minimum d'une édition, `manual` restant derrière
-eux. La sélection jouable d'une édition vit dans
+Cinq vrais jeux sont donc livrés, un de plus que le minimum d'une édition, `manual` restant
+derrière eux. La sélection jouable d'une édition vit dans
 `LE3-Editions/<édition>/minigames/selection.yml` : `/mg launch` refuse un jeu absent de cette liste.
 
 ### Ce que ces jeux ont en commun
