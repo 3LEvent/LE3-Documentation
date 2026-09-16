@@ -58,18 +58,30 @@ nouvelle quête, c'est le plus souvent combiner des épreuves existantes avec de
 | :--- | :--- | :--- |
 | `activate` | N blocs à activer dans une zone, dans l'ordre ou non | Disponible |
 | `survive` | Rester N minutes dans une zone | Disponible |
-| `wave` | Des vagues de monstres à vaincre | À venir |
-| `search` | Un objet caché dans l'un de N emplacements | À venir |
-| `escort` | Un PNJ à accompagner | À venir |
-| `puzzle` | Une séquence à reproduire | À venir |
+| `wave` | Des vagues de monstres à vaincre l'une après l'autre, sans quitter la zone | Disponible |
+| `search` | Un objet caché dans l'un de N emplacements, avec des indices à l'approche | Disponible |
+| `escort` | Un monstre MythicMobs à accompagner d'un bout à l'autre d'un trajet | Disponible |
+| `puzzle` | Une séquence à reproduire dans l'ordre | Disponible |
 
 Une épreuve se joue **par équipe** : chaque équipe a sa progression, sauvegardée à chaque palier, et
 reprend où elle en était après un redémarrage. Deux équipes qui arrivent en même temps sur une
 épreuve à instance unique passent l'une après l'autre, la seconde voyant sa place dans la file. Une
 épreuve terminée donne son item une seule fois par équipe.
 
-Les quatre épreuves à venir sont déclarées mais **refusées au chargement** : une édition qui les
-utilise le sait tout de suite plutôt que de les voir ne rien faire.
+Les six types ont un exécutant depuis le 2026-09-16. Un type ajouté à l'énumération sans exécutant
+resterait **refusé au chargement** : une édition qui l'utilise le sait tout de suite plutôt que de
+le voir ne rien faire.
+
+Trois de ces épreuves ont une particularité qui se configure :
+
+- `wave` tient la zone. Si plus personne de l'équipe n'y est pendant le délai de grâce, la tentative
+  échoue et les monstres restants disparaissent. Chaque vague nettoyée est un palier, donc un
+  redémarrage ne rejoue que la vague en cours.
+- `search` tire sa cachette du couple épreuve et équipe, jamais du hasard. La même équipe cherche
+  toujours au même endroit, deux équipes cherchent ailleurs, et les indices sont des paliers de
+  distance écrits par l'édition, jamais un nombre de blocs.
+- `escort` ne déplace pas le monstre : c'est son IA MythicMobs qui suit les joueurs. Un monstre qui
+  cesse de suivre se corrige dans son fichier MythicMobs, pas dans une version du plugin.
 
 ---
 
