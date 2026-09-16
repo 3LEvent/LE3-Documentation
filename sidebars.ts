@@ -46,6 +46,7 @@ const sidebars: SidebarsConfig = {
         'projects/staff-panel',
         'projects/minecraft-plugins',
         'projects/minecraft-minigames',
+        'projects/minecraft-exploration',
         'projects/discord-bot',
         'projects/discord-admin',
       ],
