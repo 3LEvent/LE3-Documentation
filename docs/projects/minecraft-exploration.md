@@ -78,14 +78,18 @@ utilise le sait tout de suite plutôt que de les voir ne rien faire.
 MythicMobs décrit la créature, ce plugin décrit l'événement autour.
 
 * **Un seul exemplaire vivant** par boss, quel que soit ce qui l'a fait apparaître.
-* **Jamais d'aléatoire** : un horaire fixe, ou un délai après la mort précédente. Un boss que les
-  joueurs peuvent anticiper est un boss qu'ils reviennent chercher.
+* **Un boss par jour, cumulatif.** Le premier jour débloque le premier boss, le deuxième jour le
+  deuxième et le premier, jusqu'au quatrième. Le cinquième jour n'en apporte pas de nouveau et les
+  quatre restent chassables. C'est le même jour d'événement que celui qui débloque les succès.
+* **Disponible toute la journée** : un boss débloqué se tient à son point d'apparition et revient
+  cinq minutes après sa mort. Jamais d'aléatoire : un boss que les joueurs peuvent trouver quand ils
+  veulent est un boss qu'ils reviennent chercher.
 * **Aucune apparition programmée pendant un mini-jeu.** Un boss déjà vivant reste en place.
 * **Le crédit va à l'équipe qui a le plus frappé**, dégâts cumulés sur tout le combat. C'est plus
   juste que la cible de l'aggro, qui change au dernier moment. Les dégâts du staff sont ignorés, et
   l'option `CONTRIBUTORS` crédite toutes les équipes au-dessus d'une part des dégâts.
 * **Rejouable** : un boss peut être vaincu plusieurs fois par chaque équipe, et son succès progresse
-  d'un cran à chaque victoire.
+  d'un cran à chaque victoire. C'est son butin qui donne envie d'y revenir.
 * ⚠️ **`Despawn: false` est obligatoire** dans le mob MythicMobs : sinon il disparaît quand son
   chunk se décharge, c'est-à-dire en plein combat. Le plugin le vérifie au démarrage.
 
@@ -106,6 +110,9 @@ sienne si l'équipe en décide une, et elle arrivera comme un module de plus.
   livrant son fichier de réglages et le règle.
 * Les modules **ne se connaissent pas** : ils se parlent par des drapeaux posés sur une équipe, que
   les quêtes et les autres modules peuvent lire.
+* Les **quêtes changent d'une édition à l'autre** : elles vivent dans BeautyQuests et sont
+  versionnées avec le contenu de l'édition. Tant qu'elles s'appuient sur des épreuves existantes,
+  réécrire les quêtes d'une édition ne demande aucune ligne de code.
 * Tout ce qu'un module enregistre disparaît quand il est désactivé. Un module qui échoue est mis de
   côté pour la soirée au lieu d'emporter le plugin avec lui.
 
