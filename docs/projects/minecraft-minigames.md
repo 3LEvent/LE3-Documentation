@@ -121,9 +121,15 @@ Les règles qui suivent valent pour tous les jeux, et le moteur les applique, pa
 | `territory` | On peint le sol en marchant et en tirant. La manche est notée sur la moyenne de la surface possédée, mesurée toutes les trente secondes, et non sur la surface finale |
 | `pack` | Chaque équipe chasse une équipe et est chassée par une autre, tout le long de la manche. Les coups portés hors de sa paire ne font rien |
 | `core` | Chaque équipe défend un noyau dans sa base et attaque ceux de deux adversaires, atteints par des portails. Les bases sont des copies : les portails décident qui affronte qui, pas la géographie |
+| `rings` | Vol en élytres à travers des anneaux enfilés le long d'un tracé. Trois modes : contre-la-montre, chasse aux anneaux, relais aérien |
+| `workshop` | Chaque équipe reproduit un modèle sur sa parcelle, avec une palette comptée. La note est la part des positions correctes, orientation comprise |
+| `hunger_games` | Survie sur une carte construite, plan de loot fixe, bordure qui se referme. Un kill ne rapporte rien : ce qui compte est de rester debout |
+| `seekers` | Une équipe traque, les sept autres se cachent déguisées en blocs. Huit manches courtes, pour que chaque équipe traque une fois |
 
-Cinq vrais jeux sont donc livrés, un de plus que le minimum d'une édition, `manual` restant
-derrière eux. La sélection jouable d'une édition vit dans
+Les neuf jeux du roster sont livrés, `manual` restant derrière eux. Quatre d'entre eux attendent du
+contenu qui n'est pas du code : `hunger_games` et `seekers` veulent des cartes construites à la
+main, `workshop` veut ses modèles. Une manche dont la carte ou le modèle manque n'a pas d'arène, et
+le jeu le dit avec le nom qu'il a cherché. La sélection jouable d'une édition vit dans
 `LE3-Editions/<édition>/minigames/selection.yml` : `/mg launch` refuse un jeu absent de cette liste.
 
 ### Ce que ces jeux ont en commun
@@ -138,7 +144,22 @@ quatrième.
   peut ainsi l'annoncer et une édition peut la déplacer sans toucher au code.
 - **Ce qui doit être fermé est fermé par de la matière**, pas par une région protégée : le cœur de
   Balls Of Steel et le mur central de Territoire sont en bedrock, et la timeline le retire. Un
-  joueur voit la différence depuis le terrain.
+  joueur voit la différence depuis le terrain. Quand c'est tout le terrain qui se referme, c'est la
+  bordure de monde vanilla, pour la même raison.
+
+### Jouer sur une carte construite à la main
+
+Un jeu qui ne peut pas générer son terrain demande une copie d'un monde construit :
+`ArenaBuilder.template(nom)` pointe un dossier `le3_template_<nom>` posé à côté des mondes du
+serveur, que le serveur ne charge jamais. Le moteur le copie hors du thread principal, joue dans la
+copie, et supprime la copie à la fin de la manche. Le monde d'origine n'est jamais touché.
+
+Deux fichiers ne sont pas copiés, `uid.dat` et `session.lock` : sans cela le serveur croirait que la
+copie et l'original sont le même monde et refuserait de charger le second. Une copie qui échoue ne
+bloque pas la soirée, la manche continue sans arène et la console dit pourquoi.
+
+Pour préparer une carte : la construire dans un monde normal, arrêter le serveur, renommer son
+dossier en `le3_template_<nom>`, et le retirer de la liste des mondes chargés.
 
 ---
 
