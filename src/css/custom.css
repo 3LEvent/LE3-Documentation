@@ -53,7 +53,25 @@
 
 .navbar {
   border-bottom: 1px solid #f1f5f9;
-  backdrop-filter: blur(10px);
+}
+
+/*
+ * `backdrop-filter` fait de la navbar le bloc conteneur de ses descendants en
+ * `position: fixed`. Or `.navbar-sidebar`, le menu mobile, est un enfant de la
+ * navbar : le flou le confinait à la hauteur de la barre, donc un menu ouvert
+ * mais vide, sans liens ni catégories. Le flou reste donc réservé au bureau,
+ * au-dessus du point de rupture où le menu mobile n'existe pas (996px).
+ */
+@media (min-width: 997px) {
+  .navbar {
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* Le menu mobile hérite du fond semi-transparent de la navbar : sans flou
+ * derrière lui, le contenu de la page transparaît à travers les liens. */
+.navbar-sidebar {
+  background-color: #ffffff;
 }
 
 .navbar__title {
