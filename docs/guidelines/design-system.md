@@ -175,8 +175,11 @@ Conventions actuelles :
 * **Web** : **Font Awesome** via CDN (`cdnjs.cloudflare.com`, autorisé dans la CSP). Les modèles
   stockent des classes d'icônes en base (`categories.icon` avec `fa-comments` par défaut,
   `resourcelinks.icon` avec `fa-link`).
-* **Avatars joueurs** : `mc-heads.net` - tête Minecraft à partir du `mc_uuid`, avec repli
+* **Avatars joueurs** : `minotar.net/helm` - tête Minecraft à partir du `mc_uuid`, avec repli
   `MHF_Steve` géré par un `onerror`. Aucun avatar Discord n'est utilisé côté site public.
+  Le service précédent, `mc-heads.net`, a été abandonné le 2026-09-17 : il répondait `200` avec
+  une tête Steve pour tous les profils, y compris ceux qui ont un skin. La réponse restant une
+  image valide, le repli `onerror` ne se déclenchait jamais et la panne était invisible.
 * **In-game** : caractères Unicode du resource pack, injectés via les placeholders
   `%img_teamN%`.
 
