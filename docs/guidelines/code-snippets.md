@@ -228,16 +228,30 @@ export const apiFetch = async <T>(url: string, options: RequestInit = {}): Promi
 ### Avatar joueur avec repli
 
 ```ts
+const MC_HEAD_ENDPOINT = 'https://minotar.net/helm';
+export const STEVE_HEAD_URL = `${MC_HEAD_ENDPOINT}/MHF_Steve/100.png`;
+
 export const getUserAvatarURL = (user: BaseUser | null): string => {
     if (user && user.mc_uuid) {
-        return `https://mc-heads.net/avatar/${user.mc_uuid}/100`;
+        return `${MC_HEAD_ENDPOINT}/${user.mc_uuid}/100.png`;
     }
-    return 'https://mc-heads.net/avatar/MHF_Steve/100';
+    return STEVE_HEAD_URL;
 };
 ```
 
-Le repli est doublé côté HTML par un `onerror` : `mc-heads.net` peut répondre 404 pour un UUID
-valide mais inconnu.
+Le repli est doublé côté HTML par un `onerror` qui se désarme lui-même
+(`this.onerror=null;this.src='...'`) : `minotar.net` répond 404 sur un profil inconnu, et le
+désarmement évite une boucle si la tête de repli échoue à son tour.
+
+:::warning Le rendu doit échouer bruyamment
+
+Le service précédent, `mc-heads.net`, a été abandonné le 2026-09-17 : il s'était mis à répondre
+`200` avec une tête Steve pour **tous** les profils, skin ou pas. La réponse restant un PNG
+valide, l'`onerror` ne se déclenchait jamais et tous les avatars du site sont devenus Steve sans
+la moindre erreur. Avant de changer de service de rendu, vérifier qu'il répond bien `404` sur un
+profil inconnu, plutôt qu'une image par défaut.
+
+:::
 
 ---
 

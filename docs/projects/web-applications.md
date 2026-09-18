@@ -134,7 +134,7 @@ Le panel ajoute `npm run docker:up`, `docker:down` et `seed:dev` pour son enviro
 * `app.disable('x-powered-by')` et `app.set('trust proxy', 1)` (les applications tournent derrière
   un reverse proxy).
 * CSP explicite par application, adaptée aux domaines réellement embarqués (Twitch, Discord CDN,
-  `mc-heads.net`, Google Fonts…). Ajouter une ressource externe **exige** de mettre à jour la
+  `minotar.net`, Google Fonts…). Ajouter une ressource externe **exige** de mettre à jour la
   directive correspondante, sinon le navigateur la bloque silencieusement.
 * HSTS : `maxAge: 31536000`, `includeSubDomains`, `preload`.
 * CORS en liste blanche : `3levent.fr` / `live.3levent.fr` pour les sites publics,
