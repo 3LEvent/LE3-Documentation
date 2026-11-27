@@ -73,15 +73,20 @@ panel, qui réécrit les clés Redis depuis sa base.
 | `/site maintenance` | Bascule un site public en maintenance |
 | `/site inscriptions` | Ouvre ou ferme les inscriptions |
 | `/calendrier` | Consulte le calendrier publié par le panel |
+| `/site etat` | État de la maintenance et des inscriptions |
 | `/staff invite` | Génère une invitation au panel |
-| `/link` | Lie un compte Discord à un compte staff du panel |
+| `/staff sync` | Réaligne tous les rôles Discord sur le panel |
+| `/link` | Constate la liaison faite depuis le panel et resynchronise ses rôles ; le bot ne lie rien lui-même |
 | `/deploy status` | Dernier déploiement de chaque service |
 | `/deploy run` | Déclenche le déploiement d'un service |
+| `/audit` | Dernières actions du staff passées par le bot, refus compris |
 
 Les permissions sont graduées par conséquence, jamais par ancienneté : lire un statut est ouvert
 largement, redémarrer le serveur et inviter au staff restent aux deux rôles les plus élevés. Elles
 s'expriment en clés de rôles dans `config.json`, jamais en identifiants Discord codés dans le
-code.
+code. Les commandes sont visibles de tout le staff : l'accès se décide dans `config.json` et le
+panel, pas dans l'affichage. Les boutons de confirmation revérifient le rôle et le compte panel au
+clic. Réponses et alertes sont des cartes Components V2.
 
 ## 4. Alertes
 

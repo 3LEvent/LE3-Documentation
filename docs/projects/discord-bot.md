@@ -34,17 +34,31 @@ Les modèles de `backend/models/site/` sont donc des copies conformes de ceux de
 
 | Commande | Rôle | Permission |
 | :--- | :--- | :--- |
-| `/verify <otp>` | Valide le code généré sur le site, approuve l'inscription, attribue les rôles | membres autorisés |
-| `/team invite` | Affiche ou régénère le code d'invitation du capitaine | capitaines et staff |
-| `/team size` | Définit la taille maximale des équipes | staff |
-| `/linked [membre]` | Consulte les liaisons Discord vers Minecraft | staff |
-| `/ticket …` | Panneau, ouverture, fermeture, prise en charge, transcript | selon la sous-commande |
+| `/verify <code>` | Valide le code affiché sur la page d'inscription, approuve l'inscription, attribue le rôle participant et le rôle d'équipe | membres autorisés |
+| `/team info` | Équipe du membre et ses inscrits ; le capitaine y voit le code d'invitation et peut en générer un nouveau | membres |
+| `/team size` | Nombre de joueurs validés par équipe | staff |
+| `/team roles` | Crée les rôles d'équipe manquants et les aligne sur les inscriptions validées, après confirmation | staff |
+| `/linked [membre]` | Liaisons Discord vers Minecraft ; aussi en clic droit sur un membre, **Fiche 3LEvent** | staff |
+| `/ticket open` | Formulaire de ticket : type de demande, description, preuves | tout le monde |
+| `/ticket …` | Fermeture (auteur ou staff), panneau, ajout, retrait, prise en charge, renommage, transcript | staff |
+| `/help` | Commandes du bot et liens utiles | tout le monde |
 
-Les salons vocaux privés se créent automatiquement à l'entrée dans le salon relais configuré, et
-disparaissent quand ils se vident.
+Les messages du bot sont en **Components V2** (cartes à couleur d'accent, sections, galeries) et
+toutes les commandes sont limitées au serveur.
 
-Les permissions sont exprimées dans `config.json` sous forme de clés de rôles, jamais
-d'identifiants Discord en dur dans le code.
+**Tickets.** Le bouton **Créer un ticket** du panneau de `#support` ouvre le même formulaire que
+`/ticket open`. Les types de demande reprennent les cas de la page « Problèmes et tickets » du
+wiki joueur, avec pour chacun ce que le staff doit recevoir. À la fermeture, confirmée par une
+fenêtre avec raison facultative, l'historique est archivé dans le salon des transcripts et envoyé
+en message privé à l'auteur, puis le salon est supprimé.
+
+**Salons vocaux.** Rejoindre le salon relais crée un salon privé fermé, confié au membre, avec un
+panneau : ouvrir ou fermer, inviter ou retirer des membres, places, nom. Quand le propriétaire part,
+le salon passe à un membre encore présent ; vide, il est supprimé. Au démarrage, le bot rattrape
+ce qui s'est passé pendant son absence.
+
+Les permissions sont exprimées dans `config.json` sous forme de clés de rôles, une par usage,
+jamais d'identifiants Discord en dur dans le code.
 
 ## 3. Ce qui casse en silence
 
