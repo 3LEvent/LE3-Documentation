@@ -105,7 +105,7 @@ site) et `le3:calendar:live` (calendrier des épreuves, lu par le Live et le bot
 
 ### Plugin Core - dépôt `LE3-Plugin-Core`
 
-Le noyau Java du serveur de jeu (Paper `26.2`, Java 25).
+Le noyau Java du serveur de jeu (Paper `26.3`, Java 25).
 
 * Équipes en **lecture seule** : la composition vient du site via l'API, jamais l'inverse.
 * Système de succès par équipe et par joueur, avec progression persistée en MySQL.

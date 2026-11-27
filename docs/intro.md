@@ -54,7 +54,7 @@ structure de dossiers. Un développeur qui connaît l'une connaît les autres.
 | **Frontend** | HTML statique + TypeScript compilé (`tsc`), **aucun framework** | - |
 | **Styles** | Tailwind CSS (CLI, directive `@theme`) | `4.x` |
 | **Tests** | Vitest, JUnit | un test de contrat du bus par dépôt TypeScript, plus des tests unitaires (au 2026-09-15 : 29 Main, 29 Live, 49 Panel, 12 bot joueurs, 34 bot admin) ; 61 tests JUnit sur le plugin |
-| **Plugin Minecraft** | Java + Paper API | Java 25, Paper `26.2.build.98-stable` |
+| **Plugin Minecraft** | Java + Paper API | Java 25, Paper `26.3.build.263-stable` |
 | **Client Redis du plugin** | Jedis (shadé et relocalisé) | `7.5.3` |
 | **Build plugin** | Maven (shade + fmt-maven-plugin) | - |
 | **Exécution** | Docker | - |

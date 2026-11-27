@@ -14,7 +14,7 @@ Le noyau Java de l'événement. Il gère les équipes (en lecture seule), le sys
 | **Nom du JAR** | `LE3CorePlugin-<version>.jar` |
 | **Nom du plugin** | `LE3CorePlugin` |
 | **Classe principale** | `fr.le3event.core.LE3CorePlugin` |
-| **Java / API** | Java 25 · Paper `26.2.build.98-stable` (`api-version: 26.2`) |
+| **Java / API** | Java 25 · Paper `26.3.build.263-stable` (`api-version: 26.3`) |
 | **Auteurs** | 3LEvent |
 
 ---
@@ -23,7 +23,7 @@ Le noyau Java de l'événement. Il gère les équipes (en lecture seule), le sys
 
 | Dépendance | Portée | Rôle |
 | :--- | :--- | :--- |
-| `paper-api` `26.2.build.98-stable` | `provided` | API serveur |
+| `paper-api` `26.3.build.263-stable` | `provided` | API serveur |
 | `HikariCP` 7.1.0 | `compile` (shadée) | Pool de connexions SQL |
 | `mysql-connector-j` 26.7.0 | `compile` (shadée) | Pilote MySQL |
 | `jedis` 7.5.3 | `compile` (shadée) | Client Redis : cache partagé et bus d'événements |
