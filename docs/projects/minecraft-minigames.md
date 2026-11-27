@@ -146,6 +146,10 @@ quatrième.
   Balls Of Steel et le mur central de Territoire sont en bedrock, et la timeline le retire. Un
   joueur voit la différence depuis le terrain. Quand c'est tout le terrain qui se referme, c'est la
   bordure de monde vanilla, pour la même raison.
+- **L'arène se protège seule**, sans WorldGuard : hors des zones que le jeu déclare cassables, on
+  ne casse ni ne pose rien. La règle couvre aussi ce qui est une entité et non un bloc : cadres,
+  tableaux, coussins (Minecraft 26.3) et tout objet posé comme une entité. Aucun golem ni Wither
+  ne peut être construit avec les blocs d'une arène.
 
 ### Jouer sur une carte construite à la main
 
